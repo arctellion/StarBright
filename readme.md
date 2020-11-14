@@ -37,4 +37,5 @@ arguments:
 * z0, z1 - extent of z co-ordinates
 * d - minimum distance between points
 * test - number of tests to run, default 1000. 
+
 generate the locations of planetary sytems. 
