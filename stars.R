@@ -92,19 +92,21 @@ fun_uwp <- function(n) {
   #atmo factor
   tech <- tech + switch(atm, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1)
   #hydro factor
-  if (hyd == 9) {
-    tech <- tech + 1
-  } else if (hyd == 10) {
-    tech <- tech + 2
-  }
+  tech <- tech + switch(hyd, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2)
+  # if (hyd == 9) {
+  #   tech <- tech + 1
+  # } else if (hyd == 10) {
+  #   tech <- tech + 2
+  # }
   #pop factor
-  if (pop > 9) {
-    tech <- tech + 4
-  } else  if (pop == 9) {
-    tech <- tech + 2
-  } else if (pop < 6) {
-    tech <- tech + 1
-  }
+  tech <- tech + switch(pop, 1, 1, 1, 1, 1, 0, 0, 0, 2, 4, 4 ,4, 4, 4, 4)
+  # if (pop > 9) {
+  #   tech <- tech + 4
+  # } else  if (pop == 9) {
+  #   tech <- tech + 2
+  # } else if (pop < 6) {
+  #   tech <- tech + 1
+  # }
   #gov factor
   if (gov == 0 || gov == 5) {
     tech <- tech + 1
