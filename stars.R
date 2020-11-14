@@ -301,7 +301,10 @@ sim <- as.data.frame(sim)
 colnames(sim) <- c("id")
 sim$uwp <- sapply((sim$id+123456), fun_uwp)
 sim <- sim %>% 
-  mutate(uwp = as.character(uwp))
+  mutate(uwp = as.character(uwp)) %>%
+  mutate(sport = str_sub(uwp, 1, 1))
+sim$sport <- as.factor(sim$sport)
+summary(sim)
 sim_sport_dist <- ggplot(sim, aes(x = str_sub(uwp, 1, 1))) + geom_bar()
 sim_size_dist <- ggplot(sim, aes(x = str_sub(uwp, 2, 2))) + geom_bar()
 sim_atm_dist <- ggplot(sim, aes(x = str_sub(uwp, 3, 3))) + geom_bar()
@@ -314,4 +317,4 @@ fig_sim <- ggarrange( sim_sport_dist, sim_size_dist, sim_atm_dist,
                 sim_hydo_dist, sim_pop_dist, sim_gov_dist, sim_law_dist, sim_tech_dist,
                 labels = c( "S'prt", "Sze", "Atm", "Hyd", "Pop", "Gov", "Law", "Tech"),
                 ncol = 3, nrow = 3)
-ggsave("simulation.png", fig_sim, width = 10, height = 10, units = "cm", dpi = 300)
+fig_sim
