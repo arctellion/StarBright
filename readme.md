@@ -39,3 +39,10 @@ arguments:
 * test - number of tests to run, default 1000. 
 
 generate the locations of planetary sytems. 
+
+## To Do
+
+* Separate some functions out into a library
+* Check Seed value generation for world placement
+* Make plotly files available online.
+* ...
