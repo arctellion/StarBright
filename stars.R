@@ -117,6 +117,9 @@ fun_uwp <- function(n) {
   if(identical(tech, numeric(0))) { 
     tech <- 1
   }
+  if (tech < 0){
+    tech <- 0
+  }
   return (sprintf("%s%X%X%X%X%X%s-%s", sprt, sze, atm, hyd, pop, gov, law, ext.hex(tech)))
 }
 
@@ -179,8 +182,8 @@ fun_ext <- function(n){
   return (ix)
 }
 
-rand.sep <- function(n, x0, x1, y0, y1, z0, z1, d, test = 1000) {
-  set.seed(n+x0+x1+y0+y1+z0+z1)
+rand.sep <- function(n, x0, x1, y0, y1, z0, z1, d, seed = 256, test = 1000) {
+  set.seed(seed)
   for (i in 1:test) {
     nums <- cbind(round(runif(n, x0, x1),2), round(runif(n, y0, y1),2), round(runif(n, z0, z1),2))
     #if (min(dist(nums)) >= d || max(dist(nums)) <= 6) {
@@ -215,13 +218,13 @@ rand.sep <- function(n, x0, x1, y0, y1, z0, z1, d, test = 1000) {
 # systems <- as.data.frame(systems)
 
 #Generate quadrants
-omega <- rand.sep(500, -5, 5, -5, 5, -5, 5, 1)
-alpha <- rand.sep(350, 5, 15, -5, 5, -5, 5, 1)
-beta <- rand.sep(350, -15, -5, -5, 5, -5, 5, 1)
-gamma <- rand.sep(250, -5, 5, 5, 15, -5, 5, 1)
-delta <- rand.sep(250, -5, 5, -15, -5, -5, 5, 1)
-epsilon <- rand.sep(350, -5, 5, -5, 5, 5, 15, 1)
-zeta <- rand.sep(350, -5, 5, -5, 5, -15, -5, 1)
+omega <- rand.sep(500, -5, 5, -5, 5, -5, 5, 1,500)
+alpha <- rand.sep(350, 5, 15, -5, 5, -5, 5, 1,350)
+beta <- rand.sep(350, -15, -5, -5, 5, -5, 5, 1,375)
+gamma <- rand.sep(250, -5, 5, 5, 15, -5, 5, 1,250)
+delta <- rand.sep(250, -5, 5, -15, -5, -5, 5, 1,275)
+epsilon <- rand.sep(350, -5, 5, -5, 5, 5, 15, 1,365)
+zeta <- rand.sep(350, -5, 5, -5, 5, -15, -5, 1,355)
 #dist matrix for each
 om_dist <- dist(omega)
 al_dist <- dist(alpha)
@@ -234,15 +237,21 @@ ze_dist <- dist(zeta)
 omega <- as.data.frame(omega)
 omega <- omega %>% rowid_to_column("id")
 colnames(omega) <- c("id", "x", "y", "z")
-
+alpha <- as.data.frame(alpha)
+alpha <- alpha %>% rowid_to_column("id")
+colnames(alpha) <- c("id", "x", "y", "z")
 
 # this works (below)
 omega$uwp <- sapply((omega$id+145), fun_uwp)
+alpha$uwp <- sapply((alpha$id+541), fun_uwp)
+
 
 omega <- omega %>% 
   mutate(uwp = as.character(uwp)) %>% 
   mutate(sport = str_sub(uwp, 1, 1))
-
+alpha <- alpha %>%
+  mutate(uwp = as.character(uwp)) %>% 
+  mutate(sport = str_sub(uwp, 1, 1))
 
 # sys50 <- systems %>%
 #     filter(dist < 50) %>%
@@ -263,10 +272,46 @@ omega_pop_dist <- ggplot(omega, aes(x = str_sub(uwp, 5, 5))) + geom_bar()
 omega_gov_dist <- ggplot(omega, aes(x = str_sub(uwp, 6, 6))) + geom_bar()
 omega_law_dist <- ggplot(omega, aes(x = str_sub(uwp, 7, 7))) + geom_bar()
 omega_tech_dist <- ggplot(omega, aes(x = str_sub(uwp, 9, 9))) + geom_bar()
+alpha_3d_map <- plot_ly(alpha, x = ~x, y = ~y, z = ~z, color = ~sport, size = I(8), text = ~uwp, hovertemplate = paste("UWP: %{text}", "<extra></extra>"))
+alpha_sport_dist <- ggplot(alpha, aes(x = str_sub(uwp, 1, 1))) + geom_bar()
+alpha_size_dist <- ggplot(alpha, aes(x = str_sub(uwp, 2, 2))) + geom_bar()
+alpha_atm_dist <- ggplot(alpha, aes(x = str_sub(uwp, 3, 3))) + geom_bar()
+alpha_hydo_dist <- ggplot(alpha, aes(x = str_sub(uwp, 4, 4))) + geom_bar()
+alpha_pop_dist <- ggplot(alpha, aes(x = str_sub(uwp, 5, 5))) + geom_bar()
+alpha_gov_dist <- ggplot(alpha, aes(x = str_sub(uwp, 6, 6))) + geom_bar()
+alpha_law_dist <- ggplot(alpha, aes(x = str_sub(uwp, 7, 7))) + geom_bar()
+alpha_tech_dist <- ggplot(alpha, aes(x = str_sub(uwp, 9, 9))) + geom_bar()
 
 library(ggpubr)
-fig <- ggarrange( omega_sport_dist, omega_size_dist, omega_atm_dist, 
+fig_omega <- ggarrange( omega_sport_dist, omega_size_dist, omega_atm_dist, 
                 omega_hydo_dist, omega_pop_dist, omega_gov_dist, omega_law_dist, omega_tech_dist,
                 labels = c( "Starport", "Size", "Atmosphere", "Hydro", "Population", "Government", "Law", "Tech"),
                 ncol = 3, nrow = 3)
-ggsave("omega_distribution.png", fig, width = 10, height = 10, units = "cm", dpi = 300)
+fig_alpha <- ggarrange( alpha_sport_dist, alpha_size_dist, alpha_atm_dist, 
+                alpha_hydo_dist, alpha_pop_dist, alpha_gov_dist, alpha_law_dist, alpha_tech_dist,
+                labels = c( "Starport", "Size", "Atmosphere", "Hydro", "Population", "Government", "Law", "Tech"),
+                ncol = 3, nrow = 3)
+ggsave("omega_distribution.png", fig_omega, width = 10, height = 10, units = "cm", dpi = 300)
+ggsave("alpha_distribution.png", fig_alpha, width = 10, height = 10, units = "cm", dpi = 300)
+
+
+## simulation of 1,000,000 systems to check distsribution
+sim <- c(1:1000000)
+sim <- as.data.frame(sim)
+colnames(sim) <- c("id")
+sim$uwp <- sapply((sim$id+123456), fun_uwp)
+sim <- sim %>% 
+  mutate(uwp = as.character(uwp))
+sim_sport_dist <- ggplot(sim, aes(x = str_sub(uwp, 1, 1))) + geom_bar()
+sim_size_dist <- ggplot(sim, aes(x = str_sub(uwp, 2, 2))) + geom_bar()
+sim_atm_dist <- ggplot(sim, aes(x = str_sub(uwp, 3, 3))) + geom_bar()
+sim_hydo_dist <- ggplot(sim, aes(x = str_sub(uwp, 4, 4))) + geom_bar()
+sim_pop_dist <- ggplot(sim, aes(x = str_sub(uwp, 5, 5))) + geom_bar()
+sim_gov_dist <- ggplot(sim, aes(x = str_sub(uwp, 6, 6))) + geom_bar()
+sim_law_dist <- ggplot(sim, aes(x = str_sub(uwp, 7, 7))) + geom_bar()
+sim_tech_dist <- ggplot(sim, aes(x = str_sub(uwp, 9, 9))) + geom_bar()
+fig_sim <- ggarrange( sim_sport_dist, sim_size_dist, sim_atm_dist, 
+                sim_hydo_dist, sim_pop_dist, sim_gov_dist, sim_law_dist, sim_tech_dist,
+                labels = c( "S'prt", "Sze", "Atm", "Hyd", "Pop", "Gov", "Law", "Tech"),
+                ncol = 3, nrow = 3)
+ggsave("simulation.png", fig_sim, width = 10, height = 10, units = "cm", dpi = 300)
