@@ -96,11 +96,6 @@ fun_uwp <- function(n) {
   # if (hyd == 9) {
   #   tech <- tech + 1
   # } else if (hyd == 10) {
-  #   tech <- tech + 2
-  # }
-  #pop factor
-  tech <- tech + switch(pop, 1, 1, 1, 1, 1, 0, 0, 0, 2, 4, 4 ,4, 4, 4, 4)
-  # if (pop > 9) {
   #   tech <- tech + 4
   # } else  if (pop == 9) {
   #   tech <- tech + 2
