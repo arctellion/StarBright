@@ -1,5 +1,3 @@
-import random
-
 def flux():
     """Rolls flux dice. 1d6 - 1d6, giving range -5 to +5"""
 
@@ -19,7 +17,7 @@ def die_roll():
     """Rolls a d6"""
 
     result = 0
-    result = random.randint(1, 6)
+    result = np.random.randint(1, 6)
     return result
 
 def ext_hex(n):
@@ -69,7 +67,7 @@ def fun_uwp(n):
   """
 
   #random seed set
-  random.seed(1000 + n)
+  np.random.seed(1000 + n)
   # Starport
   starport = { 2: "A", 3: "A", 4:"A", 5:"B", 6:"B", 7:"C", 8:"C", 9:"D", 10:"E", 11:"E", 12:"X"}
   sprt = starport[dice(2)]
@@ -152,7 +150,7 @@ def fun_uwp(n):
 #print(fun_uwp(256))
 #print(fun_uwp(123456))
 
-fun_pbg(p):
+def fun_pbg(p):
   """
   Generate the Population Digit, Gas Giants & Asteroid Belts
   
@@ -174,7 +172,7 @@ fun_pbg(p):
   pbg = str(pop)+str(belt)+str(gas)
   return pbg
 
-fun_trade(n):
+def fun_trade(n):
   """Generate Trade Classifications for a given UWP n"""
   siz <- ext_dec(n[1])
   atm <- ext_dec(n[2])
