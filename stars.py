@@ -23,12 +23,6 @@ def rand_sep(n, x0, x1, y0, y1, z0, z1, d, seed = 256, test = 1000):
 #omega = rand_sep(500, -5, 5, -5, 5, -5, 5, 1,500)
 
 # sample run for uwp distribution
-def tuple_uwp(df):
-  return pd.Series(
-    tt.fun_uwp(row.id)
-    for row in df.itertuples()
-  )
-
 sim = pd.DataFrame(np.arange(1,1000000,1), columns=['id'])
-sim['uwp'] = tuple_uwp(sim)
+sim['uwp'] = sim['id'].apply(tt.fun_uwp)
 head(sim)
