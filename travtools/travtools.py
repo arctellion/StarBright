@@ -249,3 +249,25 @@ def fun_ext(n):
   if (int(n[5],16) < 7):
     px = -1
 
+def rand_sep(n, x0, x1, y0, y1, z0, z1, d, seed = 256, test = 1000):
+  """
+  Generates n random points in 3 dimensional space. 
+  n - number of points
+  x0, y0, z0 - lower limit for x, y & z
+  x1, y1, z1 - upper limit for x, y & z
+  d - minimum distance between points.
+  seed - optional seed for the random number generator, default - 256
+  test - number of times to check for the distance between points
+  """
+  import scipy.spatial.distance as sc
+  
+  np.random.seed(seed)
+  for i in range(1,test):
+    x = np.random.randint(x0, x1, n)
+    y = np.random.randint(y0, y1, n)
+    z = np.random.randint(z0, z1, n)
+    points = np.column_stack((x,y,z))
+#     if (min(sc.pdist(points)) < d):
+#       return(points)
+#   return("FAIL") #failed
+  return points
