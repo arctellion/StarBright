@@ -1,3 +1,5 @@
+import numpy as np
+
 def flux():
     """Rolls flux dice. 1d6 - 1d6, giving range -5 to +5"""
 
@@ -161,13 +163,13 @@ def fun_pbg(p):
     pop = 0
   else:
     pop = dice(2) - 3
-    if pop < 1
+    if pop < 1:
       pop = 1
   belt = die_roll() - 3
-  if belt < 0
+  if belt < 0:
     belt = 0
   gas = round(dice(2) / 2) - 2
-  if gas < 0
+  if gas < 0:
     gas = 0
   pbg = str(pop)+str(belt)+str(gas)
   return pbg
