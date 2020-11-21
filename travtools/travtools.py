@@ -69,7 +69,7 @@ def fun_uwp(n):
   """
 
   #random seed set
-  np.random.seed(1000 + n + 123456)
+  np.random.seed(1000 + n) # + 123456) add back in for sim
   # Starport
   starport = { 2: "A", 3: "A", 4:"A", 5:"B", 6:"B", 7:"C", 8:"C", 9:"D", 10:"E", 11:"E", 12:"X"}
   sprt = starport[dice(2)]

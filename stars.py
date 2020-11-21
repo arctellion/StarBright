@@ -6,6 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 omega = tt.fun_stars(500, 1, [10,10,10])
 omega = pd.DataFrame(omega, columns=["x","y","z"])
+omega = omega.rename_axis('id').reset_index()
+omega['uwp'] = omega['id'].apply(tt.fun_uwp)
 print(omega.head())
 
 fig = plt.figure()
