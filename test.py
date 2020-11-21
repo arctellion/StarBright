@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True):
     """Get random points in a box with given dimensions and minimum separation.
     
@@ -73,7 +74,7 @@ def get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True):
     if not allow_wall:
         ps += dmin/2
     
-    dratio = (np.sqrt(dsq.min(axis=1))/dmin).mean
+    #dratio = (np.sqrt(dsq.min(axis=1))/dmin).mean
     return ps#, iter_no+1, dratio
   
 tmp = get_sphere_distribution(250, 1, [10,10,10])
@@ -81,4 +82,9 @@ print(tmp)
 
 omega = get_sphere_distribution(500, 1, [10,10,10])
 omega = pd.DataFrame(omega, columns=["x","y","z"])
-omega.head()
+print(omega.head())
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(omega['x'], omega['y'], omega['z'])
+plt.show()

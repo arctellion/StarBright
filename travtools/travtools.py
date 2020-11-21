@@ -19,7 +19,7 @@ def die_roll():
     """Rolls a d6"""
 
     result = 0
-    result = np.random.randint(1, 6)
+    result = np.random.randint(1, 7)
     return result
 
 def ext_hex(n):
@@ -69,7 +69,7 @@ def fun_uwp(n):
   """
 
   #random seed set
-  np.random.seed(1000 + n)
+  np.random.seed(1000 + n + 123456)
   # Starport
   starport = { 2: "A", 3: "A", 4:"A", 5:"B", 6:"B", 7:"C", 8:"C", 9:"D", 10:"E", 11:"E", 12:"X"}
   sprt = starport[dice(2)]
@@ -88,7 +88,7 @@ def fun_uwp(n):
   if atm < 0:
     atm = 0
   elif atm > 15:
-    atm <- 15
+    atm = 15
 
   # Hydrographics 0-10
   hyd = flux() + atm
@@ -104,7 +104,7 @@ def fun_uwp(n):
   # Population 0-15
   pop = dice(2) - 2
   if pop == 10:
-    pop = dice.sum(2) + 3
+    pop = dice(2) + 3
 
   # Government 0-15
   gov = flux() + pop
@@ -249,25 +249,77 @@ def fun_ext(n):
   if (int(n[5],16) < 7):
     px = -1
 
-def rand_sep(n, x0, x1, y0, y1, z0, z1, d, seed = 256, test = 1000):
-  """
-  Generates n random points in 3 dimensional space. 
-  n - number of points
-  x0, y0, z0 - lower limit for x, y & z
-  x1, y1, z1 - upper limit for x, y & z
-  d - minimum distance between points.
-  seed - optional seed for the random number generator, default - 256
-  test - number of times to check for the distance between points
-  """
-  import scipy.spatial.distance as sc
-  
-  np.random.seed(seed)
-  for i in range(1,test):
-    x = np.random.randint(x0, x1, n)
-    y = np.random.randint(y0, y1, n)
-    z = np.random.randint(z0, z1, n)
-    points = np.column_stack((x,y,z))
-#     if (min(sc.pdist(points)) < d):
-#       return(points)
-#   return("FAIL") #failed
-  return points
+def fun_stars(n, dmin, Ls, maxiter=1e4, allow_wall=True):
+    """Get random points in a box with given dimensions and minimum separation.
+    
+    Parameters:
+      
+    - n: number of points
+    - dmin: minimum distance
+    - Ls: dimensions of box, shape (3,) array 
+    - maxiter: maximum number of iterations.
+    - allow_wall: whether to allow points on wall; 
+       (if False: points need to keep distance dmin/2 from the walls.)
+        
+    Return:
+        
+    - ps: array (n, 3) of point positions, 
+      with 0 <= ps[:, i] < Ls[i]
+    - n_iter: number of iterations ** NOT USED
+    - dratio: average nearest-neighbor distance, divided by dmin. ** NOT USED
+    
+    Note: with a fill density (sphere volume divided by box volume) above about
+    0.53, it takes very long. (Random close-packed spheres have a fill density
+    of 0.64).
+    
+    Author: Han-Kwang Nienhuys (2020)
+    Copying: BSD, GPL, LGPL, CC-BY, CC-BY-SA
+    See Stackoverflow: https://stackoverflow.com/a/62895898/6228891 
+    """
+    Ls = np.array(Ls).reshape(3)
+    if not allow_wall:
+        Ls -= dmin
+    
+    # filling factor; 0.64 is for random close-packed spheres
+    # This is an estimate because close packing is complicated near the walls.
+    # It doesn't work well for small L/dmin ratios.
+    sphere_vol = np.pi/6*dmin**3
+    box_vol = np.prod(Ls + 0.5*dmin)
+    fill_dens = n*sphere_vol/box_vol
+    if fill_dens > 0.64:
+        msg = f'Too many to fit in the volume, density {fill_dens:.3g}>0.64'
+        raise ValueError(msg)
+    
+    # initial try   
+    ps = np.random.uniform(size=(n, 3)) * Ls
+    
+    # distance-squared matrix (diagonal is self-distance, don't count)
+    dsq = ((ps - ps.reshape(n, 1, 3))**2).sum(axis=2)
+    dsq[np.arange(n), np.arange(n)] = np.infty
+
+    for iter_no in range(int(maxiter)):
+        # find points that have too close neighbors
+        close_counts = np.sum(dsq < dmin**2, axis=1)  # shape (n,)
+        n_close = np.count_nonzero(close_counts)
+        if n_close == 0:
+            break
+        
+        # Move the one with the largest number of too-close neighbors
+        imv = np.argmax(close_counts)
+        
+        # new positions
+        newp = np.random.uniform(size=3)*Ls
+        ps[imv]= newp
+        
+        # update distance matrix
+        new_dsq_row = ((ps - newp.reshape(1, 3))**2).sum(axis=-1)
+        dsq[imv, :] = dsq[:, imv] = new_dsq_row
+        dsq[imv, imv] = np.inf
+    else:
+        raise RuntimeError(f'Failed after {iter_no+1} iterations.')
+
+    if not allow_wall:
+        ps += dmin/2
+    
+    #dratio = (np.sqrt(dsq.min(axis=1))/dmin).mean
+    return ps#, iter_no+1, dratio
