@@ -1,90 +1,65 @@
 import numpy as np
+#import matplotlib.pyplot as plt
+#from mpl_toolkits.mplot3d import Axes3D
+import plotly.express as px
 import pandas as pd
 
+class Points():
+    def __init__(self,n=10, r=1, center=(0,0,0), mindist=0.2, maxtrials=10000 ) :
+        self.success = False
+        self.n = n
+        self.r = r
+        self.center=np.array(center)
+        self.d = mindist
+        self.points = np.ones((self.n,3))*10*r+self.center
+        self.c = 0
+        self.trials = 0
+        self.maxtrials = maxtrials
+        self.tx = "rad: {}, center: {}, min. dist: {} ".format(self.r, center, self.d)
+        self.fill()
 
-def get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True):
-    """Get random points in a box with given dimensions and minimum separation.
-    
-    Parameters:
-      
-    - n: number of points
-    - dmin: minimum distance
-    - Ls: dimensions of box, shape (3,) array 
-    - maxiter: maximum number of iterations.
-    - allow_wall: whether to allow points on wall; 
-       (if False: points need to keep distance dmin/2 from the walls.)
-        
-    Return:
-        
-    - ps: array (n, 3) of point positions, 
-      with 0 <= ps[:, i] < Ls[i]
-    - n_iter: number of iterations
-    - dratio: average nearest-neighbor distance, divided by dmin.
-    
-    Note: with a fill density (sphere volume divided by box volume) above about
-    0.53, it takes very long. (Random close-packed spheres have a fill density
-    of 0.64).
-    
-    Author: Han-Kwang Nienhuys (2020)
-    Copying: BSD, GPL, LGPL, CC-BY, CC-BY-SA
-    See Stackoverflow: https://stackoverflow.com/a/62895898/6228891 
-    """
-    Ls = np.array(Ls).reshape(3)
-    if not allow_wall:
-        Ls -= dmin
-    
-    # filling factor; 0.64 is for random close-packed spheres
-    # This is an estimate because close packing is complicated near the walls.
-    # It doesn't work well for small L/dmin ratios.
-    sphere_vol = np.pi/6*dmin**3
-    box_vol = np.prod(Ls + 0.5*dmin)
-    fill_dens = n*sphere_vol/box_vol
-    if fill_dens > 0.64:
-        msg = f'Too many to fit in the volume, density {fill_dens:.3g}>0.64'
-        raise ValueError(msg)
-    
-    # initial try   
-    ps = np.random.uniform(size=(n, 3)) * Ls
-    
-    # distance-squared matrix (diagonal is self-distance, don't count)
-    dsq = ((ps - ps.reshape(n, 1, 3))**2).sum(axis=2)
-    dsq[np.arange(n), np.arange(n)] = np.infty
+    def dist(self, p, x):
+        if len(p.shape) >1:
+            return np.sqrt(np.sum((p-x)**2, axis=1))
+        else:
+            return np.sqrt(np.sum((p-x)**2))
 
-    for iter_no in range(int(maxiter)):
-        # find points that have too close neighbors
-        close_counts = np.sum(dsq < dmin**2, axis=1)  # shape (n,)
-        n_close = np.count_nonzero(close_counts)
-        if n_close == 0:
-            break
-        
-        # Move the one with the largest number of too-close neighbors
-        imv = np.argmax(close_counts)
-        
-        # new positions
-        newp = np.random.uniform(size=3)*Ls
-        ps[imv]= newp
-        
-        # update distance matrix
-        new_dsq_row = ((ps - newp.reshape(1, 3))**2).sum(axis=-1)
-        dsq[imv, :] = dsq[:, imv] = new_dsq_row
-        dsq[imv, imv] = np.inf
-    else:
-        raise RuntimeError(f'Failed after {iter_no+1} iterations.')
+    def newpoint(self):
+        x = (np.random.rand(3)-0.5)*2
+        x = x*self.r-self.center
+        if self.dist(self.center, x) < self.r:
+            self.trials += 1
+            if np.all(self.dist(self.points, x) > self.d):
+                self.points[self.c,:] = x
+                self.c += 1
 
-    if not allow_wall:
-        ps += dmin/2
-    
-    #dratio = (np.sqrt(dsq.min(axis=1))/dmin).mean
-    return ps#, iter_no+1, dratio
-  
-tmp = get_sphere_distribution(250, 1, [10,10,10])
-print(tmp)
+    def fill(self):
+        while self.trials < self.maxtrials and self.c < self.n:
+            self.newpoint()
+        self.points = self.points[self.dist(self.points,self.center) < self.r,:]
+        if len(self.points) == self.n:
+            self.success = True
+        self.tx +="\n{} of {} found ({} trials)".format(len(self.points),self.n,self.trials)
 
-omega = get_sphere_distribution(500, 1, [10,10,10])
-omega = pd.DataFrame(omega, columns=["x","y","z"])
-print(omega.head())
+    def __repr__(self):
+        return self.tx
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(omega['x'], omega['y'], omega['z'])
-plt.show()
+
+#center =(0,0,0)
+#radius = 25
+#mindist = 1
+
+p  = Points(n=5000,r=25, center=(0,0,0), mindist=1)
+#print(p.points)
+#print(p)
+x,y,z = p.points[:,0], p.points[:,1], p.points[:,2]
+df = pd.DataFrame(p.points, columns=["x","y","z"])
+print(df.head())
+fig = px.scatter_3d(df, x='x', y='y', z='z')
+fig.update_traces(marker=dict(size=2),
+                  selector=dict(mode='markers'))
+fig.show()
+#fig = plt.figure()
+#ax = fig.add_subplot(111, projection='3d')
+#ax.scatter(x, y, z)
+#plt.show()
