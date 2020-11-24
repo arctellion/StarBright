@@ -1,5 +1,5 @@
-import converters
-import dice
+import converters as cnv
+import dice 
 
 def fun_uwp(n):
   """
@@ -12,17 +12,17 @@ def fun_uwp(n):
   np.random.seed(1000 + n) # + 123456) add back in for sim
   # Starport
   starport = { 2: "A", 3: "A", 4:"A", 5:"B", 6:"B", 7:"C", 8:"C", 9:"D", 10:"E", 11:"E", 12:"X"}
-  sprt = starport[dice(2)]
+  sprt = starport[dice.dice(2)]
 
   # Size 0-15
-  sze = dice(2) - 2
+  sze = dice.dice(2) - 2
   if sze < 0:
     sze = 0
   elif sze == 10:
-    sze = die_roll() + 9
+    sze = dice.die_roll() + 9
 
   # atmosphere 0-15
-  atm = flux() + sze
+  atm = dice.flux() + sze
   if sze == 0:
     atm = 0
   if atm < 0:
@@ -31,7 +31,7 @@ def fun_uwp(n):
     atm = 15
 
   # Hydrographics 0-10
-  hyd = flux() + atm
+  hyd = dice.flux() + atm
   if sze < 2:
     hyd = 0
   elif (atm < 2 | atm > 9):
@@ -42,24 +42,24 @@ def fun_uwp(n):
     hyd = 10
 
   # Population 0-15
-  pop = dice(2) - 2
+  pop = dice.dice(2) - 2
   if pop == 10:
-    pop = dice(2) + 3
+    pop = dice.dice(2) + 3
 
   # Government 0-15
-  gov = flux() + pop
+  gov = dice.flux() + pop
   if gov < 0:
     gov = 0
   elif gov > 15:
     gov = 15
 
   # Law level 0-18
-  law = flux() + gov
+  law = dice.flux() + gov
   if law < 0:
     law = 0
   elif law > 18:
     law = 18
-  law = ext_hex(law)
+  law = conv.ext_hex(law)
 
   #Tech Level 0+
   tech = die_roll()
@@ -82,7 +82,7 @@ def fun_uwp(n):
     tech = tech - 2
   if tech < 0:
     tech = 0
-  tech = ext_hex(tech)
+  tech = conv.ext_hex(tech)
   #output the data in std UWP format SpSzAtHyPoGoLa-Tc
   result = sprt + '%X%X%X%X%X' % (sze, atm, hyd, pop, gov) + law + '-' + tech
   return result
@@ -97,13 +97,13 @@ def fun_pbg(p):
   if p == 0:
     pop = 0
   else:
-    pop = dice(2) - 3
+    pop = dice.dice(2) - 3
     if pop < 1:
       pop = 1
-  belt = die_roll() - 3
+  belt = dice.die_roll() - 3
   if belt < 0:
     belt = 0
-  gas = round(dice(2) / 2) - 2
+  gas = round(dice.dice(2) / 2) - 2
   if gas < 0:
     gas = 0
   pbg = str(pop)+str(belt)+str(gas)
@@ -169,7 +169,7 @@ def fun_ext(n):
   """
   
   sport = n[0]
-  tech = ext_dec(n[-1])
+  tech = conv.ext_dec(n[-1])
   sprt_fac = {A: 1, B: 1, C: 0, D: -1, E: -1, X: -1}
   sx = sprt_fac[sport]
   tx = 0
