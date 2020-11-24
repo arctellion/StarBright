@@ -2,11 +2,15 @@
 
 StarBright in the Dark, is the setting for a Traveller Campaign that will start running at some point in the near future. 
 
-## Stars.R
+## stars.py
 
 This is the backbone file currently for generating the star systems for the Campaign, using Traveller 5.1 system creation rules. 
 
-## Functions within the code
+## Functions
+
+All functions are held within discrete modules in the travtools library
+
+## module dice.py
 
 ### dice.sum(n)
 roll n dice and return the sum of the values rolled.
@@ -14,11 +18,15 @@ roll n dice and return the sum of the values rolled.
 ### dice.flux()
 roll flux dice. ie. 1d6 - 1d6
 
+## module converters.py
+
 ### ext.hex(n)
 takes a number and turns it into extended hex. 
 
 ### ext.dec(n)
 takes and extended hex number and turns it back into its decimal equivalent.
+
+## module system.py
 
 ### fun_uwp(n)
 takes number n as a seed and generates a uwp for the planet. using the same value for n will generate the same uwp every time. 
@@ -29,20 +37,17 @@ taking a uwp as it's argument, this function for computing trade codes -- Not co
 ### fun_ext(n)
 takes a uwp and calculates the extended profile, to generate Ix, Ex & Cx
 
-### rand.sep(n, x0, x1, y0, y1, z0, z1, d, test = 1000)
-arguments:
-* n - number of systems to generate
-* x0, x1 - extent of x co-ordinates
-* y0, y2 - extent of y co-ordinates
-* z0, z1 - extent of z co-ordinates
-* d - minimum distance between points
-* test - number of tests to run, default 1000. 
+### fun_pbg(uwp)
+takes a uwp and determines the population digit, the asteroid belts and gas giant number for the system.
 
-generate the locations of planetary sytems. 
+## module stars.py
+
+holds the code for generating the star locations, spherical generation.
+
 
 ## To Do
 
-* Separate some functions out into a library
 * Check Seed value generation for world placement
+* update and finish writing various modules.
 * Make plotly files available online.
 * ...
