@@ -1,6 +1,6 @@
 import numpy as np
 import travtools.converters as cnv
-import travtools.dice 
+import travtools.dice as dd
 
 def fun_uwp(n):
   """
@@ -13,17 +13,17 @@ def fun_uwp(n):
   np.random.seed(1000 + n) # + 123456) add back in for sim
   # Starport
   starport = { 2: "A", 3: "A", 4:"A", 5:"B", 6:"B", 7:"C", 8:"C", 9:"D", 10:"E", 11:"E", 12:"X"}
-  sprt = starport[dice.dice(2)]
+  sprt = starport[dd.dice(2)]
 
   # Size 0-15
-  sze = dice.dice(2) - 2
+  sze = dd.dice(2) - 2
   if sze < 0:
     sze = 0
   elif sze == 10:
-    sze = dice.die_roll() + 9
+    sze = dd.die_roll() + 9
 
   # atmosphere 0-15
-  atm = dice.flux() + sze
+  atm = dd.flux() + sze
   if sze == 0:
     atm = 0
   if atm < 0:
@@ -32,7 +32,7 @@ def fun_uwp(n):
     atm = 15
 
   # Hydrographics 0-10
-  hyd = dice.flux() + atm
+  hyd = dd.flux() + atm
   if sze < 2:
     hyd = 0
   elif (atm < 2 | atm > 9):
@@ -43,19 +43,19 @@ def fun_uwp(n):
     hyd = 10
 
   # Population 0-15
-  pop = dice.dice(2) - 2
+  pop = dd.dice(2) - 2
   if pop == 10:
-    pop = dice.dice(2) + 3
+    pop = dd.dice(2) + 3
 
   # Government 0-15
-  gov = dice.flux() + pop
+  gov = dd.flux() + pop
   if gov < 0:
     gov = 0
   elif gov > 15:
     gov = 15
 
   # Law level 0-18
-  law = dice.flux() + gov
+  law = dd.flux() + gov
   if law < 0:
     law = 0
   elif law > 18:
@@ -63,7 +63,7 @@ def fun_uwp(n):
   law = cnv.ext_hex(law)
 
   #Tech Level 0+
-  tech = die_roll()
+  tech = dd.die_roll()
   #starport factor
   sprt_fct = { "A": 6, "B": 4, "C": 2, "D": 0, "E": 0, "X": -4}
   tech = tech + sprt_fct[sprt]
@@ -88,25 +88,25 @@ def fun_uwp(n):
   result = sprt + '%X%X%X%X%X' % (sze, atm, hyd, pop, gov) + law + '-' + tech
   return result
 
-def fun_pbg(p):
+def fun_pbg(uwp):
   """
   Generate the Population Digit, Gas Giants & Asteroid Belts
   
-  Arguments, p the UWP to process to get population digit.
+  Arguments, uwp the UWP to process to get population digit.
   """
   
-  p = cnv.ext_dec(p.str.slice(4,5))
+  p = cnv.ext_dec(str(uwp[4]))
   pop = 0
   if p == 0:
     pop = 0
   else:
-    pop = dice.dice(2) - 3
+    pop = dd.dice(2) - 3
     if pop < 1:
       pop = 1
-  belt = dice.die_roll() - 3
+  belt = dd.die_roll() - 3
   if belt < 0:
     belt = 0
-  gas = round(dice.dice(2) / 2) - 2
+  gas = round(dd.dice(2) / 2) - 2
   if gas < 0:
     gas = 0
   pbg = str(pop)+str(belt)+str(gas)

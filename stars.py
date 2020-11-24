@@ -11,11 +11,9 @@ p  = st.Points(n=5000,r=25, center=(0,0,0), mindist=1)
 omega = pd.DataFrame(p.points, columns=["x","y","z"])
 omega = omega.rename_axis('id').reset_index()
 print(omega.head())
-
-
-omega['uwp'] = omega['id'].apply(st.fun_uwp)
-omega['pbg'] = omega['uwp'].apply(st.fun_pbg)
-
+omega['uwp'] = omega['id'].apply(sy.fun_uwp)
+print(omega.dtypes)
+omega['pbg'] = omega['uwp'].apply(sy.fun_pbg)
 print(omega.head())
 
 #fig = px.scatter_3d(df, x='x', y='y', z='z')
