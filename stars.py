@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 import travtools as tt
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+import plotly.express as px
 
 p  = tt.stars.Points(n=5000,r=25, center=(0,0,0), mindist=1)
 #print(p.points)
