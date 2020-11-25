@@ -186,3 +186,23 @@ def fun_ext(n):
   px = 0
   if (int(n[5],16) < 7):
     px = -1
+
+def fun_bases(uwp):
+  """
+  Generate Navy & Scout Bases
+
+  Navy - Sport Class 2d - A: 6 or less , B: 5 or less.
+  Scout - Sport Class 2d - A: 4 or less, B: 5 or less, C: 6 or less, D: 7 or less.
+  """
+  base = ""
+  sport = str(uwp[0])
+  roll=dd.dice(2)
+  nvy = {A: 6, B: 5, C: 0, D: 0, E: 0, X: 0}
+  sct = {A: 4, B: 5, C: 6, D: 7, E: 0, X: 0}
+  if (nvy[sport] > 0):
+    if (roll <= nvy[sport]):
+      base += "N"
+  if (sct[sport] > 0):
+    if (roll <= sct[sport]):
+      base += "S"
+  return base
