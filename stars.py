@@ -16,8 +16,6 @@ print(omega.dtypes)
 omega['pbg'] = omega['uwp'].apply(sy.fun_pbg)
 print(omega.head())
 omega['base'] = omega['uwp'].apply(sy.fun_bases)
-print(omega(head))
-#fig = px.scatter_3d(df, x='x', y='y', z='z')
-#fig.update_traces(marker=dict(size=2),
-#                  selector=dict(mode='markers'))
-#fig.show()
+print(omega.head())
+omega['']
+

@@ -161,7 +161,7 @@ def fun_trade(n):
 #S - flux + 5
 #S - flux + TL
 # if pop = 0, all = 0, if any less than 1, then = 1
-def fun_ext(n):
+def fun_ext(uwp,pbg,bases):
   """
   Generates the Extended Profile for a planet {Ix}(Ex)[Cx].
   Importance (Ix)
@@ -170,23 +170,67 @@ def fun_ext(n):
   Cultural (Cx) - [HASS]
   H - Heterogeneity, A - Acceptance, S - Strangeness, S - Symbols
   """
-  
-  sport = n[0]
-  tech = conv.ext_dec(n[-1])
-  sprt_fac = {A: 1, B: 1, C: 0, D: -1, E: -1, X: -1}
-  sx = sprt_fac[sport]
-  tx = 0
+  #Importance
+  ix = 0
+  sport = str(uwp[0])
+  bases = str(bases)
+  tech = conv.ext_dec(str(uwp[-1]))
+  pop = conv.ext_dec(str(uwp[4]))
+  sprt_fac = {"A": 1, "B": 1, "C": 0, "D": -1, "E": -1, "X": -1}
+  ix += sprt_fac[sport]
   if (tech > 15):
-    tx = tx + 1
-  elif (tech > 10):
-    tx = tx + 1
+    ix += 1
+  elif (tech > 9):
+    ix += 1
   elif (tech < 9):
-    tx = tx - 1
-  ix = sx + tx
-  px = 0
-  if (int(n[5],16) < 7):
-    px = -1
-
+    ix += -1
+  if (pop < 7):
+    ix += -1
+  if (bases == "NS"):
+    ix += 1
+  trx = 0
+  ##Economic
+  belt = int(str(pbg[1]))
+  gas = int(str(pbg[2]))
+  ex = ""
+  r = dd.dice(2)
+  if (tech > 7):
+    r = r + belt + gas
+  l = pop - 1
+  if (l < 0):
+    l = 0
+  if (pop = 0):
+    i = 0
+  elif (pop > 0 || pop < 4):
+    i = ix
+  elif (pop > 3 || pop < 7):
+    i = ix + dd.die_roll()
+  elif (pop > 6):
+    i = ix + dd.dice(2)
+  e = dd.flux()
+  ex = "("+str(r)+str(l)+str(i)
+  if (e > 0):
+    ex = ex + "+"+str(e)+")"
+  else: 
+    ex = ex + str(e) + ")"
+  ##Cultural
+  h = pop + dd.flux()
+  a = pop + ix
+  s = dd.flux() + 5
+  sy = dd.flux() + tech
+  if (pop == 0):
+    h, a, s, sy = 0
+  if (h < 1):
+    h = 1
+  if (a < 1):
+    a = 1
+  if (s < 1):
+    s = 1
+  if (sy < 1): 
+    sy = 1
+  cx = "[" + str(h) + str(a) + str(s) + str(sy) + "]"
+  return (ix + ex + cx)
+    
 def fun_bases(uwp):
   """
   Generate Navy & Scout Bases
@@ -197,8 +241,8 @@ def fun_bases(uwp):
   base = ""
   sport = str(uwp[0])
   roll=dd.dice(2)
-  nvy = {A: 6, B: 5, C: 0, D: 0, E: 0, X: 0}
-  sct = {A: 4, B: 5, C: 6, D: 7, E: 0, X: 0}
+  nvy = {"A": 6, "B": 5, "C": 0, "D": 0, "E": 0, "X": 0}
+  sct = {"A": 4, "B": 5, "C": 6, "D": 7, "E": 0, "X": 0}
   if (nvy[sport] > 0):
     if (roll <= nvy[sport]):
       base += "N"
