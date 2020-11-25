@@ -171,24 +171,24 @@ def fun_ext(uwp,pbg,bases):
   H - Heterogeneity, A - Acceptance, S - Strangeness, S - Symbols
   """
   #Importance
-  ix = 0
+  i = 0
   sport = str(uwp[0])
   bases = str(bases)
-  tech = conv.ext_dec(str(uwp[-1]))
-  pop = conv.ext_dec(str(uwp[4]))
+  tech = cnv.ext_dec(str(uwp[-1]))
+  pop = cnv.ext_dec(str(uwp[4]))
   sprt_fac = {"A": 1, "B": 1, "C": 0, "D": -1, "E": -1, "X": -1}
-  ix += sprt_fac[sport]
+  i += sprt_fac[sport]
   if (tech > 15):
-    ix += 1
+    i += 1
   elif (tech > 9):
-    ix += 1
+    i += 1
   elif (tech < 9):
-    ix += -1
+    i -= 1
   if (pop < 7):
-    ix += -1
+    i -= 1
   if (bases == "NS"):
-    ix += 1
-  trx = 0
+    i += 1
+  ix = "{"+str(i)+"}"
   ##Economic
   belt = int(str(pbg[1]))
   gas = int(str(pbg[2]))
@@ -199,27 +199,29 @@ def fun_ext(uwp,pbg,bases):
   l = pop - 1
   if (l < 0):
     l = 0
-  if (pop = 0):
-    i = 0
-  elif (pop > 0 || pop < 4):
-    i = ix
-  elif (pop > 3 || pop < 7):
-    i = ix + dd.die_roll()
+  if (pop == 0):
+    inf = 0
+  elif (0 < pop < 4):
+    inf = i
+  elif (3 < pop < 7):
+    inf = i + dd.die_roll()
   elif (pop > 6):
-    i = ix + dd.dice(2)
+    inf = i + dd.dice(2)
+  if inf < 0: 
+    inf = 0
   e = dd.flux()
-  ex = "("+str(r)+str(l)+str(i)
-  if (e > 0):
+  ex = "("+str(cnv.ext_hex(r))+str(cnv.ext_hex(l))+str(cnv.ext_hex(inf))
+  if (e >= 0):
     ex = ex + "+"+str(e)+")"
   else: 
     ex = ex + str(e) + ")"
   ##Cultural
   h = pop + dd.flux()
-  a = pop + ix
+  a = pop + i
   s = dd.flux() + 5
   sy = dd.flux() + tech
   if (pop == 0):
-    h, a, s, sy = 0
+    h = a = s = sy = 0
   if (h < 1):
     h = 1
   if (a < 1):
@@ -228,7 +230,7 @@ def fun_ext(uwp,pbg,bases):
     s = 1
   if (sy < 1): 
     sy = 1
-  cx = "[" + str(h) + str(a) + str(s) + str(sy) + "]"
+  cx = "[" + str(cnv.ext_hex(h)) + str(cnv.ext_hex(a)) + str(cnv.ext_hex(s)) + str(cnv.ext_hex(sy)) + "]"
   return (ix + ex + cx)
     
 def fun_bases(uwp):
