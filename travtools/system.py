@@ -136,34 +136,12 @@ def fun_trade(n):
   #Ri - Atm 6,8, Pop 6-8
   #Va - Atm 0
 
-#Extended Profile {Ix} (Ex) [Cx]
-#Importance (Ix)
-#Starport Type A or B +1
-#Starport D or worse -1
-#Tech Level G or more +1
-#Tech Level A or more +1
-#Tech Level 8 or less -1
-#Per Ag Hi In Ri +1
-#If Pop 6 or less -1
-#If Naval AND Scout Base +1
-#If Way Station +1
-#Important= +4 or greater.
-#Unimportant= 0 or less.
-#Economic (Ex)
-#(RLI+E)
-#R - Resources - 2D (if tech 8+, then +Gas Giants +Asteroid Belts) min 0
-#L - Labour - Pop - 1 min 0 
-#I - Infrastructure - Pop 0 = 0, Pop 1-3 = Ix, Pop 4-6 = 1D + Ix, Pop 7+ = 2D + Ix min 0
-#E - Efficiency - Flux
-#Cultrual (Cx)
-#H - Pop + flux
-#A - Pop + Ix
-#S - flux + 5
-#S - flux + TL
-# if pop = 0, all = 0, if any less than 1, then = 1
 def fun_ext(uwp,pbg,bases):
   """
   Generates the Extended Profile for a planet {Ix}(Ex)[Cx].
+  
+  Takes as variables, UWP, Pop-belt-gas giant, bases list, Trade Codes
+  
   Importance (Ix)
   Economic (Ex) - (RLI+E)
   R - Resources, L - Labour, I - Infrastruture, E - Efficiency
@@ -188,6 +166,10 @@ def fun_ext(uwp,pbg,bases):
     i -= 1
   if (bases == "NS"):
     i += 1
+  if i > 5:
+    i = 5
+  if i < -3:
+    i = -3
   ix = "{"+str(i)+"}"
   ##Economic
   belt = int(str(pbg[1]))
