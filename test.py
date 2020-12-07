@@ -5,15 +5,16 @@ from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import networkx as nx
 import scipy.spatial.distance as dis
+from math import sqrt
 
-class Points():
-    def __init__(self,n=10, r=1, center=(0,0,0), mindist=0.2, maxtrials=10000 ) :
+class Points2D():
+    def __init__(self,n=10, r=1, center=(0,0), mindist=0.2, maxtrials=10000 ) :
         self.success = False
         self.n = n
         self.r = r
         self.center=np.array(center)
         self.d = mindist
-        self.points = np.ones((self.n,3))*10*r+self.center
+        self.points = np.ones((self.n,2))*10*r+self.center
         self.c = 0
         self.trials = 0
         self.maxtrials = maxtrials
@@ -27,7 +28,7 @@ class Points():
             return np.sqrt(np.sum((p-x)**2))
 
     def newpoint(self):
-        x = (np.random.rand(3)-0.5)*2
+        x = (np.random.rand(2)-0.5)*2
         x = x*self.r-self.center
         if self.dist(self.center, x) < self.r:
             self.trials += 1
@@ -49,21 +50,35 @@ class Points():
 #center =(0,0,0)
 #radius = 25
 #mindist = 1
+p  = Points(n=100,r=10, center=(0,0), mindist=1)
+df = pd.DataFrame(p.points, columns=["x","y"])
+print(df.head())
+# coords = df.to_dict('index')
+# print(coords)
 
-p  = Points(n=10,r=5, center=(0,0,0), mindist=5)
+# def dist(a,b):
+#   d=[a[0]-b[0],a[1]-b[1],a[2]-b[2]]
+#   return(sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2]))
+
+# D={}
+# for pt,pts in coords.items():
+#   D[pt] = {}
+#   for pt1, pts1 in coords.items():
+#     D[pt][pt1] = dist(pts,pts1)
+# for p1,v in D.items():
+#   for p2, d in v.items():
+#     print(p1, p2, d)
+
 #print(p)
-df = pd.DataFrame(p.points, columns=["x","y","z"])
 #print(df.head())
 a = dis.cdist(p.points,p.points)
 b = dis.pdist(p.points)
 # translate df into dict for network
 #pos = df.to_dict('index')
 #print(pos)
-
 print(a)
+
 print(b)
-
-
 #G = nx.from_numpy_matrix(a)
 #plt.subplot(121)
 #nx.draw(G)
