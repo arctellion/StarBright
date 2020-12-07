@@ -170,7 +170,11 @@ def fun_ext(uwp,pbg,bases):
     i = 5
   if i < -3:
     i = -3
-  ix = "{"+str(i)+"}"
+  ix = "{"
+  if i > -1:
+    ix += "+"+str(i)+"}"
+  else:
+    ix += str(i)+"}"
   ##Economic
   belt = int(str(pbg[1]))
   gas = int(str(pbg[2]))

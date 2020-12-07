@@ -55,16 +55,19 @@ p  = Points(n=10,r=5, center=(0,0,0), mindist=5)
 df = pd.DataFrame(p.points, columns=["x","y","z"])
 #print(df.head())
 a = dis.cdist(p.points,p.points)
+b = dis.pdist(p.points)
 # translate df into dict for network
 #pos = df.to_dict('index')
 #print(pos)
 
 print(a)
+print(b)
 
-G = nx.from_numpy_matrix(a)
-plt.subplot(121)
-nx.draw(G)
-plt.savefig("path.png")
+
+#G = nx.from_numpy_matrix(a)
+#plt.subplot(121)
+#nx.draw(G)
+#plt.savefig("path.png")
 #G = nx.drawing.nx_agraph.to_agraph(G)
 
 #G.node_attr.update(color="red", style="filled")

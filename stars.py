@@ -4,6 +4,7 @@ import travtools.stars as st
 import travtools.system as sy
 import plotly.express as px
 import plotly
+import re
 
 p  = st.Points(n=5000,r=25, center=(0,0,0), mindist=1)
 #print(p.points)
@@ -21,8 +22,14 @@ print(omega.head())
 omega['IxExCx'] = np.vectorize(sy.fun_ext)(omega['uwp'],omega['pbg'],omega['base'])
 print(omega.head())
 
+def split_ix(d):
+  return(int(re.search("[+-]?\d",d)[0]))
+
+omega['ix'] = np.vectorize(split_ix)(omega['IxExCx'])
+print(omega.head())
+
 fig = px.scatter_3d()
-fig = px.scatter_3d(omega, x='x', y='y', z='z')
+fig = px.scatter_3d(omega, x='x', y='y', z='z', color = 'ix')  
 fig.update_traces(marker=dict(size=2),
                   selector=dict(mode='markers'))
 plotly.offline.plot(fig, filename = 'stars.html', auto_open=False)
