@@ -32,10 +32,10 @@ omega['ix'] = np.vectorize(split_ix)(omega['IxExCx'])
 omega2d['ix'] = np.vectorize(split_ix)(omega2d['ixexcx'])
 print(omega.head())
 print(omega2d.head())
-
+## output csv of star data
 omega.to_csv('stars.csv')
 omega2d.to_csv('stars2d.csv')
-
+## output interactive graphs of star data
 fig = px.scatter_3d(omega, x='x', y='y', z='z', color = 'ix')  
 fig.update_traces(marker=dict(size=2),
                   selector=dict(mode='markers'))
