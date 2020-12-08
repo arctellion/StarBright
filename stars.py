@@ -11,12 +11,9 @@ p2d = st.Points2D(n=2000, r=100, center=(0,0), mindist=1)
 #3d world view
 omega = pd.DataFrame(p.points, columns=["x","y","z"])
 omega = omega.rename_axis('id').reset_index()
-print(omega.head())
 omega['uwp'] = np.vectorize(sy.fun_uwp)(omega['id'])
 omega['pbg'] = np.vectorize(sy.fun_pbg)(omega['uwp'])
-print(omega.head())
 omega['base'] = np.vectorize(sy.fun_bases)(omega['uwp'])
-print(omega.head())
 omega['IxExCx'] = np.vectorize(sy.fun_ext)(omega['uwp'],omega['pbg'],omega['base'])
 print(omega.head())
 #2d world view
