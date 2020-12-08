@@ -33,7 +33,7 @@ omega2d['ix'] = np.vectorize(split_ix)(omega2d['ixexcx'])
 print(omega.head())
 print(omega2d.head())
 
-omeega.to_csv('stars.csv')
+omega.to_csv('stars.csv')
 omega2d.to_csv('stars2d.csv')
 
 fig = px.scatter_3d(omega, x='x', y='y', z='z', color = 'ix')  
