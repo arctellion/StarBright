@@ -166,7 +166,7 @@ def fun_trade(n):
     tc += "Va "
   return tc
     
-def fun_ext(uwp,pbg,bases):
+def fun_ext(uwp,pbg,bases,trade):
   """
   Generates the Extended Profile for a planet {Ix}(Ex)[Cx].
   
@@ -196,6 +196,14 @@ def fun_ext(uwp,pbg,bases):
     i -= 1
   if (bases == "NS"):
     i += 1
+  if "Ag" in trade:
+    i += 1
+  if "Hi" in trade:
+    i += 1
+  if "In" in trade:
+    i += 1
+  if "Ri" in trade:
+    i += 1    
   if i > 5:
     i = 5
   if i < -3:

@@ -15,7 +15,7 @@ omega['uwp'] = np.vectorize(sy.fun_uwp)(omega['id'])
 omega['pbg'] = np.vectorize(sy.fun_pbg)(omega['uwp'])
 omega['base'] = np.vectorize(sy.fun_bases)(omega['uwp'])
 omega['trade'] = np.vectorize(sy.fun_trade)(omega['uwp'])
-omega['IxExCx'] = np.vectorize(sy.fun_ext)(omega['uwp'],omega['pbg'],omega['base'])
+omega['IxExCx'] = np.vectorize(sy.fun_ext)(omega['uwp'],omega['pbg'],omega['base'],omega['trade'])
 print(omega.head())
 #2d world view
 omega2d = pd.DataFrame(p2d.points, columns=["x","y"])
@@ -24,7 +24,7 @@ omega2d['uwp'] = np.vectorize(sy.fun_uwp)(omega2d['id'])
 omega2d['pbg'] = np.vectorize(sy.fun_pbg)(omega2d['uwp'])
 omega2d['base'] = np.vectorize(sy.fun_bases)(omega2d['uwp'])
 omega2d['trade'] = np.vectorize(sy.fun_trade)(omega2d['uwp'])
-omega2d['ixexcx'] = np.vectorize(sy.fun_ext)(omega2d['uwp'],omega2d['pbg'],omega2d['base'])
+omega2d['ixexcx'] = np.vectorize(sy.fun_ext)(omega2d['uwp'],omega2d['pbg'],omega2d['base'],omega2d['trade'])
 print(omega2d.head())
 #
 def split_ix(d):
