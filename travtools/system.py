@@ -114,28 +114,58 @@ def fun_pbg(uwp):
 
 def fun_trade(n):
   """Generate Trade Classifications for a given UWP n"""
-  siz <- ext_dec(n[1])
-  atm <- ext_dec(n[2])
-  hyd <- ext_dec(n[3])
-  pop <- ext_dec(n[4])
-  gov <- ext_dec(n[5])
-  law <- ext_dec(n[6])
-  print("UWP: ", n, "\nSize: ", siz, "| Atmo: ", atm, "| Hydro: ", hyd, "| Pop: ", pop, "| Gov: ", gov, "| Law: ", law, "\n")
+  siz = cnv.ext_dec(n[1])
+  atm = cnv.ext_dec(n[2])
+  hyd = cnv.ext_dec(n[3])
+  pop = cnv.ext_dec(n[4])
+  gov = cnv.ext_dec(n[5])
+  law = cnv.ext_dec(n[6])
+  tc = ""
+  #print("UWP: ", n, "\nSize: ", siz, "| Atmo: ", atm, "| Hydro: ", hyd, "| Pop: ", pop, "| Gov: ", gov, "| Law: ", law, "\n")
   #Ag - Atm 5-9, Hyd 4-8, Pop 5-7
+  if atm in [5,6,7,8,9] and hyd in [4,5,6,7,8] and pop in [5,6,7]:
+    tc += "Ag "
   #As - Siz 0, Atm 0, Hyd 0
+  if siz == 0 and atm == 0 and hyd == 0:
+    tc += "As "
   #Ba - Pop 0, Gov 0, Law 0
+  if pop == 0 and gov == 0 and law == 0:
+    tc += "Ba "
   #De - Atm 2-9, Hydro 0
+  if atm in [2,3,4,5,6,7,8,9] and hyd == 0:
+    tc += "De "
   #Fl - Atm 10-12, Hydro 1-10
+  if atm in [10,11,12] and hyd in [1,2,3,4,5,6,7,8,9,10]:
+    tc += "Fl "
   #Hi - Pop 9-15
+  if pop in [9,10,11,12,13,14,15]:
+    tc += "Hi "
   #Ic - Atm 0,1, Hydro 1-10
+  if atm in [0,1] and hyd in [1,2,3,4,5,6,7,8,9,10]:
+    tc += "Ic "
   #In - Atm 0-4,7,9,10-12, Pop: 9-15
+  if atm in [0,1,2,3,4,7,9,10,11,12] and pop in [9,10,11,12,13,14,15]:
+    tc += "In "
   #Lo - Pop 1-3
+  if pop in [1,2,3]:
+    tc += "Lo "
   #Na - Atm 0-3, Hydo 0-3, Pop: 6-15
+  if atm in [0,1,2,3] and hyd in [0,1,2,3] and pop in [6,7,8,9,10,11,12,13,14,15]:
+    tc += "Na "
   #Ni - Pop 4-6
+  if pop in [4,5,6]:
+    tc += "Ni "
   #Po - Atm 2-5, Hydro 0-3
+  if atm in [2,3,4,5] and hyd in [0,1]:
+    tc += "Po "
   #Ri - Atm 6,8, Pop 6-8
+  if atm in [6,8] and pop in [6,7,8,]:
+    tc += "Ri "
   #Va - Atm 0
-
+  if atm == 0:
+    tc += "Va "
+  return tc
+    
 def fun_ext(uwp,pbg,bases):
   """
   Generates the Extended Profile for a planet {Ix}(Ex)[Cx].
