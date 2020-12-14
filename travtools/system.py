@@ -164,7 +164,7 @@ def fun_trade(n):
   #Va - Atm 0
   if atm == 0:
     tc += "Va "
-  return tc
+  return tc.strip()
     
 def fun_ext(uwp,pbg,bases,trade):
   """
