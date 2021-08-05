@@ -33,6 +33,42 @@ def ext_dec(n):
         elif n == "K":
             result = 19
         elif n == "L":
-            result = 20
-    
+            result = 20    
     return result
+
+def neg_ehex(n, d):
+    """Converts a negative number for qrebs into it's ehex number.
+
+    n is the number/letter to convert.
+    d is the direction of conversion: 
+        F = Forwards number to letter
+        B = Backwards letter to number
+    """
+
+    result = n
+    
+    if d == "F":
+        if n == -1:
+            result = "A"
+        elif n == -2:
+            result = "B"
+        elif n == -3:
+            result = "C"
+        elif n == -4: 
+            result = "D"
+        elif n == -5:
+            result = "X"
+        return str(result)
+
+    if d == "B": 
+        if n == "A":
+            result = -1
+        elif n == "B":
+            result = -2
+        elif n == "C":
+            result = -3
+        elif n == "D":
+            result = -4
+        elif n == "X":
+            result = -5
+        return str(result)
