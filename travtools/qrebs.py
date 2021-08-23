@@ -2,11 +2,11 @@ import numpy as np
 import travtools.converters as cnv
 import travtools.dice as dd
 
-def qrebs(n):
+def qrebs(n, l = 0):
     """
     Generates QREBS (Quality, Reliablity, Ease of Use, Bulk/Burden, Safety), based on Traveller 5.1 generation rules.
 
-    Takes argument n, as a seed number to ensure that the generation process is repeatable for a given value of n.
+    Takes argument n, as a seed number to ensure that the generation process is repeatable for a given value of n, and argument l, defaulting to 0, l if 1 reports QREBS in long format, otherwise short format.
     """
     np.random.seed(1000 + n)
     ## the rolls
@@ -35,13 +35,17 @@ def qrebs(n):
     e = cnv.neg_ehex(e, "F")
     b = cnv.neg_ehex(b, "F")
     s = cnv.neg_ehex(s, "F")
-
-    qrebs = "QREBS for device:\n\n"
-    qrebs = qrebs + "Quality: " + q + " (" + quality + ")\n"
-    qrebs = qrebs + "Period: " + period + "\n"
-    qrebs = qrebs + "Reliability: " + r + " (" + reliability + ")\n" 
-    qrebs = qrebs + "Ease of Use: " + e + " (" + ease + ")\n" 
-    qrebs = qrebs + "Bulk / Burden: " + b + " (" + burden + ")\n" 
-    qrebs = qrebs + "Safety: " + s + " (" + safety + ")\n" 
-
-    return qrebs
+    if l == 1:
+        qrebs = "QREBS for device:\n\n"
+        qrebs = qrebs + "Quality: " + q + " (" + quality + ")\n"
+        qrebs = qrebs + "Period: " + period + "\n"
+        qrebs = qrebs + "Reliability: " + r + " (" + reliability + ")\n" 
+        qrebs = qrebs + "Ease of Use: " + e + " (" + ease + ")\n" 
+        qrebs = qrebs + "Bulk / Burden: " + b + " (" + burden + ")\n" 
+        qrebs = qrebs + "Safety: " + s + " (" + safety + ")\n" 
+        return qrebs
+    elif l == 0:
+        qrebs = q + r + e + b + s
+        return qrebs
+    else:
+        return #bad choice return nothing.

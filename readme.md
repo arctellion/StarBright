@@ -30,8 +30,8 @@ This function takes a number (n) and turns it either: d=F - forward, or d=B - Ba
 
 ## module qrebs.py
 
-### qrebs(n)
-This function takes a variable n as the seed and generates a QREBS for an item, returning the full QREBS as well as it's description.
+### qrebs(n, l)
+This function takes a variable n as the seed and generates a QREBS for an item, if l = 1 it will return the full QREBS as well as it's description, otherwise if l = 0 (default) it will return the shorterned 5 digit code.
 
 ## module system.py
 
