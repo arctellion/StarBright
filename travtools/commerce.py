@@ -8,8 +8,9 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
     """
     Generate trade goods for a given UWP. Using skills, skill, where skill is {Steward, Admin, Streetwise, Liaison} defaults = 0, for given broker, default = 0, for a given number of days default = 7.
     """
-
+    
     pop = cnv.ext_dec(n[4])
+    tech = n[8]
     trade = sy.fun_trade(n)
 
     admin = skill['Admin']
@@ -28,3 +29,4 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
         freight[i] = dd.flux() + pop
         cargo[i] = 100
         i += 1
+    
