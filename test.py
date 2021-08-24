@@ -3,6 +3,7 @@ import numpy as np
 #import travtools.stars as st
 #import travtools.system as sy
 import travtools.qrebs as qr
+import travtools.commerce as cm
 #import plotly.express as px
 #import plotly
 #import re
@@ -14,6 +15,8 @@ while i <= 10:
     print(qrb)
     i = i + 1
 
+g=cm.trade_gds("B732521-A",{'Steward':2, 'Admin':3, 'Streetwise':5, 'Liaison':1})
+print(g)
 ## system generation test for a million systems
 #idx=range(1,1000000)
 #cols=['uwp']
