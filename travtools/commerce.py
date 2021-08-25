@@ -62,7 +62,13 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
     high = dd.flux() + pop + steward
     mid = dd.flux() + pop + admin
     low = dd.flux() + pop + street
-    
+    if high < 0: 
+        high = 0
+    if mid < 0:
+        mid = 0
+    if low < 0:
+        low = 0
+
     i = 0
     freight = ['None']*days
     cargo = [100]*days

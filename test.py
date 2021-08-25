@@ -15,7 +15,7 @@ while i <= 10:
     print(qrb)
     i = i + 1
 print("\n====\n")
-g=cm.trade_gds("A2009AB-E",{'Steward':2, 'Admin':3, 'Streetwise':5, 'Liaison':1})
+g=cm.trade_gds("A2009AB-E",{'Steward':2, 'Admin':3, 'Streetwise':0, 'Liaison':1}, 8)
 print(g)
 ## system generation test for a million systems
 #idx=range(1,1000000)
