@@ -43,6 +43,19 @@ def spec_price(n, t):
 
     return cost
 
+ag_ga = [['Bulk Protein','Bulk Carbs','Bulk Fats','Bulk Pharma','Livestock', 'Seedstock'], #Raws
+['Flavoured Waters','Wines','Juices','Nectars','Decoctions','Drinkable Lymphs'], #Consumables
+['Health Foods','Nutraceuticals','Fast Drug','Painkillers','Antiseptic','Antibiotics'], #Pharma
+['Incenses','Iridescents','Photonics','Pigments','Noisemakers','Soundmakers'], #Novelties
+['Fine Furs','Meat Delicacies','Fruit Delicacies','Candies','Textiles','Exotic Sauces'], #Rares
+['As','De','Fl','Ic','Na','In']] #Imbalances
+ag_fa = [[], #Raws
+[], #Consumables
+[], #Pharma
+[], #Novelties
+[], #Rares
+[]] #Imbalances
+
 #trade
 def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, days = 7):
     """
