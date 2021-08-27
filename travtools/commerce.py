@@ -184,8 +184,8 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
     while i < days:
         amount = dd.flux() + pop
         frttot += amount
-        freight[i] = str(amount) + ' ' + trade_goods(trades)
-        cargo[i] = '100 ' + trade_goods(trades)
+        freight[i] = str(amount) + 'dt of ' + trade_goods(trades)
+        cargo[i] = 'upto 100dt of ' + trade_goods(trades)
         i += 1
     frt = ", ".join(freight)
     cgo = ", ".join(cargo)
