@@ -184,20 +184,21 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
     while i < days:
         amount = dd.flux() + pop
         frttot += amount
-        freight[i] = str(amount) + 'dt of ' + trade_goods(trades)
-        cargo[i] = 'upto 100dt of ' + trade_goods(trades)
+        frtprc = amount * 1000
+        freight[i] = '{}dt of {} at Cr{:,}'.format(amount,trade_goods(trades),frtprc)
+        cargo[i] = '100dt of ' + trade_goods(trades)
         i += 1
-    frt = ", ".join(freight)
-    cgo = ", ".join(cargo)
+    frt = "\n|=> ".join(freight)
+    cgo = "\n|=> ".join(cargo)
     trd = "During the last {} days you find:\n".format(days)
-    trd = trd + "* High Passengers: {}\n".format(high)
-    trd = trd + "* Middle Passengers: {}\n".format(mid)
-    trd = trd + "* Low Passengers: {}\n---\n".format(low)
-    trd = trd + "* Freight totalling {}dt in lots: {} \n".format(frttot, frt)
-    trd = trd + "* Spec Cargo: {} \n".format(cgo)
+    trd = trd + "* High Passengers: {} at Cr10,000 +/- Cr1,000 depending on demand\n".format(high)
+    trd = trd + "* Middle Passengers: {} at Cr8,000 +/- Cr1,000 depending on demand\n".format(mid)
+    trd = trd + "* Low Passengers: {} at Cr1,000 +/- Cr100 depending on demand\n---\n".format(low)
+    trd = trd + "* Freight totalling {}dt in lots:\n|=> {}\n".format(frttot, frt)
+    trd = trd + "* Spec Cargo available:\n|=> {}\n".format(cgo)
     tc = " ".join(map(str, trades))
     cost = spec_price(trades, tech)
-    crgo = "{} - {} Cr{}".format(tech, tc, cost)
-    trd = trd + "|==> Spec Cargo Cost: {} per dt.".format(crgo)
+    crgo = "{} - {} Cr{:,}".format(tech, tc, cost)
+    trd = trd + "|===> Spec Cargo Cost: {} per dt.".format(crgo)
 
     return trd
