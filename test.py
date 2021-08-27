@@ -22,8 +22,8 @@ print("\n====\n")
 # Streetwise - Sir Otto - 1
 # Liaison - Sir Otto - 2; Aruk - 1;  ?? - 1;
 
-#g=cm.trade_gds("A2009AB-E",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
-#print(g)
+g=cm.trade_gds("A2009AB-E",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
+print(g)
 
 
 ## system generation test for a million systems
