@@ -49,10 +49,10 @@ def trade_goods(n):
     """
     goods = ""
     l = len(n) 
-    z = np.random.randint(1, l)
+    z = np.random.randint(0, (l-1))
     i = dd.die_roll()-1
     j = dd.die_roll()-1
-
+    #print('tg:{};l:{};z{};i{};j{}'.format(n,l,z,i,j))
     if n[z] == 'Ag':
         goods = ag_ga[i][j]
     if n[z] == 'As':
@@ -82,6 +82,19 @@ def trade_goods(n):
     if n[z] == 'Va':
         goods = va[i][j]
     return goods
+
+def sell_price(n,b,d):
+    """
+    sell_price takes arguments of a Cargo Code (n), Brokers Skill (b) and Destination UWP (d), it returns the sell price of the goods, taking brokering into account.
+    """
+    price = 0
+
+    dtech = d[8]
+    dtrade = sy.fun_trade(d).split()
+    stech = n[0]
+    strade = n[4:]
+
+    return price
 
 #Trade Goods Data
 ag_ga = [['Bulk Protein','Bulk Carbs','Bulk Fats','Bulk Pharma','Livestock', 'Seedstock'], #Raws

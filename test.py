@@ -10,7 +10,7 @@ import travtools.commerce as cm
 
 ##qrebs generation
 i=1
-while i <= 14:
+while i <= 100:
     qrb = qr.qrebs(i)
     print(qrb)
     i = i + 1
