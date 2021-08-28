@@ -45,14 +45,14 @@ def spec_price(n, t):
 
 def trade_goods(n):
     """
-    Generate base cost of speculative cargo for a given set of trade codes n, with tech level t.
+    Generate a random Trade good type given a list of trade codes n.
     """
     goods = ""
     l = len(n) 
     z = np.random.randint(0, (l-1))
     i = dd.die_roll()-1
     j = dd.die_roll()-1
-    print('tg:{};l:{};z{};i{};j{}'.format(n,l,z,i,j))
+    #print('tg:{};l:{};z{};i{};j{}'.format(n,l,z,i,j))
     if n[z] == 'Ag':
         goods = ag_ga[i][j]
     if n[z] == 'As':

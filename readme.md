@@ -50,6 +50,22 @@ takes a uwp and calculates the extended profile, to generate Ix, Ex & Cx
 ### fun_bases(uwp)
 takes a uwp and sees whether there are naval or scout bases present.
 
+## module commerce.py
+
+### spec_price(n,t)
+Generate base cost of speculative cargo for a given set of trade codes n, with tech level t.
+
+### trade_goods(n)
+Generate a random Trade good type given a list of trade codes n.
+
+### sell_price(n,b,d)
+
+takes arguments of a Cargo Code (n) in the format: E - Hi In Na Va Cr3,400, Brokers Skill (b) and Destination UWP (d) in the format A430311-B, it returns the sell price of the goods, taking brokering into account.
+
+### trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, days = 7):
+
+generate trade goods for a given UWP in the format A430311-B. Using skills, skill, where skill is {Steward, Admin, Streetwise, Liaison} defaults = 0, for a given number of days default = 7.
+
 ## module stars.py
 
 This code has 2 Classes Points & Points2D these are used to generate random points to act as placeholder for planetary systems. Each point is spread in 3d space or 2d space by providing the class with a number of points, a radius, a center point (x,y,z for Points and x,y for Points2D), a minimum distance between points, and a maximum number of itterations to find the points and make them fit. 
