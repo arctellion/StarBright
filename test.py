@@ -9,12 +9,12 @@ import travtools.commerce as cm
 #import re
 
 ##qrebs generation
-i=1
-while i <= 100:
-    qrb = qr.qrebs(i)
-    print(qrb)
-    i = i + 1
-print("\n====\n")
+# i=1
+# while i <= 100:
+#     qrb = qr.qrebs(i)
+#     print(qrb)
+#     i = i + 1
+# print("\n====\n")
 
 #Starbright Crew:
 # Steward - Prof Afan - 1; 
@@ -25,7 +25,8 @@ print("\n====\n")
 g=cm.trade_gds("A2009AB-E",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
 print(g)
 
-
+g = cm.sell_price("E - Hi In Na Va Cr3,400",4,"A430311-B")
+print("Sell Price:  Cr{:,}".format(g))
 ## system generation test for a million systems
 #idx=range(1,1000000)
 #cols=['uwp']

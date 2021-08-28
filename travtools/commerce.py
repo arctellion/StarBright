@@ -52,7 +52,7 @@ def trade_goods(n):
     z = np.random.randint(0, (l-1))
     i = dd.die_roll()-1
     j = dd.die_roll()-1
-    #print('tg:{};l:{};z{};i{};j{}'.format(n,l,z,i,j))
+    print('tg:{};l:{};z{};i{};j{}'.format(n,l,z,i,j))
     if n[z] == 'Ag':
         goods = ag_ga[i][j]
     if n[z] == 'As':
@@ -87,13 +87,136 @@ def sell_price(n,b,d):
     """
     sell_price takes arguments of a Cargo Code (n), Brokers Skill (b) and Destination UWP (d), it returns the sell price of the goods, taking brokering into account.
     """
-    price = 0
+    price = 5000
 
-    dtech = d[8]
+    dtech = cnv.ext_dec(d[8])
     dtrade = sy.fun_trade(d).split()
-    stech = n[0]
-    strade = n[4:]
-
+    stech = cnv.ext_dec(n[0])
+    strade = n[3:n.find("Cr")].split()
+    #print("DestTech: {}; DestTrade: {}; SourceTech: {}; SourceTrade: {}; Broker: {}".format(dtech,dtrade,stech,strade,b))
+    ptech = (stech - dtech)*0.1
+    pr = 0
+    for i in range(len(strade)):
+        if strade[i] == 'Ag':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'Ag':
+                    pr += 1000
+                if dtrade[x] == 'As':
+                    pr += 1000
+                if dtrade[x] == 'De':
+                    pr += 1000
+                if dtrade[x] == 'Hi':
+                    pr += 1000
+                if dtrade[x] == 'In':
+                    pr += 1000
+                if dtrade[x] == 'Ri':
+                    pr += 1000
+                if dtrade[x] == 'Va':
+                    pr += 1000
+        if strade[i] == 'As':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'As':
+                    pr += 1000
+                if dtrade[x] == 'In':
+                    pr += 1000
+                if dtrade[x] == 'Ri':
+                    pr += 1000
+                if dtrade[x] == 'Va':
+                    pr += 1000
+        if strade[i] == 'Ba':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'In':
+                    pr += 1000
+        if strade[i] == 'De':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'De':
+                    pr += 1000
+        if strade[i] == 'Fl':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'Fl':
+                    pr += 1000
+                if dtrade[x] == 'In':
+                    pr += 1000
+        if strade[i] == 'Hi':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'Hi':
+                    pr += 1000
+        if strade[i] == 'Ic':
+            pr += 0
+        if strade[i] == 'In':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'Ag':
+                    pr += 1000
+                if dtrade[x] == 'As':
+                    pr += 1000
+                if dtrade[x] == 'De':
+                    pr += 1000
+                if dtrade[x] == 'Fl':
+                    pr += 1000
+                if dtrade[x] == 'Hi':
+                    pr += 1000
+                if dtrade[x] == 'In':
+                    pr += 1000
+                if dtrade[x] == 'Ri':
+                    pr += 1000
+                if dtrade[x] == 'Va':
+                    pr += 1000
+        if strade[i] == 'Lo':
+            pr += 0
+        if strade[i] == 'Na':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'As':
+                    pr += 1000
+                if dtrade[x] == 'De':
+                    pr += 1000
+                if dtrade[x] == 'Va':
+                    pr += 1000
+        if strade[i] == 'Ni':
+            pr += 0
+        if strade[i] == 'Po':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'Ag':
+                    pr -= 1000
+                if dtrade[x] == 'Hi':
+                    pr -= 1000
+                if dtrade[x] == 'In':
+                    pr -= 1000
+                if dtrade[x] == 'Ri':
+                    pr -= 1000
+        if strade[i] == 'Ri':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'Ag':
+                    pr += 1000
+                if dtrade[x] == 'De':
+                    pr += 1000
+                if dtrade[x] == 'Hi':
+                    pr += 1000
+                if dtrade[x] == 'In':
+                    pr += 1000
+                if dtrade[x] == 'Ri':
+                    pr += 1000
+        if strade[i] == 'Va':
+            for x in range(len(dtrade)):
+                if dtrade[x] == 'As':
+                    pr += 1000
+                if dtrade[x] == 'In':
+                    pr += 1000
+                if dtrade[x] == 'Va':
+                    pr += 1000
+    br = {-5: 0.4, -4: 0.5, -3: 0.7, -2: 0.8, -1: 0.9, 0: 1.0, 1: 1.1, 2: 1.2, 3: 1.3, 4: 1.5, 5: 1.7, 6: 2.0, 7: 3.0, 8: 4.0}
+    broker = dd.flux() + b
+    if broker > 8:
+        broker = 8
+    if broker < -5:
+        broker = -5
+    pbrk = br[broker]
+    price = price + pr
+    tpr = int(price * ptech)
+    #print('price: {}; tech effect: {}; {}; broker: {}'.format(price,ptech,tpr, pbrk))
+    price += tpr
+    if price < 0:
+        price = 0
+    price = int(price * pbrk)
     return price
 
 #Trade Goods Data
@@ -134,7 +257,7 @@ ic = [['Bulk Ices','Bulk Precipitates','Bulk Ephemerals','Exotic Flora','Bulk Ga
 ['Unusual Ices','Cryo Alloys','Rare Minerals','Unusual Fluids','Cryogems','VHDUS Dyes'], #Rares
 ['Fossils','Cryogems','Vision Suppressant','Fission Suppressant','Wafers','Cold Sleep Pills']] #Uniques
 na = [['Bulk Abrasives','Bulk Gases','Bulk Minerals','Bulk Precipitates','Exotic Fauna','Exotic Flora'], #Raws
-['Archeologicals''Fauna''Flora''Minerals''Ephemerals''Polymers'], #Samples
+['Archeologicals','Fauna','Flora','Minerals','Ephemerals','Polymers'], #Samples
 ['Branded Tools','Drinkable Lymphs','Strange Seeds','Pattern Creators','Pigments','Warm Leather'], #Novelties
 ['Hummingsand','Masterpieces','Fine Carpets','Isotopes','Pelts','Seedstock'], #Rares
 ['Masterpieces','Unusual Rocks','Artifacts','Non-Fossil Carca','Replicating Clays','ANIFX Emitter'], #Uniqies
