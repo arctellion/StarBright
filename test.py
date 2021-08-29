@@ -22,10 +22,10 @@ import travtools.commerce as cm
 # Streetwise - Sir Otto - 1
 # Liaison - Sir Otto - 2; Aruk - 1;  ?? - 1;
 
-g=cm.trade_gds("A2009AB-E",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
+g=cm.trade_gds("A200654-F",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
 print(g)
 
-g = cm.sell_price("E - Hi In Na Va Cr3,400",4,"A430311-B")
+g = cm.sell_price("F - Na Ni Va Cr6,500",4,"D110566-B")        
 print("Sell Price:  Cr{:,}".format(g))
 ## system generation test for a million systems
 #idx=range(1,1000000)
