@@ -83,12 +83,18 @@ def trade_goods(n):
         goods = va[i][j]
     return goods
 
-def sell_price(n,b,d):
+def sell_price(n, d, b = 0, t = 0):
     """
-    sell_price takes arguments of a Cargo Code (n), Brokers Skill (b) and Destination UWP (d), it returns the sell price of the goods, taking brokering into account.
+    takes arguments of a Cargo Code (n) in the format: E - Hi In Na Va Cr3,400, Brokers Skill default is 0, no broker (b), Any Trader Roll default to 0, no trader (t) and Destination UWP (d) in the format A430311-B, it returns the sell price of the goods, taking brokering into account.
     """
     price = 5000
-
+    if b > 0:
+        if b > 8:
+            b = 8
+        b = int(round(b/2))
+    if t > 0:
+        if t > 6:
+            t = 6
     dtech = cnv.ext_dec(d[8])
     dtrade = sy.fun_trade(d).split()
     stech = cnv.ext_dec(n[0])
@@ -204,12 +210,28 @@ def sell_price(n,b,d):
                 if dtrade[x] == 'Va':
                     pr += 1000
     br = {-5: 0.4, -4: 0.5, -3: 0.7, -2: 0.8, -1: 0.9, 0: 1.0, 1: 1.1, 2: 1.2, 3: 1.3, 4: 1.5, 5: 1.7, 6: 2.0, 7: 3.0, 8: 4.0}
-    broker = dd.flux() + b
-    if broker > 8:
-        broker = 8
-    if broker < -5:
-        broker = -5
-    pbrk = br[broker]
+    if b > 0:
+        if t > 0:
+            broker = t - dd.die_roll() + b
+            if broker > 8:
+                broker = 8
+            if broker < -5:
+                broker = -5
+            pbrk = br[broker]
+        else:
+            broker = dd.flux() + b 
+            if broker > 8:
+                broker = 8
+            if broker < -5:
+                broker = -5
+            pbrk = br[broker]
+    else:
+        broker = dd.flux()
+        if broker > 8:
+            broker = 8
+        if broker < -5:
+            broker = -5
+        pbrk = br[broker]
     price = price + pr
     tpr = int(price * ptech)
     #print('price: {}; tech effect: {}; {}; broker: {}'.format(price,ptech,tpr, pbrk))

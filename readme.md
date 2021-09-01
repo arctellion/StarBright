@@ -58,9 +58,9 @@ Generate base cost of speculative cargo for a given set of trade codes n, with t
 ### trade_goods(n)
 Generate a random Trade good type given a list of trade codes n.
 
-### sell_price(n,b,d)
+### sell_price(n,d,b = 0, t = 0)
 
-takes arguments of a Cargo Code (n) in the format: E - Hi In Na Va Cr3,400, Brokers Skill (b) and Destination UWP (d) in the format A430311-B, it returns the sell price of the goods, taking brokering into account.
+takes arguments of a Cargo Code (n) in the format: E - Hi In Na Va Cr3,400, Brokers Skill default is 0, no broker (b), Any Trader Roll default to 0, no trader (t) and Destination UWP (d) in the format A430311-B, it returns the sell price of the goods, taking brokering into account.
 
 ### trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, days = 7):
 
