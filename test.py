@@ -4,6 +4,7 @@ import numpy as np
 #import travtools.system as sy
 import travtools.qrebs as qr
 import travtools.commerce as cm
+import travtools.gunmaker as gm
 #import plotly.express as px
 #import plotly
 #import re
@@ -27,6 +28,8 @@ print(g)
 
 g = cm.sell_price("F - Na Ni Va Cr6,500","D110566-B",8,3)        
 print("Sell Price:  Cr{:,}".format(g))
+
+gm.gunmaker()
 ## system generation test for a million systems
 #idx=range(1,1000000)
 #cols=['uwp']
