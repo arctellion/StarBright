@@ -63,14 +63,34 @@ mg = {
     3: ['S','Sub',-1,3,0.3,0,'Bullet',-1,'',0,-1,0.9]
 }
 spray = {
-
+    0: ['A','Acid',0,3,1.0,1,'Corrode',2,'Pen','1-2-3',4,3.0],
+    1: ['H','Fire',0,1,0.9,0,'Burn','1-2-3','Pen','1-2-3','2-4-6',2.0],
+    2: ['P','Poison Gas',0,2,1.0,'Gas','1-2-3','Poison','1-2-3','2-4-6',3.0],
+    3: ['S','Stench',3,2,0.4,0,'Stench','1-2-3','',0,'1-2-3',1.2]
 }
 exotic = {
 
 }
 launcher = {
-    
+
 }
+
 def gunmaker():
     gun = ""
+    print("ID | Code | Descriptor")
+    for key in cat:
+        print("{:^3}|{:^6}| {:<}".format(key,cat[key][0],cat[key][1]))
+    
+    while True:
+        try:
+            choose = int(input("Choose Weapon Type [1-14]:"))
+        except ValueError:
+            print("Invalid input!")
+            continue
+        if choose <= 0 or choose >14:
+            print("Please choose from between 1 and 14.")
+            continue
+        else:
+            break
+    print(cat[choose])
     return gun
