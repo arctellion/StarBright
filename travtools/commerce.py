@@ -236,6 +236,7 @@ def sell_price(n, d, b = 0, t = 0):
     tpr = int(price * ptech)
     #print('price: {}; tech effect: {}; {}; broker: {}'.format(price,ptech,tpr, pbrk))
     price += tpr
+    print('Base Price: {}\n'.format(price))
     if price < 0:
         price = 0
     price = int(price * pbrk)
