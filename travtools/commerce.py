@@ -49,7 +49,10 @@ def trade_goods(n):
     """
     goods = ""
     l = len(n) 
-    z = np.random.randint(0, (l-1))
+    if l > 1:
+        z = np.random.randint(0, (l-1))
+    else: 
+        z = 0
     i = dd.die_roll()-1
     j = dd.die_roll()-1
     #print('tg:{};l:{};z{};i{};j{}'.format(n,l,z,i,j))
@@ -342,6 +345,8 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
     frttot = 0
     while i < days:
         amount = dd.flux() + pop
+        if amount < 0:
+            amount = 0
         frttot += amount
         frtprc = amount * 1000
         freight[i] = '{}dt of {} at Cr{:,}'.format(amount,trade_goods(trades),frtprc)

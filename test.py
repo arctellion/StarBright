@@ -23,10 +23,10 @@ import travtools.gunmaker as gm
 # Streetwise - Sir Otto - 1
 # Liaison - Sir Otto - 2; Aruk - 1;  ?? - 1;
 
-g=cm.trade_gds("A200654-F",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
+g=cm.trade_gds("D110566-B",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 7)
 print(g)
 
-g = cm.sell_price("F - Na Ni Va Cr6,500","D110566-B",8,3)        
+g = cm.sell_price("F - Na Ni Va Cr6,500","D110566-B",8,2)        
 print("Sell Price:  Cr{:,}".format(g))
 
 #gm.gunmaker()
