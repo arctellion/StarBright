@@ -1,6 +1,6 @@
 # StarBirght in the Dark
 
-StarBright in the Dark, is the setting for a Traveller Campaign that will start running at some point in the near future. 
+StarBright in the Dark, is the setting for a Traveller Campaign that I am running. I created a whole pile of libraries and functions to help my life as GM be a little easier.
 
 ## Functions
 

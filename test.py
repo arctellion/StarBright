@@ -1,7 +1,8 @@
 import numpy as np
+import time
 #import pandas as pd
 #import travtools.stars as st
-#import travtools.system as sy
+import travtools.system as sy
 import travtools.qrebs as qr
 import travtools.commerce as cm
 import travtools.gunmaker as gm
@@ -23,10 +24,10 @@ import travtools.gunmaker as gm
 # Streetwise - Sir Otto - 1
 # Liaison - Sir Otto - 2; Aruk - 1;  ?? - 1;
 
-g=cm.trade_gds("D110566-B",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 3)
+g=cm.trade_gds("B4638A9-B",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 3)
 print(g)
 
-g = cm.sell_price("F - Na Ni Va Cr6,500","D110566-B",8,2)        
+g = cm.sell_price("B - Ri Cr5,100","B787AA9-E",8,4)
 print("Sell Price:  Cr{:,}".format(g))
 
 #gm.gunmaker()
@@ -37,3 +38,5 @@ print("Sell Price:  Cr{:,}".format(g))
 #omega = omega.rename_axis('id').reset_index()
 #omega['uwp'] = np.vectorize(sy.fun_uwp)(omega['id'])
 #omega.to_csv('stars.csv')
+
+#collab subsector Planet: A573331-C 813 Lo  {+1}(B21+2)[445A]
