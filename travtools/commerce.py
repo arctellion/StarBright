@@ -294,7 +294,7 @@ ind = [['Electronics','Photonics','Magnetics','Fluidics','Polymers','Gravitics']
 ['Nostrums','Restoratives','Palliatives','Chelates','Antidotes','Antitoxins'], #Pharma
 ['Software','Databases','Expert Systems','Upgrades','Backups','Raw Sensings'], #Data
 ['Disposables','Respirators','Filter Masks','Combination','Parts ','Improvements']] #Consumables
-po = [['Bulk Nutrients''Bulk Fibers''Bulk Organics''Bulk Minerals''Bulk Textiles''Exotic Flora'], #Raws
+po = [['Bulk Nutrients','Bulk Fibers','Bulk Organics','Bulk Minerals','Bulk Textiles','Exotic Flora'], #Raws
 ['Art','Recordings','Writings','Tactiles','Osmancies','Wafers'], #Entertainments
 ['Strange Crystals','Strange Seeds','Pigments','Emotion Lighting','Silanes','Flora'], #Novelties
 ['Gemstones','Antiques','Collectibles','Allotropes','Spices','Seedstock'], #Rares
