@@ -12,7 +12,7 @@ cat = {
     5:  ['R', 'Rifle',          5, 5,   4.0,  0, 'Bullet', 2, 2,   500],
     6:  ['Ca','Carbine',        5, 4,   3.0, -1, 'Bullet', 1, 1,   400],
     #Handguns
-    7:  ['P', 'Pistol',         5, 3,   1.1,  0, 'Bullet', 1, 1,   150],
+    7:  ['P', 'Pistol',         5, 2,   1.1,  0, 'Bullet', 1, 1,   150],
     8:  ['R', 'Revolver',       4, 2,   1.25, 0, 'Bullet', 1, 1,   100],
     #Other weapons
     9:  ['S', 'Shotgun',        4, 2,   4.0,  0, 'Frag',   2, 2,   300],
@@ -49,7 +49,8 @@ handgun ={
     0: ['',  'blank',      0,0,1.0,0,'',      0,'',   0,0,1.0],
     1: ['Ac','Accelerator',4,0,0.6,0,'Bullet',2,'',   0,2,3.0],
     2: ['L', 'Laser',      5,0,1.2,0,'Burn',  2,'Pen',2,4,6.0],
-    3: ['M', 'Machine',    0,2,1.2,0,'Bullet',2,'',   0,0,1.5]
+    3: ['M', 'Machine',    0,2,1.2,0,'Bullet',2,'',   0,0,1.5],
+    4: ['G', 'Gauss',      8,+3,0.6,0,'Bullet',3,'',   0,3,4.0]
 }
 shot = {
     0: ['', 'blank',  0,0,1.0,0,'',      0,'',     0,0,1.0],
@@ -91,7 +92,7 @@ launcher = {
 
 burden = {
     0: ['',   'blank',          0, 0, 1.0, 0,'',0, 0,'',                    0,1.0],
-    1: ['aD', 'Anti-Designator',3, 1, 3.0, 3,'',0, 1,'Not Pitols, Shotguns',0,3.0],
+    1: ['aD', 'Anti-Designator',3,+1, 3.0, 3,'',0, 1,'Not Pitols, Shotguns',0,3.0],
     2: ['B',  'Body',           2, 1, 0.5,-4,'',0,-1,'Only Pistols',        0,3.0],
     3: ['D',  'Disposable',     3, 0, 0.9,-1,'Q= -2',0, 0,'',               0,0.5],
     4: ['H',  'Heavy',          0, 1, 1.3, 3,'',0, 1,'Not Lasers',          0,2.0],
