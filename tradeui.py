@@ -6,6 +6,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
+from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.properties import ObjectProperty
 import travtools.commerce as cm
 
@@ -15,7 +16,8 @@ import travtools.commerce as cm
 #     #pat = re.compile('[a-zA-Z](?:[a-zA-Z0-9]){6}-[a-zA-Z0-9]')
 #   #pat = [ABCDEXFGHY][0-9A-F][0-9A-F][0-9A][0-9A-F][0-9A-F][0-9A-J]-[0-9A-J]
 
-class MyUI(Widget):
+#class MyUI(Widget):
+class MyUI(TabbedPanel):
     uwp = ObjectProperty(None)
     steward = ObjectProperty(None)
     admin = ObjectProperty(None)
