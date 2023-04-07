@@ -1,0 +1,81 @@
+#:kivy 2.1.0
+# filename: testui.kv
+<MyUI>:
+    uwp: uwp
+    steward: steward
+    admin: admin
+    street: street
+    liaison: liaison
+    days: days
+    status: status
+    #:set fifteen  ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
+    #:set fourteen  ["1","2","3","4","5","6","7","8","9","10","11","12","13","14"]
+
+    GridLayout:
+        cols:1
+        size: root.width-(root.width/10), root.height-(root.height/10)
+        pos: root.center_x - (self.width/2), root.center_y - (self.height/2)
+        GridLayout:
+            cols:2
+            #trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, days = 7):
+            Label:
+                text: "UWP: "
+            TextInput:
+                id: uwp  # <- Add this
+                multiline:False
+
+            Label:
+                text: "Steward: "
+            Spinner:
+                id: steward  # <-Add this
+                text: "Steward Skill"
+                values: fifteen
+
+            Label:
+                text: "Admin: "
+            Spinner:
+                id: admin  # <-Add this
+                text: "Admin Skill"
+                values: fifteen
+
+            Label:
+                text: "Streetwise: "
+            Spinner:
+                id: street  # <-Add this
+                text: "Streetwise Skill"
+                values: fifteen
+
+            Label:
+                text: "Liaison: "
+            Spinner:
+                id: liaison  # <-Add this
+                text: "Liaison Skill"
+                values: fifteen
+
+            Label:
+                text: "Days to Look: "
+            Spinner:
+                id: days  # <-Add this
+                text: "Choose Number of Days"
+                values: fourteen
+
+        Button:
+            text:"GO!"
+            size_hint_max_y: 50
+            halign: 'center'
+            valign: 'middle'
+            on_release: root.btn() # <- Add this
+            
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+
+            Label:
+                id: status
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                padding: 10, 10
+                text: ""
+                halign: 'left'
+                valign: 'top'
