@@ -25,12 +25,18 @@ class MyUI(TabbedPanel):
     liaison = ObjectProperty(None)
     days = ObjectProperty(None)
     status = ObjectProperty(None)
+    cargostatus = ObjectProperty(None)
+    cargo = ObjectProperty(None)
+    broker = ObjectProperty(None)
+    uwpsell = ObjectProperty(None)
+    trade = ObjectProperty(None)
     uwp_pat = re.compile('[ABCDEXFGHY][0-9A-F][0-9A-F][0-9A][0-9A-F][0-9A-F][0-9A-J]-[0-9A-J]')
     skills = {}
     trade = ""
+    value = 0
 
     # Goes inside MyGrid Class
-    def btn(self):
+    def buy(self):
         self.status.text = ""
         if self.uwp.text == "":
             self.status.text = "No UWP Provided."
@@ -56,7 +62,25 @@ class MyUI(TabbedPanel):
             pass
         if self.trade:
             self.status.text = self.trade
-            print(self.trade)
+            # print(self.trade)
+        
+    def sell(self):
+        self.cargostatus.text=""
+        if self.cargo.text == "":
+            self.cargostatus.text = "No Cargo Code entered."
+        elif len(self.uwpsell.text) != 9:
+            self.cargostatus.text = "Incorrect length of UWP, should be 9 characters long."
+        elif not self.uwp_pat.match(self.uwpsell.text):
+            self.status.text = "Incorrect UWP Pattern."
+        #g = cm.sell_price("B - Ri Cr5,100","B787AA9-E",8,4)
+        try:
+            trd = int(self.trade.text)
+        except ValueError as e:
+            trd = 0
+        self.value = cm.sell_price(self.cargo.text,self.uwpsell.text, int(self.broker.text), trd)
+        if self.value > 0:
+            self.cargostatus.text = "Sell Price: Cr{:,}".format(self.value)
+            #print("Sell Price:  Cr{:,}".format(slef.value))
 
 class TradeUiApp(App): # <- Main Class
     def build(self):

@@ -102,7 +102,7 @@ def sell_price(n, d, b = 0, t = 0):
     dtrade = sy.fun_trade(d).split()
     stech = cnv.ext_dec(n[0])
     strade = n[3:n.find("Cr")].split()
-    #print("DestTech: {}; DestTrade: {}; SourceTech: {}; SourceTrade: {}; Broker: {}".format(dtech,dtrade,stech,strade,b))
+    #print("DestTech: {}; DestTrade: {}; SourceTech: {}; SourceTrade: {}; Broker: {}; TradeRoll: {}".format(dtech,dtrade,stech,strade,b,t))
     ptech = (stech - dtech)*0.1
     pr = 0
     for i in range(len(strade)):
@@ -239,7 +239,7 @@ def sell_price(n, d, b = 0, t = 0):
     tpr = int(price * ptech)
     #print('price: {}; tech effect: {}; {}; broker: {}'.format(price,ptech,tpr, pbrk))
     price += tpr
-    print('Base Price: {}\n'.format(price))
+    #print('Base Price: {}\n'.format(price))
     if price < 0:
         price = 0
     price = int(price * pbrk)

@@ -8,8 +8,14 @@
     liaison: liaison
     days: days
     status: status
+    cargostatus:cargostatus
+    cargo:cargo
+    broker:broker
+    uwpsell:uwpsell
+    trade:trade
     #:set fifteen  ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
     #:set fourteen  ["1","2","3","4","5","6","7","8","9","10","11","12","13","14"]
+    #:set six ["1","2","3","4","5","6"]
     do_default_tab: False
 
     TabbedPanelItem:
@@ -68,7 +74,7 @@
                 size_hint_max_y: 50
                 halign: 'center'
                 valign: 'middle'
-                on_release: root.btn() # <- Add this
+                on_release: root.buy() # <- Add this
                 
             ScrollView:
                 do_scroll_x: False
@@ -87,6 +93,56 @@
     TabbedPanelItem:
         text: "Selling"
 
-        Label:
-            id:selling
-            text: "SELLING TAB"
+        GridLayout:
+            cols:1
+            Label:
+                text: "SELLING TAB"
+                font_size:40
+            GridLayout:
+                cols:2
+                Label:
+                    text:"Cargo ID:"
+                TextInput:
+                    id:cargo
+                    multiline:False
+
+                Label:
+                    text:"Broker:"
+                Spinner:
+                    id:broker
+                    text:"Broker Skill"
+                    values:fifteen
+                
+                Label:
+                    text:"Trade pre-roll (optional):"
+                Spinner:
+                    id:trade
+                    text:"Trade Roll"
+                    values:six
+                
+                Label:
+                    text:"Destination UWP:"
+                TextInput:
+                    id:uwpsell
+                    multiline: False
+
+            Button:
+                text:"GO!"
+                size_hint_max_y: 50
+                halign: 'center'
+                valign: 'middle'
+                on_release: root.sell() # <- Add this
+
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+
+                Label:
+                    id: cargostatus
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    text_size: self.width, None
+                    padding: 10, 10
+                    text: ""
+                    halign: 'left'
+                    valign: 'top'
