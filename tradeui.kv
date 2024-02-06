@@ -12,7 +12,7 @@
     cargo:cargo
     broker:broker
     uwpsell:uwpsell
-    trade:trade
+    trde:trde
     #:set fifteen  ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
     #:set fourteen  ["1","2","3","4","5","6","7","8","9","10","11","12","13","14"]
     #:set six ["1","2","3","4","5","6"]
@@ -25,6 +25,9 @@
             cols:1
             size: root.width-(root.width/10), root.height-(root.height/10)
             pos: root.center_x - (self.width/2), root.center_y - (self.height/2)
+            Label:
+                text: "BUYING TAB"
+                font_size:40
             GridLayout:
                 cols:2
                 #trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, days = 7):
@@ -116,7 +119,7 @@
                 Label:
                     text:"Trade pre-roll (optional):"
                 Spinner:
-                    id:trade
+                    id:trde
                     text:"Trade Roll"
                     values:six
                 

@@ -11,11 +11,11 @@ import travtools.gunmaker as gm
 #import re
 
 ##qrebs generation
-# i=1
-# while i <= 100:
-#     qrb = qr.qrebs(i)
-#     print(qrb)
-#     i = i + 1
+i=1
+while i <= 100:
+    qrb = qr.qrebs(i)
+    print(qrb)
+    i = i + 1
 # print("\n====\n")
 
 #Starbright Crew:
@@ -24,11 +24,11 @@ import travtools.gunmaker as gm
 # Streetwise - Sir Otto - 1
 # Liaison - Sir Otto - 2; Aruk - 1;  ?? - 1;
 
-g=cm.trade_gds("A110877-E",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 2)
-print(g)
+#g=cm.trade_gds("A110877-E",{'Steward':1, 'Admin':2, 'Streetwise':1, 'Liaison':2}, 2)
+#print(g)
 
-g = cm.sell_price("B - Ri Cr5,100","B787AA9-E",8,4)
-print("Sell Price:  Cr{:,}".format(g))
+#g = cm.sell_price("B - Ri Cr5,100","B787AA9-E",8,4)
+#print("Sell Price:  Cr{:,}".format(g))
 
 #gm.gunmaker()
 ## system generation test for a million systems

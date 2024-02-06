@@ -22,7 +22,7 @@ class MyUI(TabbedPanel):
     cargo = ObjectProperty(None)
     broker = ObjectProperty(None)
     uwpsell = ObjectProperty(None)
-    trade = ObjectProperty(None)
+    trde = ObjectProperty(None)
     uwp_pat = re.compile('[ABCDEXFGHY][0-9A-F][0-9A-F][0-9A][0-9A-F][0-9A-F][0-9A-J]-[0-9A-J]')
     skills = {}
     trade = ""
@@ -67,7 +67,7 @@ class MyUI(TabbedPanel):
             self.status.text = "Incorrect UWP Pattern."
         #g = cm.sell_price("B - Ri Cr5,100","B787AA9-E",8,4)
         try:
-            trd = int(self.trade.text)
+            trd = int(self.trde.text)
         except ValueError as e:
             trd = 0
         self.value = cm.sell_price(self.cargo.text,self.uwpsell.text, int(self.broker.text), trd)
