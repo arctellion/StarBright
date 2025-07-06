@@ -122,48 +122,94 @@ def fun_trade(n):
   law = cnv.ext_dec(n[6])
   tc = ""
   #print("UWP: ", n, "\nSize: ", siz, "| Atmo: ", atm, "| Hydro: ", hyd, "| Pop: ", pop, "| Gov: ", gov, "| Law: ", law, "\n")
-  #Ag - Atm 5-9, Hyd 4-8, Pop 5-7
-  if atm in [5,6,7,8,9] and hyd in [4,5,6,7,8] and pop in [5,6,7]:
-    tc += "Ag "
+  ## Planetary Trade Codes
   #As - Siz 0, Atm 0, Hyd 0
   if siz == 0 and atm == 0 and hyd == 0:
     tc += "As "
-  #Ba - Pop 0, Gov 0, Law 0
-  if pop == 0 and gov == 0 and law == 0:
-    tc += "Ba "
   #De - Atm 2-9, Hydro 0
   if atm in [2,3,4,5,6,7,8,9] and hyd == 0:
     tc += "De "
   #Fl - Atm 10-12, Hydro 1-10
   if atm in [10,11,12] and hyd in [1,2,3,4,5,6,7,8,9,10]:
     tc += "Fl "
-  #Hi - Pop 9-15
-  if pop in [9,10,11,12,13,14,15]:
-    tc += "Hi "
+  #Ga - siz 678, atm 568, hyd 567
+  if siz in [6,7,8] and atm in [5,6,7,8] and hyd in [5,6,7]:
+    tc += "Ga "
+  #He - siz 3-12, atm 2479101112, Hydro 012
+  if siz in [3,4,5,6,7,8,9,10,11,12] and atm in [2,4,7,9,10,11,12] and hyd in [0,1,2]:
+    tc += "He "
   #Ic - Atm 0,1, Hydro 1-10
   if atm in [0,1] and hyd in [1,2,3,4,5,6,7,8,9,10]:
     tc += "Ic "
-  #In - Atm 0-4,7,9,10-12, Pop: 9-15
-  if atm in [0,1,2,3,4,7,9,10,11,12] and pop in [9,10,11,12,13,14,15]:
-    tc += "In "
-  #Lo - Pop 1-3
-  if pop in [1,2,3]:
-    tc += "Lo "
-  #Na - Atm 0-3, Hydo 0-3, Pop: 6-15
-  if atm in [0,1,2,3] and hyd in [0,1,2,3] and pop in [6,7,8,9,10,11,12,13,14,15]:
-    tc += "Na "
-  #Ni - Pop 4-6
-  if pop in [4,5,6]:
-    tc += "Ni "
-  #Po - Atm 2-5, Hydro 0-3
-  if atm in [2,3,4,5] and hyd in [0,1]:
-    tc += "Po "
-  #Ri - Atm 6,8, Pop 6-8
-  if atm in [6,8] and pop in [6,7,8,]:
-    tc += "Ri "
+  #Oc- siz 10-15, atm 3456789 13 14 15, hydro 10
+  if siz in [10,11,12,13,14,15] and atm in [3,4,5,6,7,8,9,13,14,15] and hyd == 10:
+    tc += "Oc "
   #Va - Atm 0
   if atm == 0:
     tc += "Va "
+  #Wa - siz 3456789, atm 3456789 13 14 15, hydro 10
+  if siz in [3,4,5,6,7,8,9] and atm in [3,4,5,6,7,8,9,13,14,15] and hyd == 10:
+    tc += "Wa "
+  ##---##
+  ## Population Trade Codes
+  #Ba - Pop 0, Gov 0, Law 0
+  if pop == 0 and gov == 0 and law == 0:
+    tc += "Ba "
+  #Lo - Pop 1-3
+  if pop in [1,2,3]:
+    tc += "Lo "
+  #Ni - Pop 4-6
+  if pop in [4,5,6]:
+    tc += "Ni "
+  #Ph - Pop 8
+  if pop == 8:
+    tc += "Ph "
+  #Hi - Pop 9-15
+  if pop in [9,10,11,12,13,14,15]:
+    tc += "Hi "
+  ##---##
+  ## Economic Trade Codes
+  #Pa - Atm 4-9, Hydro 4-8, Pop 4,8
+  if atm in [4,5,6,7,8,9] and hyd in [4,5,6,7,8] and pop in [4,8]:
+    tc += "Pa "
+  #Ag - Atm 4-9, Hyd 4-8, Pop 5-7
+  if atm in [4,5,6,7,8,9] and hyd in [4,5,6,7,8] and pop in [5,6,7]:
+    tc += "Ag "
+  #Na - Atm 0-3, Hydo 0-3, Pop: 6-15
+  if atm in [0,1,2,3] and hyd in [0,1,2,3] and pop in [6,7,8,9,10,11,12,13,14,15]:
+    tc += "Na "
+  #Px - Atm 231011, hyd 1-5, pop 3-6, law 6789
+  if atm in [2,3,10,11] and hyd in [1,2,3,4,5] and pop in [3,4,5,6] and law in [6,7,8,9]:
+    tc += "Px "
+  #Pi - atm 012479, pop 78
+  if atm in [0,1,2,4,7,9] and pop in [7,8]:
+    tc += "Pi "
+  #In - Atm 012,4,7,9,10-12, Pop: 9-15
+  if atm in [0,1,2,4,7,9,10,11,12] and pop in [9,10,11,12,13,14,15]:
+    tc += "In "
+  #Po - Atm 2-5, Hydro 0-3
+  if atm in [2,3,4,5] and hyd in [0,1]:
+    tc += "Po "
+  #Pr - Atm 6,8, Pop 5,9
+  if atm in [6,8] and pop in [5,9]:
+    tc += "Pr "
+  #Ri - Atm 6,8, Pop 6-8
+  if atm in [6,8] and pop in [6,7,8]:
+    tc += "Ri "
+  ##---##
+  ## Other Trade Codes
+  #Re - pop 0-4. gov 6, law 0,4,5
+  if pop in [0,1,2,3,4] and gov == 6 and law in [0,4,5]:
+    tc += "Re "
+  #Cy - Pop 5-10, gov 6, law 0-3
+  if pop in [5,6,7,8,9,10] and gov == 6 and law in [0,1,2,3]:
+    tc += "Cy "
+  #Da - Pop 0-6
+  if pop in [0,1,2,3,4,5,6]:
+    tc += "Da "
+  #Pz - pop 7-15
+  if pop in [7,8,9,10,11,12,13, 14,15]:
+    tc += "Pz "
   return tc.strip()
     
 def fun_ext(uwp,pbg,bases,trade):
