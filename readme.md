@@ -50,3 +50,13 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 ```bash
 python app.py
 ```
+
+---
+
+## Folders
+
+* `misc` - old and miscellaneous files
+* `html_demos` - html single page applications for testing proof of concept before coding in python
+* `screenshots` - screenshots of the application
+* `travtools` - internal libraries
+* `views` - views for the application
