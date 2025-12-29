@@ -1,49 +1,81 @@
 import numpy as np
-import pandas as pd
-import travtools.stars as st
-import travtools.system as sy
-import plotly.express as px
-import plotly
-import re
 
-p  = st.Points(n=5000,r=25, center=(0,0,0), mindist=1)
-p2d = st.Points2D(n=2000, r=100, center=(0,0), mindist=1)
-#3d world view
-omega = pd.DataFrame(p.points, columns=["x","y","z"])
-omega = omega.rename_axis('id').reset_index()
-omega['uwp'] = np.vectorize(sy.fun_uwp)(omega['id'])
-omega['pbg'] = np.vectorize(sy.fun_pbg)(omega['uwp'])
-omega['base'] = np.vectorize(sy.fun_bases)(omega['uwp'])
-omega['trade'] = np.vectorize(sy.fun_trade)(omega['uwp'])
-omega['IxExCx'] = np.vectorize(sy.fun_ext)(omega['uwp'],omega['pbg'],omega['base'],omega['trade'])
-print(omega.head())
-#2d world view
-omega2d = pd.DataFrame(p2d.points, columns=["x","y"])
-omega2d = omega2d.rename_axis('id').reset_index()
-omega2d['uwp'] = np.vectorize(sy.fun_uwp)(omega2d['id'])
-omega2d['pbg'] = np.vectorize(sy.fun_pbg)(omega2d['uwp'])
-omega2d['base'] = np.vectorize(sy.fun_bases)(omega2d['uwp'])
-omega2d['trade'] = np.vectorize(sy.fun_trade)(omega2d['uwp'])
-omega2d['ixexcx'] = np.vectorize(sy.fun_ext)(omega2d['uwp'],omega2d['pbg'],omega2d['base'],omega2d['trade'])
-print(omega2d.head())
-#
-def split_ix(d):
-  return(int(re.search("[+-]?\d",d)[0]))
+class Points():
+    def __init__(self,n=10, r=1, center=(0,0,0), mindist=0.2, maxtrials=10000 ) :
+        self.success = False
+        self.n = n
+        self.r = r
+        self.center=np.array(center)
+        self.d = mindist
+        self.points = np.ones((self.n,3))*10*r+self.center
+        self.c = 0
+        self.trials = 0
+        self.maxtrials = maxtrials
+        self.tx = "rad: {}, center: {}, min. dist: {} ".format(self.r, center, self.d)
+        self.fill()
 
-omega['ix'] = np.vectorize(split_ix)(omega['IxExCx'])
-omega2d['ix'] = np.vectorize(split_ix)(omega2d['ixexcx'])
-print(omega.head())
-print(omega2d.head())
-## output csv of star data
-omega.to_csv('stars.csv')
-omega2d.to_csv('stars2d.csv')
-## output interactive graphs of star data
-fig = px.scatter_3d(omega, x='x', y='y', z='z', color = 'ix')  
-fig.update_traces(marker=dict(size=2),
-                  selector=dict(mode='markers'))
-plotly.offline.plot(fig, filename = 'stars.html', auto_open=False)
+    def dist(self, p, x):
+        if len(p.shape) >1:
+            return np.sqrt(np.sum((p-x)**2, axis=1))
+        else:
+            return np.sqrt(np.sum((p-x)**2))
 
-fig2d = px.scatter(omega2d, x='x',y='y',color='ix')
-fig2d.update_traces(marker=dict(size=2),
-                    selector=dict(mode='markers'))
-plotly.offline.plot(fig2d, filename='stars2d.html', auto_open=False)
+    def newpoint(self):
+        x = (np.random.rand(3)-0.5)*2
+        x = x*self.r-self.center
+        if self.dist(self.center, x) < self.r:
+            self.trials += 1
+            if np.all(self.dist(self.points, x) > self.d):
+                self.points[self.c,:] = x
+                self.c += 1
+
+    def fill(self):
+        while self.trials < self.maxtrials and self.c < self.n:
+            self.newpoint()
+        self.points = self.points[self.dist(self.points,self.center) < self.r,:]
+        if len(self.points) == self.n:
+            self.success = True
+        self.tx +="\n{} of {} found ({} trials)".format(len(self.points),self.n,self.trials)
+
+    def __repr__(self):
+        return self.tx
+
+class Points2D():
+    def __init__(self,n=10, r=1, center=(0,0), mindist=0.2, maxtrials=10000 ) :
+        self.success = False
+        self.n = n
+        self.r = r
+        self.center=np.array(center)
+        self.d = mindist
+        self.points = np.ones((self.n,2))*10*r+self.center
+        self.c = 0
+        self.trials = 0
+        self.maxtrials = maxtrials
+        self.tx = "rad: {}, center: {}, min. dist: {} ".format(self.r, center, self.d)
+        self.fill()
+
+    def dist(self, p, x):
+        if len(p.shape) >1:
+            return np.sqrt(np.sum((p-x)**2, axis=1))
+        else:
+            return np.sqrt(np.sum((p-x)**2))
+
+    def newpoint(self):
+        x = (np.random.rand(2)-0.5)*2
+        x = x*self.r-self.center
+        if self.dist(self.center, x) < self.r:
+            self.trials += 1
+            if np.all(self.dist(self.points, x) > self.d):
+                self.points[self.c,:] = x
+                self.c += 1
+
+    def fill(self):
+        while self.trials < self.maxtrials and self.c < self.n:
+            self.newpoint()
+        self.points = self.points[self.dist(self.points,self.center) < self.r,:]
+        if len(self.points) == self.n:
+            self.success = True
+        self.tx +="\n{} of {} found ({} trials)".format(len(self.points),self.n,self.trials)
+
+    def __repr__(self):
+        return self.tx

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GunMaker WebApp</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --panel-bg: #1e1e24;
+            --text-color: #e0e0e0;
+            --accent-color: #00ff9d;
+            --accent-dim: #004d30;
+            --border-color: #333;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 { margin: 0; font-family: var(--font-mono); letter-spacing: 2px; color: var(--accent-color); }
+        h2 { font-size: 1.2rem; color: #aaa; margin-top: 0; }
+
+        /* Main Layout */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        @media (max-width: 900px) {
+            main { grid-template-columns: 1fr; }
+        }
+
+        /* Panels */
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #888; }
+        select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            border-radius: 4px;
+        }
+        select:focus { outline: 1px solid var(--accent-color); }
+
+        /* Checkbox Grid */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #151518;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .checkbox-item input {
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+            width: 16px;
+            height: 16px;
+        }
+        .checkbox-item:hover { color: #fff; }
+
+        /* Multi-select Options */
+        #optionsSelect {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            border-radius: 4px;
+            height: 120px;
+        }
+
+        /* Output Area */
+        .fillform {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #333;
+            padding: 5px 0;
+        }
+        .data-row span:first-child { color: #888; }
+        .data-value { color: var(--accent-color); text-align: right; }
+
+        .weapon-name-display {
+            font-size: 1.5rem;
+            color: #fff;
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .weapon-model-display {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-top: -5px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .extension-block {
+            background: #000;
+            border: 1px solid #444;
+            padding: 15px;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        .controls-display {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .control-tag {
+            background: #333;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid #555;
+        }
+        .control-tag.active {
+            background: var(--accent-dim);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .options-list {
+            font-size: 0.85rem; 
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            border: 1px solid var(--accent-color);
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>GUNMAKER <span style="font-size:0.5em; vertical-align: middle;">v1.4</span></h1>
+    <div style="font-size: 0.8rem; color: #888;">Interactive Weapon Design System</div>
+</header>
+
+<main>
+    <!-- Left Column: Input Controls -->
+    <div class="panel">
+        <h2>Chart 3: Weapon Type</h2>
+        <div class="form-group">
+            <label>Category & Type</label>
+            <select id="typeSelect" onchange="handleTypeChange()"></select>
+        </div>
+
+        <h2>Chart 4: Descriptor</h2>
+        <div class="form-group">
+            <label>Descriptor (Mechanism/Effect)</label>
+            <select id="descriptorSelect" onchange="updateWeapon()">
+                <option value="">(Select Type First)</option>
+            </select>
+        </div>
+
+        <h2>Chart 5: Burden</h2>
+        <div class="form-group">
+            <label>Select one or more</label>
+            <div id="burdenContainer" class="checkbox-grid">
+                <!-- Checkboxes injected via JS -->
+            </div>
+        </div>
+
+        <h2>Chart 5: Stage</h2>
+        <div class="form-group">
+            <label>Select one or more</label>
+            <div id="stageContainer" class="checkbox-grid">
+                <!-- Checkboxes injected via JS -->
+            </div>
+        </div>
+
+        <h2>Chart 5: User & Options</h2>
+        <div class="form-group">
+            <label>User (Sophont/Manipulator)</label>
+            <select id="userSelect" onchange="updateWeapon()"></select>
+        </div>
+        <div class="form-group">
+            <label>Portability</label>
+            <select id="portabilitySelect" onchange="updateWeapon()">
+                <option value="auto">Auto-Calculate (Based on Mass)</option>
+                <option value="Personal">Personal</option>
+                <option value="Crewed">Crewed</option>
+                <option value="Fixed">Fixed</option>
+                <option value="Portable">Portable (BattleDress)</option>
+                <option value="Vehicle">Vehicle Mount</option>
+                <option value="Turret">Turret</option>
+            </select>
+        </div>
+        
+        <h2>Chart 7: Installable Options</h2>
+        <div class="form-group">
+             <label>Select Options (Hold Ctrl/Cmd for multiple)</label>
+             <select id="optionsSelect" multiple onchange="updateWeapon()">
+                 <!-- Populated via JS -->
+             </select>
+        </div>
+    </div>
+
+    <!-- Right Column: Output Fillform -->
+    <div class="panel">
+        <h1 id="modelName" class="weapon-model-display">P-5</h1>
+        <h2 id="longName" class="weapon-name-display">Pistol-5</h2>
+
+        <div class="fillform">
+            <div class="data-row">
+                <span>Tech Level (TL)</span>
+                <span id="outTL" class="data-value">5</span>
+            </div>
+            <div class="data-row">
+                <span>Range</span>
+                <span id="outRange" class="data-value">2</span>
+            </div>
+            <div class="data-row">
+                <span>Mass</span>
+                <span id="outMass" class="data-value">1.1 kg</span>
+            </div>
+            <div class="data-row">
+                <span>Cost</span>
+                <span id="outCost" class="data-value">Cr 150</span>
+            </div>
+            <div class="data-row">
+                <span>QREBS</span>
+                <span id="outQREBS" class="data-value">50000</span>
+            </div>
+            
+            <h3 style="margin-top: 15px; border-bottom: 1px solid #444;">Weapon Effects</h3>
+            <div id="effectsList">
+                <!-- Effects generated here -->
+            </div>
+
+            <h3 style="margin-top: 15px; border-bottom: 1px solid #444;">Chart 8: Controls</h3>
+            <div id="controlsDisplay" class="controls-display">
+                <!-- Controls generated here -->
+            </div>
+            
+            <h3 style="margin-top: 15px; border-bottom: 1px solid #444;">Chart 7: Installable Options</h3>
+            <div id="optionsSummary" class="options-list">
+                None
+            </div>
+
+            <div class="extension-block">
+                <div style="color:#888; margin-bottom:5px;">WEAPON EXTENSION (WX:)</div>
+                <div id="wxString">Wx: R=2 Cr150 1.1kg B= Bullet-1</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="toast">Message</div>
+
+<script>
+    /* --- DATASETS FROM PDF --- */
+
+    // Chart 3: Category & Type
+    const CHART_3_TYPES = {
+        "Artillery": {
+            "G": { name: "Gun", tl: 6, range: 4, mass: 9, qrebs: "+1", h1: "*", d1: "2", cost: 5000, desc: "Artillery Gun" },
+            "Ga": { name: "Gatling", tl: 7, range: 4, mass: 40, qrebs: "+2", h1: "*", d1: "3", cost: 8000, desc: "Gatling" },
+            "C": { name: "Cannon", tl: 6, range: 6, mass: 200, qrebs: "+4", h1: "*", d1: "4", cost: 10000, desc: "Cannon" },
+            "aC": { name: "AutoCannon", tl: 8, range: 6, mass: 300, qrebs: "+4", h1: "*", d1: "5", cost: 30000, desc: "AutoCannon" }
+        },
+        "Long Guns": {
+            "R": { name: "Rifle", tl: 5, range: 5, mass: 4, qrebs: "0", h1: "Bullet", d1: "2", cost: 500, desc: "Rifle" },
+            "C": { name: "Carbine", tl: 5, range: 4, mass: 3, qrebs: "-", h1: "Bullet", d1: "1", cost: 400, desc: "Carbine" }
+        },
+        "Handguns": {
+            "P": { name: "Pistol", tl: 5, range: 2, mass: 1.1, qrebs: "0", h1: "Bullet", d1: "1", cost: 150, desc: "Pistol" },
+            "Re": { name: "Revolver", tl: 4, range: 2, mass: 1.25, qrebs: "0", h1: "Bullet", d1: "1", cost: 100, desc: "Revolver" }
+        },
+        "Shotguns": {
+            "S": { name: "Shotgun", tl: 4, range: 2, mass: 4, qrebs: "0", h1: "Frag", d1: "2", cost: 300, desc: "Shotgun" }
+        },
+        "Machineguns": {
+            "Mg": { name: "Machinegun", tl: 6, range: 5, mass: 8, qrebs: "+1", h1: "Bullet", d1: "4", cost: 3000, desc: "Machinegun" }
+        },
+        "Projectors": {
+            "Pj": { name: "Projector", tl: 9, range: 0, mass: 1, qrebs: "0", h1: "*", d1: "1", cost: 300, desc: "Projector" }
+        },
+        "Designators": {
+            "D": { name: "Designator", tl: 7, range: 5, mass: 10, qrebs: "+1", h1: "*", d1: "1", cost: 2000, desc: "Designator" }
+        },
+        "Launchers": {
+            "L": { name: "Launcher", tl: 6, range: 3, mass: 10, qrebs: "+1", h1: "*", d1: "1", cost: 1000, desc: "Launcher" },
+            "mL": { name: "Multi-Launcher", tl: 8, range: 5, mass: 8, qrebs: "+1", h1: "*", d1: "1", cost: 3000, desc: "Multi-Launcher" }
+        }
+    };
+
+    // Chart 4: Descriptors
+    const CHART_4_DESCRIPTORS = {
+        "Artillery": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "aF": { name: "Anti-Flyer", tl: 4, range: 6, mass: 6.0, qrebs: 0, h2: "Frag", d2: "1", h3: "Blast", d3: "3", cost: 3.0 },
+            "aT": { name: "Anti-Tank", tl: 5, range: 8, mass: 8.0, qrebs: 0, h2: "Pen", d2: "3", h3: "Blast", d3: "3", cost: 2.0 },
+            "A": { name: "Assault", tl: 2, range: 4, mass: 0.8, qrebs: 0, h2: "Bang", d2: "1", h3: "Blast", d3: "2", cost: 1.5 },
+            "F": { name: "Fusion", tl: 7, range: 4, mass: 2.3, qrebs: 0, h2: "Pen", d2: "4", h3: "Burn", d3: "4", cost: 6.0 },
+            "G": { name: "Gauss", tl: 7, range: 4, mass: 0.9, qrebs: 0, h2: "Bullet", d2: "3", h3: "", d3: "", cost: 2.0 },
+            "P": { name: "Plasma", tl: 5, range: 4, mass: 2.5, qrebs: 0, h2: "Pen", d2: "3", h3: "Burn", d3: "3", cost: 2.0 }
+        },
+        "Long Guns": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "Ac": { name: "Accelerator", tl: 4, range: 0, mass: 0.6, qrebs: 0, h2: "Bullet", d2: "2", h3: "", d3: "", cost: 3.0 },
+            "A": { name: "Assault", tl: 2, range: 4, mass: 0.8, qrebs: 0, h2: "Blast", d2: "2", h3: "Bang", d3: "1", cost: 1.5 },
+            "B": { name: "Battle", tl: 1, range: 5, mass: 1.0, qrebs: "+1", h2: "Bullet", d2: "1", h3: "", d3: "", cost: 0.8 },
+            "C": { name: "Combat", tl: 2, range: 3, mass: 0.9, qrebs: 0, h2: "Frag", d2: "2", h3: "", d3: "", cost: 1.5 },
+            "D": { name: "Dart", tl: 1, range: 4, mass: 0.6, qrebs: 0, h2: "Tranq", d2: "1-2-3", h3: "", d3: "", cost: 0.9 },
+            "PD": { name: "Poison Dart", tl: 1, range: 4, mass: 1.0, qrebs: 0, h2: "Poison", d2: "1-2-3", h3: "", d3: "", cost: 0.9 },
+            "G": { name: "Gauss", tl: 7, range: 4, mass: 0.9, qrebs: 0, h2: "Bullet", d2: "3", h3: "", d3: "", cost: 2.0 },
+            "H": { name: "Hunting", tl: 0, range: 3, mass: 0.9, qrebs: "-1", h2: "Bullet", d2: "1", h3: "", d3: "", cost: 1.2 },
+            "L": { name: "Laser", tl: 5, range: 0, mass: 1.2, qrebs: 0, h2: "Burn", d2: "2", h3: "Pen", d3: "2", cost: 6.0 },
+            "Sp": { name: "Splat", tl: 2, range: 4, mass: 1.3, qrebs: "+1", h2: "Bullet", d2: "1", h3: "", d3: "", cost: 2.4 },
+            "S": { name: "Survival", tl: 0, range: 2, mass: 0.5, qrebs: 0, h2: "Bullet", d2: "1", h3: "", d3: "", cost: 1.2 }
+        },
+        "Handguns": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "Ac": { name: "Accelerator", tl: 4, range: 0, mass: 0.6, qrebs: 0, h2: "Bullet", d2: "2", h3: "", d3: "", cost: 3.0 },
+            "L": { name: "Laser", tl: 5, range: 0, mass: 1.2, qrebs: 0, h2: "Burn", d2: "2", h3: "Pen", d3: "2", cost: 2.0 },
+            "M": { name: "Machine", tl: 2, range: 0, mass: 1.2, qrebs: 0, h2: "Bullet", d2: "2", h3: "", d3: "", cost: 1.5 }
+        },
+        "Shotguns": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "A": { name: "Assault", tl: 2, range: 4, mass: 0.8, qrebs: 0, h2: "Bang", d2: "1", h3: "Blast", d3: "2", cost: 2.0 },
+            "H": { name: "Hunting", tl: 0, range: 3, mass: 0.9, qrebs: 0, h2: "Bullet", d2: "1", h3: "", d3: "", cost: 1.2 }
+        },
+        "Machineguns": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "aF": { name: "Anti-Flyer", tl: 4, range: 6, mass: 6.0, qrebs: 0, h2: "Frag", d2: "1", h3: "Blast", d3: "3", cost: 3.0 },
+            "A": { name: "Assault", tl: 2, range: 4, mass: 0.8, qrebs: 0, h2: "Bang", d2: "1", h3: "Blast", d3: "2", cost: 1.5 },
+            "S": { name: "Sub", tl: -1, range: 3, mass: 0.3, qrebs: 0, h2: "Bullet", d2: "-1", h3: "", d3: "", cost: 0.9 }
+        },
+        "Projectors": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "A": { name: "Acid", tl: 0, range: 3, mass: 1.0, qrebs: "+1", h2: "Corrode", d2: "2", h3: "Pen", d3: "1-2-3", cost: 3.0 },
+            "H": { name: "Fire", tl: 0, range: 1, mass: 0.9, qrebs: 0, h2: "Burn", d2: "1-2-3", h3: "Pen", d3: "1-2-3", cost: 2.0 },
+            "P": { name: "Poison Gas", tl: 0, range: 2, mass: 1.0, qrebs: 0, h2: "Gas", d2: "1-2-3", h3: "Poison", d3: "1-2-3", cost: 3.0 },
+            "S": { name: "Stench", tl: 3, range: 2, mass: 0.4, qrebs: 0, h2: "Stench", d2: "1-2-3", h3: "", d3: "", cost: 1.2 },
+            "Emp": { name: "EMP", tl: 1, range: 3, mass: 1.0, qrebs: 0, h2: "EMP", d2: "1-2-3", h3: "", d3: "", cost: 4.0 },
+            "F": { name: "Flash", tl: -1, range: 2, mass: 0.5, qrebs: 0, h2: "Flash", d2: "1-2-3", h3: "", d3: "", cost: 1.5 },
+            "C": { name: "Freeze", tl: 1, range: 3, mass: 1.0, qrebs: "+1", h2: "Cold", d2: "1-2-3", h3: "", d3: "", cost: 3.0 },
+            "G": { name: "Grav", tl: 5, range: 2, mass: 3.0, qrebs: 0, h2: "Grav", d2: "1-2-3", h3: "", d3: "", cost: 20.0 },
+            "L": { name: "Laser", tl: 5, range: 0, mass: 1.2, qrebs: 0, h2: "Burn", d2: "1-2-3", h3: "Pen", d3: "1-2-3", cost: 6.0 },
+            "M": { name: "Mag", tl: 4, range: 1, mass: 2.0, qrebs: 0, h2: "EMP", d2: "1-2-3", h3: "Mag", d3: "1-2-3", cost: 15.0 },
+            "Psi": { name: "Psi Amp", tl: 4, range: 2, mass: 1.0, qrebs: 0, h2: "Psi", d2: "1-2-3", h3: "", d3: "", cost: 9.0 },
+            "R": { name: "Rad", tl: 1, range: 4, mass: 1.0, qrebs: "+2", h2: "Rad", d2: "1-2-3", h3: "", d3: "", cost: 8.0 },
+            "Sh": { name: "Shock", tl: 0, range: 2, mass: 0.5, qrebs: 0, h2: "Elec", d2: "1-2-3", h3: "Pain", d3: "1-2-3", cost: 2.0 },
+            "Sonic": { name: "Sonic", tl: 3, range: 2, mass: 0.6, qrebs: 0, h2: "Sound", d2: "1-2-3", h3: "Bang", d3: "1-2-3", cost: 1.1 }
+        },
+        "Designators": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "A": { name: "Acid", tl: 0, range: 3, mass: 1.0, qrebs: "+1", h2: "Corrode", d2: "2", h3: "Pen", d3: "1-2-3", cost: 3.0 },
+            "H": { name: "Fire", tl: 0, range: 1, mass: 0.9, qrebs: 0, h2: "Burn", d2: "1-2-3", h3: "Pen", d3: "1-2-3", cost: 2.0 },
+            "P": { name: "Poison Gas", tl: 0, range: 2, mass: 1.0, qrebs: 0, h2: "Gas", d2: "1-2-3", h3: "Poison", d3: "1-2-3", cost: 3.0 },
+            "S": { name: "Stench", tl: 3, range: 2, mass: 0.4, qrebs: 0, h2: "Stench", d2: "1-2-3", h3: "", d3: "", cost: 1.2 },
+            "Emp": { name: "EMP", tl: 1, range: 3, mass: 1.0, qrebs: 0, h2: "EMP", d2: "1-2-3", h3: "", d3: "", cost: 4.0 },
+            "F": { name: "Flash", tl: -1, range: 2, mass: 0.5, qrebs: 0, h2: "Flash", d2: "1-2-3", h3: "", d3: "", cost: 1.5 },
+            "C": { name: "Freeze", tl: 1, range: 3, mass: 1.0, qrebs: "+1", h2: "Cold", d2: "1-2-3", h3: "", d3: "", cost: 3.0 },
+            "G": { name: "Grav", tl: 5, range: 2, mass: 3.0, qrebs: 0, h2: "Grav", d2: "1-2-3", h3: "", d3: "", cost: 20.0 },
+            "L": { name: "Laser", tl: 5, range: 0, mass: 1.2, qrebs: 0, h2: "Burn", d2: "1-2-3", h3: "Pen", d3: "1-2-3", cost: 6.0 },
+            "M": { name: "Mag", tl: 4, range: 1, mass: 2.0, qrebs: 0, h2: "EMP", d2: "1-2-3", h3: "Mag", d3: "1-2-3", cost: 15.0 },
+            "Psi": { name: "Psi Amp", tl: 4, range: 2, mass: 1.0, qrebs: 0, h2: "Psi", d2: "1-2-3", h3: "", d3: "", cost: 9.0 },
+            "R": { name: "Rad", tl: 1, range: 4, mass: 1.0, qrebs: "+2", h2: "Rad", d2: "1-2-3", h3: "", d3: "", cost: 8.0 },
+            "Sh": { name: "Shock", tl: 0, range: 2, mass: 0.5, qrebs: 0, h2: "Elec", d2: "1-2-3", h3: "Pain", d3: "1-2-3", cost: 2.0 },
+            "Sonic": { name: "Sonic", tl: 3, range: 2, mass: 0.6, qrebs: 0, h2: "Sound", d2: "1-2-3", h3: "Bang", d3: "1-2-3", cost: 1.1 }
+        },
+        "Launchers": {
+            "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 },
+            "aF": { name: "AF Missile", tl: 4, range: 7, mass: 4.0, qrebs: 0, h2: "Frag", d2: "2", h3: "Blast", d3: "3", cost: 3.0 },
+            "aT": { name: "AT Missile", tl: 3, range: 4, mass: 1.0, qrebs: "+1", h2: "Frag", d2: "2", h3: "Pen", d3: "3", cost: 2.0 },
+            "Gr": { name: "Grenade", tl: 1, range: 4, mass: 0.8, qrebs: 0, h2: "Frag", d2: "2", h3: "Blast", d3: "2", cost: 1.0 },
+            "M": { name: "Missile", tl: 1, range: 6, mass: 2.2, qrebs: 0, h2: "Frag", d2: "2", h3: "Pen", d3: "2", cost: 5.0 },
+            "RAM": { name: "RAM Grenade", tl: 2, range: 6, mass: 1.0, qrebs: 0, h2: "Frag", d2: "2", h3: "Blast", d3: "2", cost: 3.0 },
+            "R": { name: "Rocket", tl: -1, range: 5, mass: 3.0, qrebs: 0, h2: "Frag", d2: "2", h3: "Pen", d3: "2", cost: 1.0 }
+        }
+    };
+
+    // Chart 5: Burden
+    const CHART_5_BURDEN = {
+        "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, d2Mod: 0, cost: 1.0 },
+        "aD": { name: "Anti-Designator", tl: 3, range: 1, mass: 3.0, qrebs: 3, d2Mod: 1, cost: 3.0 },
+        "B": { name: "Body", tl: 2, range: 1, mass: 0.5, qrebs: -4, d2Mod: -1, cost: 3.0 },
+        "D": { name: "Disposable", tl: 3, range: 0, mass: 0.9, qrebs: -1, d2Mod: 0, cost: 0.5 },
+        "H": { name: "Heavy", tl: 0, range: 1, mass: 1.3, qrebs: 3, d2Mod: 1, cost: 2.0 },
+        "Lt": { name: "Light", tl: 0, range: -1, mass: 0.7, qrebs: -1, d2Mod: -1, cost: 1.1 },
+        "M": { name: "Magnum", tl: 1, range: 1, mass: 1.1, qrebs: 1, d2Mod: 1, cost: 1.1 },
+        "Med": { name: "Medium", tl: 0, range: 0, mass: 1.0, qrebs: 0, d2Mod: 0, cost: 1.0 },
+        "R": { name: "Recoilless", tl: 1, range: 1, mass: 1.2, qrebs: 0, d2Mod: 1, cost: 3.0 },
+        "Sn": { name: "Snub", tl: 1, range: 2, mass: 0.7, qrebs: -3, d2Mod: 1, cost: 1.5 },
+        "Vh": { name: "Vheavy", tl: 0, range: 5, mass: 4.0, qrebs: 4, d2Mod: 5, cost: 5.0 },
+        "Vl": { name: "Vlight", tl: 1, range: -2, mass: 0.6, qrebs: -2, d2Mod: -1, cost: 2.0 },
+        "Vrf": { name: "VRF", tl: 2, range: 0, mass: 14.0, qrebs: 5, d2Mod: 1, cost: 9.0 }
+    };
+
+    // Chart 5: Stage
+    const CHART_5_STAGE = {
+        "": { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, d2Mod: 0, d3Mod: 0, cost: 1.0 },
+        "A": { name: "Advanced", tl: 3, range: 0, mass: 0.8, qrebs: -3, d2Mod: 2, d3Mod: 0, cost: 2.0 },
+        "Alt": { name: "Alternate", tl: 0, range: 1, mass: 1.1, qrebs: 0, d2Mod: 0, d3Mod: 0, cost: 1.1 },
+        "B": { name: "Basic", tl: 0, range: 0, mass: 1.3, qrebs: 1, d2Mod: 0, d3Mod: 0, cost: 0.7 },
+        "E": { name: "Early", tl: -1, range: -1, mass: 1.7, qrebs: 1, d2Mod: 0, d3Mod: 0, cost: 1.2 },
+        "Exp": { name: "Experimental", tl: -3, range: -1, mass: 2.0, qrebs: 3, d2Mod: 0, d3Mod: 0, cost: 4.0 },
+        "Im": { name: "Improved", tl: 1, range: 1, mass: 1.0, qrebs: -1, d2Mod: 1, d3Mod: 0, cost: 1.1 },
+        "Mod": { name: "Modified", tl: 2, range: 0, mass: 0.9, qrebs: 0, d2Mod: 0, d3Mod: 0, cost: 1.2 },
+        "P": { name: "Prototype", tl: -2, range: -1, mass: 1.9, qrebs: 2, d2Mod: 0, d3Mod: 0, cost: 3.0 },
+        "Pr": { name: "Precision", tl: 6, range: 3, mass: 4.0, qrebs: 2, d2Mod: 0, d3Mod: 0, cost: 5.0 },
+        "R": { name: "Remote", tl: 1, range: 0, mass: 1.0, qrebs: 0, d2Mod: 0, d3Mod: 0, cost: 7.0 },
+        "Sn": { name: "Sniper", tl: 1, range: 1, mass: 1.1, qrebs: 1, d2Mod: 0, d3Mod: 0, cost: 2.0 },
+        "St": { name: "Standard", tl: 0, range: 0, mass: 1.0, qrebs: 0, d2Mod: 0, d3Mod: 0, cost: 1.0 },
+        "T": { name: "Target", tl: 0, range: 0, mass: 1.1, qrebs: 1, d2Mod: 0, d3Mod: 0, cost: 1.5 },
+        "Ul": { name: "Ultimate", tl: 4, range: 4, mass: 0.7, qrebs: -4, d2Mod: 2, d3Mod: 0, cost: 1.4 }
+    };
+
+    // Chart 5: User
+    const CHART_5_USER = {
+        "": { name: "Man", mass: 1.0, qrebs: 0, code: "" },
+        "U": { name: "Universal", mass: 1.1, qrebs: 1, code: "U" },
+        "M": { name: "Man", mass: 1.0, qrebs: 0, code: "M" },
+        "V": { name: "Vargr", mass: 1.0, qrebs: 0, code: "V" },
+        "K": { name: "K’kree", mass: 1.3, qrebs: 2, code: "K" },
+        "H": { name: "Hiver (Grasper)", mass: 1.0, qrebs: -1, code: "H" },
+        "A": { name: "Aslan (Paw)", mass: 1.0, qrebs: -1, code: "A" },
+        "G": { name: "Gripper", mass: 1.0, qrebs: -2, code: "G" },
+        "T": { name: "Vegan (Tentacle)", mass: 1.0, qrebs: -2, code: "T" },
+        "S": { name: "Socket", mass: 1.0, qrebs: -2, code: "S" }
+    };
+
+    // Chart 7: Installable Options (Names for display)
+    const CHART_7_OPTIONS = {
+        "a": "Low Signature Visual (Camouflaged)",
+        "b": "Low Signature Metal (Plastic)",
+        "c": "Quiet (Silenced)",
+        "d": "Folding Stock (Close Quarters)",
+        "e": "Stable Platform (Gyro)",
+        "f": "Flash Suppressor",
+        "g": "Hot Environment Adapted",
+        "h": "Corrosion Environment Adapted",
+        "i": "Cold Environment Adapted",
+        "j": "Magnification Sights (+1 Range)"
+    };
+
+    // Chart 8: Controls
+    const CHART_8_CONTROLS = {
+        "Base_Artillery": { off: true, single: true, burst: false, full: false, p123: false, override: false },
+        "Base_Rifle_Carbine": { off: true, single: true, burst: false, full: false, p123: false, override: false },
+        "Base_Pistol_Revolver": { off: true, single: true, burst: false, full: false, p123: false, override: false },
+        "Base_Shotgun": { off: true, single: true, burst: false, full: false, p123: false, override: false },
+        "Base_Machinegun": { off: true, single: true, burst: false, full: false, p123: false, override: false },
+        "Base_Projector_Designator": { off: true, single: true, burst: false, full: false, p123: false, override: false },
+        
+        "Desc_Assault": { off: false, single: false, burst: true, full: true, p123: false, override: false },
+        "Desc_Combat": { off: false, single: false, burst: true, full: false, p123: false, override: false },
+        "Desc_Plasma_Fusion": { off: false, single: false, burst: false, full: false, p123: true, override: false },
+        "Desc_Laser": { off: false, single: false, burst: false, full: false, p123: true, override: false },
+        "Desc_Machine": { off: false, single: false, burst: false, full: true, p123: false, override: false },
+        "Desc_Splat": { off: false, single: false, burst: false, full: true, p123: false, override: false },
+        "Desc_Sub": { off: false, single: false, burst: false, full: true, p123: false, override: false },
+        "Desc_Shotgun_Assault": { off: false, single: false, burst: true, full: true, p123: false, override: false }
+    };
+
+    // --- INITIALIZATION ---
+
+    window.onload = function() {
+        populateTypeSelect();
+        populateCheckboxes('burdenContainer', CHART_5_BURDEN);
+        populateCheckboxes('stageContainer', CHART_5_STAGE);
+        populateSelect('userSelect', CHART_5_USER, false);
+        populateOptions();
+        
+        document.getElementById("typeSelect").value = "Handguns_P";
+        handleTypeChange();
+        updateWeapon();
+    };
+
+    function populateTypeSelect() {
+        const select = document.getElementById("typeSelect");
+        select.innerHTML = "";
+        for (const [cat, types] of Object.entries(CHART_3_TYPES)) {
+            const group = document.createElement("optgroup");
+            group.label = cat;
+            for (const [code, data] of Object.entries(types)) {
+                const option = document.createElement("option");
+                option.value = `${cat}_${code}`;
+                option.textContent = `${data.name} (TL ${data.tl})`;
+                group.appendChild(option);
+            }
+            select.appendChild(group);
+        }
+    }
+
+    function populateCheckboxes(containerId, dataMap) {
+        const container = document.getElementById(containerId);
+        for (const [code, data] of Object.entries(dataMap)) {
+            // Skip blank entry
+            if (code === "") continue; 
+            
+            const wrapper = document.createElement("label");
+            wrapper.className = "checkbox-item";
+            
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.value = code;
+            cb.onchange = updateWeapon;
+            
+            const span = document.createElement("span");
+            span.textContent = data.name || code;
+            
+            wrapper.appendChild(cb);
+            wrapper.appendChild(span);
+            container.appendChild(wrapper);
+        }
+    }
+
+    function populateSelect(selectId, dataMap, defaultBlank) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = "";
+        if(defaultBlank) {
+            const opt = document.createElement("option");
+            opt.value = "";
+            opt.textContent = "(Blank/Standard)";
+            select.appendChild(opt);
+        }
+        for (const [code, data] of Object.entries(dataMap)) {
+            const option = document.createElement("option");
+            option.value = code;
+            option.textContent = data.name || code;
+            select.appendChild(option);
+        }
+    }
+
+    function populateOptions() {
+        const select = document.getElementById("optionsSelect");
+        select.innerHTML = "";
+        for (const [code, name] of Object.entries(CHART_7_OPTIONS)) {
+            const el = document.createElement("option");
+            el.value = code;
+            el.textContent = name;
+            select.appendChild(el);
+        }
+    }
+
+    function handleTypeChange() {
+        const typeVal = document.getElementById("typeSelect").value;
+        if(!typeVal) return;
+        const [cat, code] = typeVal.split("_");
+        populateDescriptorSelect(cat);
+        updateWeapon();
+    }
+
+    function populateDescriptorSelect(category) {
+        const select = document.getElementById("descriptorSelect");
+        select.innerHTML = "";
+        if (CHART_4_DESCRIPTORS[category]) {
+            for (const [code, data] of Object.entries(CHART_4_DESCRIPTORS[category])) {
+                const option = document.createElement("option");
+                option.value = code;
+                option.textContent = data.name || "(Blank)";
+                select.appendChild(option);
+            }
+        } else {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "(No Descriptors Available)";
+            select.appendChild(option);
+        }
+    }
+
+    // --- CORE LOGIC ---
+
+    function updateWeapon() {
+        const typeVal = document.getElementById("typeSelect").value;
+        if(!typeVal) return;
+        const [cat, typeCode] = typeVal.split("_");
+        
+        const descCode = document.getElementById("descriptorSelect").value;
+        
+        let descData = { name: "", tl: 0, range: 0, mass: 1.0, qrebs: 0, h2: "", d2: "", h3: "", d3: "", cost: 1.0 };
+        if(descCode && CHART_4_DESCRIPTORS[cat] && CHART_4_DESCRIPTORS[cat][descCode]) {
+            descData = CHART_4_DESCRIPTORS[cat][descCode];
+        }
+
+        // Get Checked Burdens
+        const burdenInputs = document.querySelectorAll('#burdenContainer input:checked');
+        const burdenCodes = Array.from(burdenInputs).map(cb => cb.value);
+        
+        // Get Checked Stages
+        const stageInputs = document.querySelectorAll('#stageContainer input:checked');
+        const stageCodes = Array.from(stageInputs).map(cb => cb.value);
+
+        const userCode = document.getElementById("userSelect").value || "";
+        const portabilityMode = document.getElementById("portabilitySelect").value;
+        
+        const optionsSelect = document.getElementById("optionsSelect");
+        const selectedOptions = Array.from(optionsSelect.selectedOptions).map(opt => opt.value);
+
+        const typeData = CHART_3_TYPES[cat][typeCode];
+        const userData = CHART_5_USER[userCode];
+
+        // --- CALCULATIONS (Multiple Burden/Stage Aggregation) ---
+        
+        // 1. TL Calculation
+        let tl = typeData.tl + descData.tl;
+        burdenCodes.forEach(code => tl += CHART_5_BURDEN[code].tl);
+        stageCodes.forEach(code => tl += CHART_5_STAGE[code].tl);
+
+        // 2. Range Calculation
+        let range = 0;
+        if(descData.range !== 0) {
+            range = descData.range;
+        } else {
+            range = typeData.range;
+        }
+        // Add modifiers from burdens/stages
+        burdenCodes.forEach(code => range += CHART_5_BURDEN[code].range);
+        stageCodes.forEach(code => range += CHART_5_STAGE[code].range);
+        
+        if (range < 0) range = 0;
+
+        // 3. Mass Calculation (Product of multipliers)
+        let mass = typeData.mass * descData.mass * userData.mass;
+        burdenCodes.forEach(code => mass *= CHART_5_BURDEN[code].mass);
+        stageCodes.forEach(code => mass *= CHART_5_STAGE[code].mass);
+
+        // 4. Cost Calculation (Product of multipliers)
+        let cost = typeData.cost * descData.cost;
+        burdenCodes.forEach(code => cost *= CHART_5_BURDEN[code].cost);
+        stageCodes.forEach(code => cost *= CHART_5_STAGE[code].cost);
+        
+        // 5. QREBS
+        let qrebs = "50000";
+        let b = 0;
+        b += (descData.qrebs || 0);
+        burdenCodes.forEach(code => b += (CHART_5_BURDEN[code].qrebs || 0));
+        stageCodes.forEach(code => b += (CHART_5_STAGE[code].qrebs || 0));
+        
+        let qrebsArr = [];
+        if(b !== 0) qrebsArr.push(`B${b > 0 ? '+' : ''}${b}`);
+        if(qrebsArr.length > 0) qrebs = qrebsArr.join(" ");
+
+        // 6. Effects (Stacking Logic)
+        
+        // Helper to aggregate effects by Type
+        let effectMap = {};
+
+        function addToMap(type, dice) {
+            if (!type || type === "*" || type === "") return;
+
+            const existingVal = effectMap[type];
+            const newNum = parseInt(dice);
+
+            // Logic to determine if we can stack integers
+            if (existingVal !== undefined) {
+                // We already have this effect type
+                if (!isNaN(newNum) && typeof existingVal === 'number') {
+                    // Both are numbers, stack them
+                    effectMap[type] = existingVal + newNum;
+                } else {
+                    // Complex scenario (e.g. string "1-2-3" already exists, or new is string).
+                    // We won't attempt to add math to complex strings, keep existing.
+                }
+            } else {
+                // New effect type
+                if (!isNaN(newNum)) {
+                    effectMap[type] = newNum;
+                } else {
+                    effectMap[type] = dice; // Keep as string
+                }
+            }
+        }
+
+        // Process H1 (Type)
+        addToMap(typeData.h1, typeData.d1);
+
+        // Process Modifiers
+        let d2Mod = 0;
+        burdenCodes.forEach(code => d2Mod += (CHART_5_BURDEN[code].d2Mod || 0));
+        stageCodes.forEach(code => d2Mod += (CHART_5_STAGE[code].d2Mod || 0));
+
+        let d3Mod = 0;
+        stageCodes.forEach(code => d3Mod += (CHART_5_STAGE[code].d3Mod || 0));
+        
+        // Process H2 (Descriptor) with D2 Modifiers
+        if(descData.h2 !== "") {
+            let d2Val = descData.d2;
+            // Apply modifiers BEFORE stacking
+            if(!isNaN(parseInt(d2Val)) && d2Mod !== 0) {
+                d2Val = (parseInt(d2Val) + d2Mod).toString();
+            }
+            addToMap(descData.h2, d2Val);
+        }
+
+        // Process H3 (Descriptor) with D3 Modifiers
+        if(descData.h3 !== "") {
+            let d3Val = descData.d3;
+             if(!isNaN(parseInt(d3Val)) && d3Mod !== 0) {
+                d3Val = (parseInt(d3Val) + d3Mod).toString();
+            }
+            addToMap(descData.h3, d3Val);
+        }
+
+        // Convert map back to array for UI
+        let effects = Object.keys(effectMap).map(type => ({
+            type: type,
+            dice: effectMap[type]
+        }));
+
+
+        // 7. Portability
+        let portability = "";
+        if (portabilityMode === "auto") {
+            if (mass < 20) portability = "";
+            else if (mass >= 20 && mass < 200) portability = "Crewed";
+            else if (mass >= 200 && mass < 500) portability = "Turret";
+            else if (mass >= 500 && mass < 1000) portability = "Vehicle Mount";
+            else if (mass >= 1000) portability = "Fixed";
+        } else {
+            portability = portabilityMode;
+        }
+
+        // 8. Name Generation (Join all selected burden/stage names)
+        let parts = [];
+        stageCodes.forEach(code => parts.push(CHART_5_STAGE[code].name));
+        burdenCodes.forEach(code => parts.push(CHART_5_BURDEN[code].name));
+        if(descData.name) parts.push(descData.name);
+        parts.push(typeData.name);
+        if(userData.name && userData.name !== "Man") parts.push(userData.name);
+        if(portability) parts.push(portability);
+        parts.push(`TL ${tl}`);
+        let longName = parts.join(" ");
+
+        // Model Generation (Join codes)
+        let modelParts = [];
+        stageCodes.forEach(code => modelParts.push(code));
+        burdenCodes.forEach(code => modelParts.push(code));
+        if(descCode) modelParts.push(descCode);
+        modelParts.push(typeCode);
+        
+        let model = modelParts.join("") + `-${tl}`;
+        
+        // 9. Controls
+        let controls = { off: false, single: false, burst: false, full: false, p123: false, override: false };
+        
+        let baseKey = "";
+        if(cat === "Artillery") baseKey = "Base_Artillery";
+        else if(cat === "Long Guns") baseKey = "Base_Rifle_Carbine";
+        else if(cat === "Handguns") baseKey = "Base_Pistol_Revolver";
+        else if(cat === "Shotguns") baseKey = "Base_Shotgun";
+        else if(cat === "Machineguns") baseKey = "Base_Machinegun";
+        else if(cat === "Projectors" || cat === "Designators") baseKey = "Base_Projector_Designator";
+        else if(cat === "Launchers") baseKey = "Base_Artillery"; 
+
+        if(CHART_8_CONTROLS[baseKey]) {
+            controls = {...CHART_8_CONTROLS[baseKey]};
+        }
+
+        if(descCode) {
+            if(descCode === "A" || descCode === "C") { 
+                controls = mergeControls(controls, CHART_8_CONTROLS["Desc_Assault"]); 
+            }
+            if(descCode === "F" || descCode === "P") { 
+                 controls = mergeControls(controls, CHART_8_CONTROLS["Desc_Plasma_Fusion"]);
+            }
+            if(descCode === "L") { 
+                controls = mergeControls(controls, CHART_8_CONTROLS["Desc_Laser"]);
+            }
+            if(descCode === "G") { 
+                 if(cat === "Artillery" || cat === "Long Guns" || cat === "Machineguns") {
+                     controls.burst = true; controls.full = true;
+                 } else {
+                     controls.p123 = true;
+                 }
+            }
+            if(descCode === "M") { 
+                controls.full = true;
+            }
+            if(descCode === "Sp") { 
+                controls.full = true;
+            }
+            if(descCode === "S" && cat === "Machineguns") { 
+                controls.full = true;
+            }
+        }
+        
+        // 10. Installable Options Display
+        const optionsSummaryDiv = document.getElementById("optionsSummary");
+        if (selectedOptions.length > 0) {
+             const names = selectedOptions.map(code => CHART_7_OPTIONS[code] || code);
+             optionsSummaryDiv.innerHTML = names.join("<br>");
+             optionsSummaryDiv.style.color = "#e0e0e0";
+        } else {
+             optionsSummaryDiv.innerHTML = "None";
+             optionsSummaryDiv.style.color = "#888";
+        }
+
+        // --- RENDER OUTPUT ---
+        document.getElementById("modelName").textContent = model;
+        document.getElementById("longName").textContent = longName;
+        document.getElementById("outTL").textContent = tl;
+        document.getElementById("outRange").textContent = range;
+        document.getElementById("outMass").textContent = mass.toFixed(2) + " kg";
+        document.getElementById("outCost").textContent = "Cr " + Math.floor(cost).toLocaleString();
+        document.getElementById("outQREBS").textContent = qrebs;
+
+        const effList = document.getElementById("effectsList");
+        effList.innerHTML = "";
+        effects.forEach(eff => {
+            const div = document.createElement("div");
+            div.textContent = `${eff.type} ${eff.dice}`;
+            div.style.color = "#aaa";
+            div.style.fontSize = "0.9rem";
+            effList.appendChild(div);
+        });
+
+        const ctrlDiv = document.getElementById("controlsDisplay");
+        ctrlDiv.innerHTML = "";
+        const ctrlLabels = {
+            off: "Safe", single: "Semi", burst: "Burst", full: "Auto", p123: "1-2-3", override: "Ovrd"
+        };
+        for(const [key, active] of Object.entries(controls)) {
+            if(active) {
+                const tag = document.createElement("span");
+                tag.className = "control-tag active";
+                tag.textContent = ctrlLabels[key] || key;
+                ctrlDiv.appendChild(tag);
+            }
+        }
+
+        // Render Weapon Extension String
+        let effectsString = effects.map(e => `${e.type}-${e.dice}`).join(" ");
+        let wx = `Wx: R=${range} Cr${Math.floor(cost).toLocaleString()} ${mass.toFixed(1)}kg B=${typeData.qrebs || ''} ${effectsString}`;
+        document.getElementById("wxString").textContent = wx;
+    }
+
+    function mergeControls(a, b) {
+        return {
+            off: a.off || b.off,
+            single: a.single || b.single,
+            burst: a.burst || b.burst,
+            full: a.full || b.full,
+            p123: a.p123 || b.p123,
+            override: a.override || b.override
+        };
+    }
+</script>
+</body>
+</html>

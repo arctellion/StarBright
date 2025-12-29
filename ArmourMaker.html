@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveller ArmorMaker</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --panel-bg: #1e1e24;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #ff9f1c;
+            --accent-hover: #ffbf69;
+            --border: #333;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+            --std-color: #2ecc71; /* Green for Standard */
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin-top: 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Hide column helper */
+        .hidden-panel {
+            display: none !important;
+        }
+
+        @media (max-width: 1200px) { .container { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+
+        /* Panels */
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: bold;
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted); }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            background-color: #2a2a30;
+            border: 1px solid #444;
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        select:disabled {
+            background-color: #1a1a1e;
+            color: #555;
+            cursor: not-allowed;
+            border-color: #333;
+        }
+
+        select:focus, input:focus { outline: none; border-color: var(--accent); }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+
+        /* Subsystem UI Styles */
+        .subsystem-tabs {
+            display: flex;
+            border-bottom: 1px solid #2a2a30;
+            margin-bottom: 15px;
+        }
+        
+        .sub-tab {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            flex: 1;
+            border-left: 3px solid transparent;
+        }
+
+        .sub-tab:hover { color: var(--text-main); }
+        .sub-tab.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(255, 159, 28, 0.05);
+            font-weight: bold;
+        }
+
+        .subtab-content {
+            display: none;
+            animation: subFade 0.2s;
+        }
+        .subtab-content.active { display: block; }
+
+        @keyframes subFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Subsystem Option Items */
+        .sub-option-list { display: flex; flex-direction: column; gap: 10px; }
+        .sub-option-item {
+            display: grid;
+            grid-template-columns: 30px 1fr; /* Checkbox column, Content column */
+            background-color: #25252b;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid var(--border);
+            align-items: center; /* Align checkbox vertically */
+        }
+        
+        .sub-option-item.standard-fitted {
+            border-left-color: var(--std-color);
+            background-color: #1e2e24;
+        }
+
+        .sub-option-item.active {
+            border-left-color: var(--accent);
+            background-color: #2f2f36;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .sub-option-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+
+        .sub-option-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .sub-option-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        /* Drawbacks inside options */
+        .drawback-container {
+            grid-column: 1 / -1; /* Span all columns */
+            margin-top: 10px;
+            background: #18181b;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px dashed var(--border);
+            display: none; /* Hidden by default */
+        }
+        .drawback-container.visible { display: grid; }
+        
+        select.drawback-select {
+            margin-bottom: 5px;
+            padding: 5px;
+            font-size: 0.85rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .drawback-desc {
+            font-size: 0.8rem;
+            color: #ff6b6b;
+            font-style: italic;
+        }
+
+        /* Results Card */
+        .results-card {
+            font-family: var(--font-mono);
+            background: #000;
+            color: var(--accent);
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid var(--accent);
+            position: relative;
+        }
+        .results-card::before {
+            content: "ARMOR DATA";
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: var(--bg-color);
+            padding: 0 5px;
+            font-size: 0.7rem;
+            color: var(--accent);
+        }
+        .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--text-muted); }
+        .stat-value { color: #fff; font-weight: bold; text-align: right; }
+        .highlight-value { color: var(--accent); }
+        .armor-values { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .armor-pill { background: #333; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; }
+        .qrebs-display { margin-top: 15px; color: #888; font-size: 0.85rem; word-break: break-all; }
+        
+        /* New Equipment Notes Style */
+        .notes-display {
+            color: #bbb;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            padding: 5px 0;
+            font-family: var(--font-main);
+        }
+        .notes-label {
+            color: var(--std-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .sys-eval { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #444; }
+        .sys-title { color: #fff; margin-bottom: 5px; }
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+        .tooltip { font-size: 0.8rem; color: #888; margin-top: -10px; margin-bottom: 10px; }
+        .disabled-hint { font-size: 0.85rem; color: #666; font-style: italic; margin-top: -10px; margin-bottom: 15px; display: none; }
+        .disabled-hint.visible { display: block; }
+        
+        /* Premade List Styling */
+        .premade-group { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #2a2a30; }
+        .premade-group:last-child { border-bottom: none; margin-bottom: 0; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ArmorMaker <span style="font-size:0.6em; color:var(--text-muted)">System</span></h1>
+    <p style="color:var(--text-muted)">Traveller RPG Armor Generation System</p>
+</header>
+
+<div class="container">
+
+    <!-- Column 1: Core Configuration (TABS) -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Core Configuration</h2>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="btn-custom" onclick="switchTab('custom')">Custom (Systems)</button>
+            <button class="tab-btn" id="btn-premade" onclick="switchTab('premade')">Pre-Made (Items)</button>
+        </div>
+
+        <!-- CUSTOM TAB -->
+        <div id="tab-custom" class="tab-content active">
+            <label for="type-custom">Armor Type</label>
+            <select id="type-custom" onchange="updateArmor()">
+                <!-- Populated by JS: Systems Only -->
+            </select>
+
+            <label for="descriptor">Descriptor</label>
+            <select id="descriptor" onchange="updateArmor()">
+                <option value="">(Blank)</option>
+                <option value="Carrier">Carrier (&lt;Weapon&gt;)</option>
+                <option value="Assault">Assault</option>
+                <option value="Battle">Battle</option>
+                <option value="Boarding">Boarding</option>
+                <option value="Combat">Combat</option>
+                <option value="Drop">Drop</option>
+                <option value="Environ">Environ</option>
+                <option value="Exploration">Exploration</option>
+                <option value="Hazmat">HazMat</option>
+                <option value="Hostile">Hostile Environ</option>
+                <option value="Hot">Hot</option>
+                <option value="Cold">Cold</option>
+                <option value="Police">Police</option>
+                <option value="Prospector">Prospector</option>
+                <option value="Labor">Labor</option>
+                <option value="Sapper">Sapper</option>
+                <option value="Vacc">Vacc</option>
+                <option value="Protected">Protected</option>
+            </select>
+
+            <div class="row">
+                <div class="col">
+                    <label for="burden">Burden</label>
+                    <select id="burden" onchange="updateArmor()">
+                        <option value="">(Blank)</option>
+                        <option value="Disposable">Disposable</option>
+                        <option value="Heavy">Heavy</option>
+                        <option value="Light">Light</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Vlight">Vlight</option>
+                        <option value="Oversize">Oversize</option>
+                        <option value="Titan">Titan</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="stage">Stage</label>
+                    <select id="stage" onchange="updateArmor()">
+                        <option value="">(Blank)</option>
+                        <option value="Experimental">Experimental</option>
+                        <option value="Prototype">Prototype</option>
+                        <option value="Early">Early</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Improved">Improved</option>
+                        <option value="Modified">Modified</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Alternate">Alternate</option>
+                        <option value="Obsolete">Obsolete</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Ultimate">Ultimate</option>
+                    </select>
+                </div>
+            </div>
+
+            <label for="user">User</label>
+            <select id="user" onchange="updateArmor()">
+                <option value="">Man (Human)</option>
+                <option value="Universal">Universal</option>
+                <option value="Aslan">Aslan</option>
+                <option value="Hiver">Hiver</option>
+                <option value="Vargr">Vargr</option>
+                <option value="K'kree">K'kree</option>
+                <option value="Vegan">Vegan</option>
+                <option value="Droyne">Droyne</option>
+                <option value="Other">&lt;Other&gt;</option>
+            </select>
+
+            <button class="btn-reset" onclick="resetForm()">Reset System</button>
+        </div>
+
+        <!-- PRE-MADE TAB -->
+        <div id="tab-premade" class="tab-content">
+            <p class="tooltip">Select items from all three categories to stack ratings.</p>
+
+            <div id="modifiers-disabled-hint" class="disabled-hint">
+                Modifiers (Descriptor, Burden, Stage, User) are locked for standard items.
+            </div>
+
+            <!-- Body Section -->
+            <div class="premade-group">
+                <label for="premade-body" style="color:var(--accent)">Body Armor</label>
+                <select id="premade-body" onchange="updateArmor()">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+
+            <!-- Head Section -->
+            <div class="premade-group">
+                <label for="premade-head" style="color:var(--accent)">Head Protection</label>
+                <select id="premade-head" onchange="updateArmor()">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+
+            <!-- Breather Section -->
+            <div class="premade-group">
+                <label for="premade-breather" style="color:var(--accent)">Breathers / Air</label>
+                <select id="premade-breather" onchange="updateArmor()">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 2: Subsystems (New Tabs) -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Subsystems</h2>
+        </div>
+        
+        <div class="tooltip">Standard subsystems are fitted automatically without penalty. Additional options trigger drawbacks.</div>
+
+        <!-- Subsystem Navigation Tabs -->
+        <div class="subsystem-tabs">
+            <button class="sub-tab active" id="sub-comms" onclick="setSubTab('comms')">Comms</button>
+            <button class="sub-tab" id="sub-sensors" onclick="setSubTab('sensors')">Sensors</button>
+            <button class="sub-tab" id="sub-controls" onclick="setSubTab('controls')">Controls</button>
+            <button class="sub-tab" id="sub-power" onclick="setSubTab('power')">Power</button>
+            <button class="sub-tab" id="sub-other" onclick="setSubTab('other')">Other</button>
+        </div>
+
+        <!-- Subsystem Content Container -->
+        <div id="subsystem-list-container">
+            <!-- Content populated by JS -->
+        </div>
+    </div>
+
+    <!-- Column 3: Results -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Armor Data</h2>
+        </div>
+
+        <div class="results-card">
+            <div class="stat-row">
+                <span class="stat-label">LongName</span>
+                <span class="stat-value highlight-value" id="out-longname">Battle Dress</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Model</span>
+                <span class="stat-value" id="out-model">BD-10</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Tech Level</span>
+                <span class="stat-value" id="out-tl">10</span>
+            </div>
+            
+            <div style="margin: 15px 0; border-top: 1px solid #333;"></div>
+
+            <div class="stat-row">
+                <span class="stat-label">Cost</span>
+                <span class="stat-value" id="out-cost">Cr 40,000</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Mass</span>
+                <span class="stat-value" id="out-mass">40 kg</span>
+            </div>
+
+            <div style="margin: 15px 0; border-top: 1px solid #333;"></div>
+
+            <div class="stat-label">Protection Values</div>
+            <div class="armor-values" id="out-armor-values">
+                <!-- Pills injected here -->
+            </div>
+
+            <div class="qrebs-display">
+                QREBS: <span id="out-qrebs">50000</span>
+            </div>
+
+            <!-- Equipment Notes Section -->
+            <div class="stat-row" style="display:block; border:none; padding-top:10px; border-top:1px dashed #444;">
+                <span class="stat-label" style="display:block; margin-bottom:5px;">Equipment / Notes</span>
+                <span class="stat-value notes-display" id="out-notes">--</span>
+            </div>
+
+            <div class="sys-eval">
+                <div class="sys-title">System Performance</div>
+                <div class="stat-row">
+                    <span class="stat-label">Str (C1)</span>
+                    <span class="stat-value" id="out-str">x10</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Dex (C2)</span>
+                    <span class="stat-value" id="out-dex">-2</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">End (C3)</span>
+                    <span class="stat-value" id="out-end">-1</span>
+                </div>
+                <div style="margin-top:5px; font-size:0.8rem; color:#888;">
+                    Skill: <span id="out-skill">BattleDress</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /**
+     * DATASETS
+     */
+    const TYPES = {
+        // SYSTEMS
+        "D": { name: "Dress", type: "System", category: "System", tl: 10, mass: 40, cost: 40000, ar: 9, ca: 6, fl: 6, ra: 6, so: 6, ps: 1, ins: 6, seal: 6, qrebs: {}, skill: "BattleDress", eval: {str: "x10", dex: -2, end: -1} },
+        "A": { name: "Armor", type: "System", category: "System", tl: 8, mass: 30, cost: 20000, ar: 7, ca: 3, fl: 3, ra: 3, so: 3, ps: 1, ins: 3, seal: 3, qrebs: {}, skill: "BattleDress", eval: {str: "x10", dex: -2, end: -2} },
+        "S": { name: "Suit", type: "System", category: "System", tl: 5, mass: 10, cost: 1000, ar: 2, ca: 1, fl: 1, ra: 1, so: 1, ps: 1, ins: 1, seal: 1, qrebs: {}, skill: "Vacc Suit", eval: {str: "x1", dex: -2, end: -3} },
+        "U": { name: "Unit", type: "System", category: "System", tl: 9, mass: 200, cost: 60000, ar: 4, ca: 2, fl: 2, ra: 2, so: 2, ps: 1, ins: 2, seal: 2, qrebs: {}, skill: "Driver: Legged", eval: {str: "x10", dex: -2, end: 0} },
+        
+        // ITEMS - BODY
+        "J": { name: "Jack", type: "Item", category: "Body", tl: 1, mass: 1, cost: 50, ar: 5, ca: 1, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "Ma": { name: "Mail", type: "Item", category: "Body", tl: 4, mass: 3, cost: 400, ar: 6, ca: 2, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "M": { name: "Mesh", type: "Item", category: "Body", tl: 7, mass: 2, cost: 150, ar: 10, ca: 1, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "K": { name: "Cloth", type: "Item", category: "Body", tl: 8, mass: 2, cost: 250, ar: 14, ca: 1, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "Q": { name: "Quilt", type: "Item", category: "Body", tl: 9, mass: 1, cost: 600, ar: 18, ca: 1, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "P": { name: "Plate", type: "Item", category: "Body", tl: 6, mass: 4, cost: 900, ar: 22, ca: 1, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {b: 2}, comment: "B=+2" },
+        "Abl": { name: "Ablat", type: "Item", category: "Body", tl: 9, mass: 2, cost: 375, ar: 12, ca: 3, fl: 0, ra: 0, so: 0, ps: 0, ins: 8, seal: 0, qrebs: {b: 3}, comment: "2x vs K" },
+        "R": { name: "Reflec", type: "Item", category: "Body", tl: 10, mass: 1, cost: 100, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {}, comment: "Deflects Laser" },
+        "C": { name: "Coat", type: "Item", category: "Body", tl: 1, mass: 1, cost: 100, ar: 2, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "hC": { name: "Heavy Coat", type: "Item", category: "Body", tl: 2, mass: 2, cost: 200, ar: 3, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        
+        // ITEMS - HEAD
+        "Sh": { name: "Shield", type: "Item", category: "Head", tl: 2, mass: 3, cost: 100, ar: 12, ca: 3, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "aSh": { name: "Adv. Shield", type: "Item", category: "Head", tl: 8, mass: 2, cost: 400, ar: 14, ca: 2, fl: 0, ra: 8, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "H": { name: "Mil Helmet", type: "Item", category: "Head", tl: 4, mass: 1, cost: 100, ar: 8, ca: 0, fl: 0, ra: 0, so: 5, ps: 0, ins: 0, seal: 0, qrebs: {b: 1} },
+        "Hp": { name: "Full Helmet", type: "Item", category: "Head", tl: 8, mass: 1, cost: 300, ar: 10, ca: 5, fl: 12, ra: 5, so: 5, ps: 0, ins: 5, seal: 0, qrebs: {b: 2} },
+        "Hc": { name: "Crew Helmet", type: "Item", category: "Head", tl: 8, mass: 1, cost: 300, ar: 6, ca: 6, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 5, qrebs: {b: 1} },
+        "eP": { name: "Ear Protectors", type: "Item", category: "Head", tl: 4, mass: 0, cost: 100, ar: 0, ca: 0, fl: 0, ra: 0, so: 12, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "Gog": { name: "Flash Goggles", type: "Item", category: "Head", tl: 8, mass: 0, cost: 200, ar: 0, ca: 0, fl: 12, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "Sun": { name: "Sunglasses", type: "Item", category: "Head", tl: 4, mass: 0, cost: 100, ar: 0, ca: 0, fl: 6, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, qrebs: {} },
+        "Psi": { name: "Psi Shield", type: "Item", category: "Head", tl: 12, mass: 1, cost: 3000, ar: 3, ca: 0, fl: 0, ra: 0, so: 0, ps: 15, ins: 0, seal: 0, qrebs: {} },
+        
+        // ITEMS - BREATHER
+        "F": { name: "Filter", type: "Item", category: "Breather", tl: 3, mass: 1, cost: 10, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 3, qrebs: {} },
+        "B": { name: "Breather", type: "Item", category: "Breather", tl: 7, mass: 2, cost: 200, ar: 0, ca: 4, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 6, qrebs: {} },
+        "Comb": { name: "Combination", type: "Item", category: "Breather", tl: 5, mass: 1, cost: 150, ar: 0, ca: 4, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 12, qrebs: {} },
+        "Resp": { name: "Respirator", type: "Item", category: "Breather", tl: 5, mass: 1, cost: 100, ar: 0, ca: 4, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 12, qrebs: {} },
+        "aT": { name: "Air Tanks", type: "Item", category: "Breather", tl: 5, mass: 4, cost: 500, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 12, qrebs: {} },
+        "rB": { name: "ReBreather", type: "Item", category: "Breather", tl: 10, mass: 1, cost: 200, ar: 0, ca: 10, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 12, qrebs: {} },
+        "G": { name: "Gill", type: "Item", category: "Breather", tl: 11, mass: 4, cost: 4000, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 18, qrebs: {} },
+    };
+
+    const MODIFIERS = {
+        descriptor: {
+            "": { tl: 0, mass: 1, cost: 1, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, abbrev: "" },
+            "Carrier": { tl: 1, mass: 2, cost: 3, ar: "x1", ca: "x1", fl: "x1", ra: "x1", so: "x1", ps: "x1", ins: "x1", seal: "x1", abbrev: "<>" },
+            "Assault": { tl: 4, mass: 1.5, cost: 3, ar: "x2", ca: "x2", fl: "x2", ra: "x2", so: "x2", ps: "x2", ins: "x2", seal: "x2", abbrev: "A" },
+            "Battle": { tl: 3, mass: 2.5, cost: 5, ar: "x5", ca: "x5", fl: "x5", ra: "x5", so: "x5", ps: "x5", ins: "x5", seal: "x5", abbrev: "B" },
+            "Boarding": { tl: 3, mass: 1.2, cost: 4, ar: "x4", ca: "x1", fl: "x4", ra: "x1", so: "x2", ps: "x1", ins: "x1", seal: "x3", abbrev: "Bd" },
+            "Combat": { tl: 3, mass: 2, cost: 4, ar: "x4", ca: "x4", fl: "x4", ra: "x4", so: "x4", ps: "x4", ins: "x4", seal: "x4", abbrev: "C" },
+            "Drop": { tl: 2, mass: 3, cost: 3, ar: "x8", ca: "x1", fl: "x8", ra: "x1", so: "x8", ps: "x1", ins: "x1", seal: "x8", abbrev: "Dr" },
+            "Environ": { tl: 2, mass: 0.5, cost: 1.5, ar: "x4", ca: "x4", fl: "x4", ra: "x1", so: "x4", ps: "x1", ins: "x20", seal: "x10", abbrev: "Env" },
+            "Exploration": { tl: 1, mass: 1, cost: 7, ar: "x5", ca: "x1", fl: "x1", ra: "x1", so: "x1", ps: "x1", ins: "x8", seal: "x8", abbrev: "Ex" },
+            "Hazmat": { tl: 0, mass: 1.3, cost: 9, ar: "x2", ca: "x6", fl: "x6", ra: "x6", so: "x6", ps: "x1", ins: "x12", seal: "x12", abbrev: "Hz" },
+            "Hostile": { tl: 1, mass: 1.2, cost: 8, ar: "x8", ca: "x1", fl: "x1", ra: "x8", so: "x1", ps: "x1", ins: "x8", seal: "x12", abbrev: "HE" },
+            "Hot": { tl: 1, mass: 0.3, cost: 0.6, ar: "x2", ca: "x7", fl: "x5", ra: "x5", so: "x5", ps: "x1", ins: "x5", seal: "x5", abbrev: "H" },
+            "Cold": { tl: 2, mass: 0.2, cost: 0.2, ar: "x1", ca: "x1", fl: "x1", ra: "x1", so: "x1", ps: "x1", ins: "x6", seal: "x1", abbrev: "C" },
+            "Police": { tl: 0, mass: 0.6, cost: 1.7, ar: "x3", ca: "x1", fl: "x5", ra: "x1", so: "x1", ps: "x1", ins: "x1", seal: "x2", abbrev: "P" },
+            "Prospector": { tl: 2, mass: 2, cost: 6, ar: "x2", ca: "x2", fl: "x1", ra: "x1", so: "x1", ps: "x1", ins: "x3", seal: "x5", abbrev: "Pr" },
+            "Labor": { tl: -1, mass: 0.7, cost: 4, ar: "x1", ca: "x1", fl: "x1", ra: "x1", so: "x1", ps: "x1", ins: "x6", seal: "x6", abbrev: "L" },
+            "Sapper": { tl: 2, mass: 1.2, cost: 7, ar: "x5", ca: "x6", fl: "x6", ra: "x1", so: "x6", ps: "x1", ins: "x8", seal: "x8", abbrev: "S" },
+            "Vacc": { tl: 4, mass: 1, cost: 10, ar: "x5", ca: "x5", fl: "x0", ra: "x1", so: "x1", ps: "x1", ins: "x5", seal: "x5", abbrev: "V" },
+            "Protected": { tl: 2, mass: 2, cost: 7, ar: "x2", ca: "x2", fl: "x2", ra: "x2", so: "x2", ps: "x1", ins: "x3", seal: "x4", abbrev: "Pr" },
+            "CombatEnviron": { tl: 7, mass: 2.5, cost: 6, ar: "x7", ca: "x4", fl: "x5", ra: "x5", so: "x5", ps: "x1", ins: "x5", seal: "x5", abbrev: "CE" }
+        },
+        burden: {
+            "": { tl: 0, mass: 1, cost: 1, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, b: 0, abbrev: "" },
+            "Disposable": { tl: 3, mass: 0.9, cost: 0.5, ar: -5, ca: -5, fl: -5, ra: -5, so: -5, ps: 0, ins: 5, seal: -5, b: -5, abbrev: "D" },
+            "Heavy": { tl: 1, mass: 1.3, cost: 2, ar: 8, ca: 10, fl: 10, ra: 10, so: 10, ps: 0, ins: 15, seal: 10, b: 1, abbrev: "H" },
+            "Light": { tl: 0, mass: 0.7, cost: 1.1, ar: -3, ca: -3, fl: -3, ra: -3, so: -3, ps: 0, ins: 5, seal: -3, b: 0, abbrev: "L" },
+            "Medium": { tl: 0, mass: 1, cost: 1, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 10, seal: 0, b: 0, abbrev: "M" },
+            "Vlight": { tl: 1, mass: 0.6, cost: 2, ar: -5, ca: -5, fl: -5, ra: -5, so: -5, ps: 0, ins: -2, seal: -5, b: 0, abbrev: "Vl" },
+            "Oversize": { tl: 1, mass: 8, cost: 10, ar: 12, ca: 8, fl: 8, ra: 8, so: 8, ps: 0, ins: 8, seal: 8, b: 0, abbrev: "OS" },
+            "Titan": { tl: 3, mass: 27, cost: 30, ar: 16, ca: 8, fl: 8, ra: 8, so: 8, ps: 0, ins: 8, seal: 8, b: 0, abbrev: "T" }
+        },
+        stage: {
+            "": { tl: 0, mass: 1, cost: 1, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, b: 0, abbrev: "" },
+            "Experimental": { tl: -2, mass: 2, cost: 4, ar: -8, ca: -8, fl: -8, ra: -8, so: -8, ps: 0, ins: -8, seal: -8, b: 0, abbrev: "X" },
+            "Prototype": { tl: -1, mass: 1.9, cost: 3, ar: -4, ca: -4, fl: -4, ra: -4, so: -4, ps: 0, ins: -4, seal: -4, b: 0, abbrev: "P" },
+            "Early": { tl: -1, mass: 1.7, cost: 1.2, ar: -2, ca: -2, fl: -2, ra: -2, so: -2, ps: 0, ins: -2, seal: -2, b: 0, abbrev: "E" },
+            "Basic": { tl: 0, mass: 1.3, cost: 0.7, ar: -5, ca: -5, fl: -5, ra: -5, so: -5, ps: 0, ins: -5, seal: -5, b: 0, abbrev: "B" },
+            "Standard": { tl: 1, mass: 1, cost: 1, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, b: 0, abbrev: "St" },
+            "Improved": { tl: 1, mass: 1, cost: 1.1, ar: 6, ca: 6, fl: 6, ra: 6, so: 6, ps: 0, ins: 18, seal: 6, b: 0, abbrev: "Im" },
+            "Modified": { tl: 2, mass: 0.9, cost: 1.2, ar: 3, ca: 3, fl: 3, ra: 3, so: 3, ps: 0, ins: 9, seal: 3, b: 0, abbrev: "Mod" },
+            "Advanced": { tl: 3, mass: 0.8, cost: 2, ar: 10, ca: 10, fl: 10, ra: 10, so: 10, ps: 3, ins: 30, seal: 10, b: 0, abbrev: "A" },
+            "Alternate": { tl: 1, mass: 1.1, cost: 1.1, ar: 5, ca: 5, fl: 5, ra: 5, so: 5, ps: 0, ins: 15, seal: 5, b: 0, abbrev: "Alt" },
+            "Obsolete": { tl: 4, mass: 0.7, cost: 0.5, ar: 3, ca: 3, fl: 3, ra: 3, so: 3, ps: 0, ins: 9, seal: 3, b: 0, abbrev: "Ob" },
+            "Remote": { tl: 2, mass: 1.5, cost: 4, ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0, b: 0, abbrev: "Re" },
+            "Ultimate": { tl: 5, mass: 1, cost: 10, ar: 20, ca: 20, fl: 20, ra: 20, so: 20, ps: 5, ins: 50, seal: 20, b: 0, abbrev: "Ul" }
+        }
+    };
+
+    const USERS = {
+        "": { tl: 0, abbrev: "M", name: "Man" },
+        "Universal": { tl: 0, abbrev: "U", name: "Universal" },
+        "Aslan": { tl: 1, abbrev: "A", name: "Aslan" },
+        "Hiver": { tl: 1, abbrev: "H", name: "Hiver" },
+        "Vargr": { tl: 0, abbrev: "V", name: "Vargr" },
+        "K'kree": { tl: 0, abbrev: "K", name: "K'kree" },
+        "Vegan": { tl: 2, abbrev: "V", name: "Vegan" },
+        "Droyne": { tl: 0, abbrev: "D", name: "Droyne" },
+        "Other": { tl: 0, abbrev: "O", name: "Other" }
+    };
+
+    const OPTIONS = [
+        { id: "comms_a", name: "Comms: Standard", desc: "Range=5", type: "comm" },
+        { id: "comms_b", name: "Comms: Grid", desc: "Range=6", type: "comm" },
+        { id: "comms_c", name: "Comms: Battlefield", desc: "Range=6", type: "comm" },
+        { id: "comms_d", name: "Comms: Command", desc: "Range=8", type: "comm" },
+        { id: "comms_e", name: "Comms: LOS", desc: "Range=6, Secure", type: "comm" },
+        { id: "comms_f", name: "Comms: LR-LOS", desc: "Range=10, Secure", type: "comm" },
+        { id: "sensor_g", name: "Relay Option", desc: "Auto relay", type: "sensor" },
+        { id: "sensor_h", name: "Sensors: Basic", desc: "Speed/Dir/Status", type: "sensor" },
+        { id: "sensor_i", name: "Sensors: Additional", desc: "Sophisticated instr.", type: "sensor" },
+        { id: "sensor_j", name: "Sensors: Direct", desc: "See/Hear External", type: "sensor" },
+        { id: "sensor_k", name: "Sensors: Enhanced 1", desc: "+08 to 2 senses", type: "sensor" },
+        { id: "sensor_l", name: "Sensors: Enhanced 2", desc: "+08 to 2 senses", type: "sensor" },
+        { id: "sensor_m", name: "Sensors: Enhanced 3", desc: "+08 to 2 senses", type: "sensor" },
+        { id: "ctrl_n", name: "Controls: Self", desc: "Suits only", type: "ctrl" },
+        { id: "ctrl_p", name: "Controls: Feedback", desc: "Transparent operation", type: "ctrl" },
+        { id: "ctrl_q", name: "Controls: Manual", desc: "Hand/Foot/etc", type: "ctrl" },
+        { id: "ctrl_r", name: "Controls: Wafer", desc: "Jack required", type: "ctrl" },
+        { id: "ctrl_s", name: "AutoPilot", desc: "Self-operation", type: "ctrl" },
+        { id: "other_t", name: "Fine Control", desc: "C2 +3", type: "other", effect: { dex: 3 } },
+        { id: "other_u", name: "Reflec", desc: "+2 Vis, Laser Deflect", type: "other" },
+        { id: "other_v", name: "Spot Armor", desc: "", type: "other" },
+        { id: "other_w", name: "PsiShield", desc: "", type: "other", effect: { ps: 1 } },
+        { id: "other_x", name: "Stealthy", desc: "-Vis Mod", type: "other" },
+        { id: "power_0", name: "Power: None", desc: "Standard", type: "pwr" },
+        { id: "power_1", name: "Power: Day", desc: "~1 day LS", type: "pwr" },
+        { id: "power_3", name: "Power: Days", desc: "~2-3 day LS", type: "pwr" },
+        { id: "power_7", name: "Power: Week", desc: "~1 week LS", type: "pwr" },
+        { id: "power_9", name: "Power: Extended", desc: ">1 week LS", type: "pwr" },
+        { id: "other_y", name: "Stamina", desc: "C3 = Stamina", type: "other", effect: { stamina: true } }
+    ];
+
+    // STANDARD SUBSYSTEMS MAPPING (From PDF Table)
+    // Dress: c h q 7 (Comms:Battlefield, Sensor:Basic, Ctrl:Manual, Pwr:Week)
+    // Armor: c h q 3 (Comms:Battlefield, Sensor:Basic, Ctrl:Manual, Pwr:Days)
+    // Suit: b h s 1 (Comms:Grid, Sensor:Basic, Ctrl:AutoPilot???, Pwr:Day) *Literal interpretation of table codes*
+    // Unit: a h s 3 (Comms:Standard, Sensor:Basic, Ctrl:AutoPilot???, Pwr:Days)
+    const STANDARD_SUBSYSTEMS = {
+        "D": ["comms_c", "sensor_h", "ctrl_q", "power_7"],
+        "A": ["comms_c", "sensor_h", "ctrl_q", "power_3"],
+        "S": ["comms_b", "sensor_h", "ctrl_s", "power_1"],
+        "U": ["comms_a", "sensor_h", "ctrl_s", "power_3"]
+    };
+
+    // Subsystem Categories for Tabs
+    const SUBSYSTEM_CATS = {
+        "comms": ["comms_a", "comms_b", "comms_c", "comms_d", "comms_e", "comms_f", "sensor_g"],
+        "sensors": ["sensor_h", "sensor_i", "sensor_j", "sensor_k", "sensor_l", "sensor_m"],
+        "controls": ["ctrl_n", "ctrl_p", "ctrl_q", "ctrl_r", "ctrl_s"],
+        "power": ["power_0", "power_1", "power_3", "power_7", "power_9"],
+        "other": ["other_t", "other_u", "other_v", "other_w", "other_x", "other_y"]
+    };
+
+    const DRAWBACKS = {
+        1: [
+            { id: "1-1", name: "Cramped", desc: "C3 -1", effect: { end: -1 } },
+            { id: "1-2", name: "Irritating Interior Noise", desc: "Hearing -2", effect: {} },
+            { id: "1-3", name: "Bad Taste in Drinks", desc: "Complaints", effect: {} },
+            { id: "1-4", name: "Interior Runs Cold", desc: "Cold-1/Round", effect: {} },
+            { id: "1-5", name: "Interior Runs Hot", desc: "Hot-1/Round", effect: {} },
+            { id: "1-6", name: "Poor Quality Diversion", desc: "Complaints", effect: {} }
+        ],
+        2: [
+            { id: "2-1", name: "Vibration", desc: "C3 -1", effect: { end: -1 } },
+            { id: "2-2", name: "Heavy Vibration", desc: "C3 -2", effect: { end: -2 } },
+            { id: "2-3", name: "Waste Heat Plume", desc: "Mod +4 IR", effect: {} },
+            { id: "2-4", name: "Externally Loud", desc: "Bang-2/Round", effect: {} },
+            { id: "2-5", name: "Hard To Use", desc: "qrebs B -2", effect: { qrebsB: -2 } },
+            { id: "2-6", name: "Poorly Planned Interior", desc: "qrebs S -2", effect: { qrebsS: -2 } }
+        ],
+        3: [
+            { id: "3-1", name: "Faulty Manipulator Joints", desc: "C2 Half", effect: { dexHalf: true } },
+            { id: "3-2", name: "Faulty Limb Joints", desc: "Str Half", effect: { strHalf: true } },
+            { id: "3-3", name: "Poor Manipulator Design", desc: "C2 = Agility", effect: { dexIsAgi: true } },
+            { id: "3-4", name: "Highly Visible Shape", desc: "Vis +2", effect: {} },
+            { id: "3-5", name: "Mag Flashes", desc: "Mag Int 5", effect: {} },
+            { id: "3-6", name: "Contaminated Life Support", desc: "Infection -1", effect: {} }
+        ],
+        4: [
+            { id: "4-1", name: "Strange Internal Harmonics", desc: "San Check Daily", effect: {} },
+            { id: "4-2", name: "Unsteady", desc: "Check Stability/Hour", effect: {} },
+            { id: "4-3", name: "Rapid System Fatigue", desc: "C3 = Vigor", effect: { stamina: true } },
+            { id: "4-4", name: "Distracting Feedback", desc: "Skill/Int Halved", effect: {} },
+            { id: "4-5", name: "Randomly Locks", desc: "Locks 2D=12", effect: {} },
+            { id: "4-6", name: "Hangar Queen", desc: "Reliability Check Daily", effect: {} }
+        ]
+    };
+
+    /**
+     * STATE & INIT
+     */
+    
+    let currentMode = 'custom'; // 'custom' or 'premade'
+    let previousTypeKey = 'D'; // Track previous custom type
+    let currentSubTab = 'comms'; // Track active subsystem tab
+
+    function init() {
+        // 1. Populate Custom Dropdown
+        const customSelect = document.getElementById('type-custom');
+        for (const [key, data] of Object.entries(TYPES)) {
+            if (data.type === "System") {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = `${data.name} (TL ${data.tl})`;
+                customSelect.appendChild(opt);
+            }
+        }
+
+        // 2. Populate Pre-Made Dropdowns
+        const bodySelect = document.getElementById('premade-body');
+        const headSelect = document.getElementById('premade-head');
+        const breathSelect = document.getElementById('premade-breather');
+
+        [bodySelect, headSelect, breathSelect].forEach(sel => {
+            const opt = document.createElement('option');
+            opt.value = "";
+            opt.textContent = "-- Select Item --";
+            sel.appendChild(opt);
+        });
+
+        const sortedKeys = Object.keys(TYPES).sort();
+        sortedKeys.forEach(key => {
+            const data = TYPES[key];
+            if (data.type === "Item") {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = data.name;
+
+                if (data.category === 'Body') bodySelect.appendChild(opt);
+                else if (data.category === 'Head') headSelect.appendChild(opt);
+                else if (data.category === 'Breather') breathSelect.appendChild(opt);
+            }
+        });
+
+        // 3. Populate Subsystem Lists
+        const subsystemContainer = document.getElementById('subsystem-list-container');
+        
+        Object.keys(SUBSYSTEM_CATS).forEach(cat => {
+            const subTabContent = document.createElement('div');
+            subTabContent.className = 'subtab-content';
+            subTabContent.id = `sub-content-${cat}`;
+            if (cat === 'comms') subTabContent.classList.add('active'); // Default active
+
+            const listDiv = document.createElement('div');
+            listDiv.className = 'sub-option-list';
+
+            SUBSYSTEM_CATS[cat].forEach(optId => {
+                const optData = OPTIONS.find(o => o.id === optId);
+                const item = document.createElement('div');
+                item.className = 'sub-option-item';
+                item.id = `sub-item-${optId}`;
+                
+                // HTML: Checkbox | Name+Desc
+                item.innerHTML = `
+                    <div class="checkbox-wrapper" onclick="toggleSubOption('${optId}')">
+                        <input type="checkbox" id="sub-cb-${optId}">
+                    </div>
+                    <div class="sub-option-right">
+                        <div class="sub-option-name">${optData.name}</div>
+                        <div class="sub-option-desc">${optData.desc}</div>
+                        <div class="drawback-container" id="sub-drawback-${optId}">
+                            <select class="drawback-select" id="sub-drawback-select-${optId}">
+                                <option value="">-- Select Required Drawback --</option>
+                            </select>
+                            <div class="drawback-desc" id="sub-drawback-desc-${optId}"></div>
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(item);
+            });
+
+            subTabContent.appendChild(listDiv);
+            subsystemContainer.appendChild(subTabContent);
+        });
+
+        updateArmor();
+    }
+
+    function switchTab(mode) {
+        currentMode = mode;
+        
+        // Toggle Buttons
+        document.getElementById('btn-custom').className = mode === 'custom' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('btn-premade').className = mode === 'premade' ? 'tab-btn active' : 'tab-btn';
+        
+        // Toggle Content
+        document.getElementById('tab-custom').className = mode === 'custom' ? 'tab-content active' : 'tab-content';
+        document.getElementById('tab-premade').className = mode === 'premade' ? 'tab-content active' : 'tab-content';
+
+        // Handle Modifier Visibility
+        const modifiers = ['descriptor', 'burden', 'stage', 'user'];
+        const hint = document.getElementById('modifiers-disabled-hint');
+        
+        if (mode === 'premade') {
+            modifiers.forEach(id => document.getElementById(id).disabled = true);
+            hint.classList.add('visible');
+        } else {
+            modifiers.forEach(id => document.getElementById(id).disabled = false);
+            hint.classList.remove('visible');
+        }
+
+        updateArmor();
+    }
+
+    function setSubTab(tabId) {
+        currentSubTab = tabId;
+        
+        // Toggle Tab Buttons
+        Object.keys(SUBSYSTEM_CATS).forEach(c => {
+            const btn = document.getElementById(`sub-${c}`);
+            btn.className = (c === tabId) ? 'sub-tab active' : 'sub-tab';
+            
+            const content = document.getElementById(`sub-content-${c}`);
+            content.className = (c === tabId) ? 'subtab-content active' : 'subtab-content';
+        });
+    }
+
+    /**
+     * LOGIC
+     */
+
+    function toggleSubOption(optId) {
+        const cb = document.getElementById(`sub-cb-${optId}`);
+        const dropdown = document.getElementById(`sub-drawback-select-${optId}`);
+        const dropdownDesc = document.getElementById(`sub-drawback-desc-${optId}`);
+        const drawbackContainer = document.getElementById(`sub-drawback-${optId}`);
+
+        // Logic: Checked AND NOT Standard -> Show Drawback
+        // Checked AND Standard -> Hide Drawback
+        
+        if (cb.checked) {
+             // Populate options if empty
+             if (dropdown.options.length === 1) {
+                const tableId = getDrawbackTableId();
+                dropdown.innerHTML = `<option value="">-- Select Drawback (Table ${tableId}) --</option>`;
+                DRAWBACKS[tableId].forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.id;
+                    option.textContent = d.name;
+                    dropdown.appendChild(option);
+                });
+             }
+             dropdown.dataset.table = getDrawbackTableId();
+             drawbackContainer.classList.add('visible');
+        } else {
+            drawbackContainer.classList.remove('visible');
+        }
+        
+        updateArmor();
+    }
+
+    function getDrawbackTableId() {
+        // Logic based on previous implementation
+        // Count checked options that are NOT in standard list
+        const typeKey = document.getElementById('type-custom').value;
+        const standards = STANDARD_SUBSYSTEMS[typeKey] || [];
+
+        let activeCount = 0;
+        OPTIONS.forEach(opt => {
+            const cb = document.getElementById(`sub-cb-${opt.id}`);
+            // Count as Added if Checked AND not standard
+            if (cb.checked && !standards.includes(opt.id)) {
+                activeCount++;
+            }
+        });
+        
+        if (activeCount === 1) return 1;
+        if (activeCount === 2) return 2;
+        if (activeCount === 3) return 3;
+        if (activeCount === 4) return 4;
+        return 2;
+    }
+
+    function updateArmor() {
+        // 1. Determine Logic Branch based on Mode
+        
+        if (currentMode === 'premade') {
+            updatePremade();
+        } else {
+            updateCustom();
+        }
+    }
+
+    function updateCustom() {
+        // 1. Handle Type Change and Standard Subsystems
+        const typeKey = document.getElementById('type-custom').value;
+        const standards = STANDARD_SUBSYSTEMS[typeKey] || [];
+
+        // Clear old standards
+        if (typeKey !== previousTypeKey) {
+            const oldStandards = STANDARD_SUBSYSTEMS[previousTypeKey] || [];
+            oldStandards.forEach(optId => {
+                const cb = document.getElementById(`sub-cb-${optId}`);
+                if(cb) cb.checked = false;
+                // Also reset drawback UI
+                const item = document.getElementById(`sub-item-${optId}`);
+                const dr = document.getElementById(`sub-drawback-${optId}`);
+                if (dr) dr.classList.remove('visible');
+            });
+
+            // Set current standards
+            standards.forEach(optId => {
+                const cb = document.getElementById(`sub-cb-${optId}`);
+                if(cb) cb.checked = true;
+            });
+
+            previousTypeKey = typeKey;
+        }
+
+        // 2. Apply Visual Styles
+        OPTIONS.forEach(opt => {
+            const cb = document.getElementById(`sub-cb-${opt.id}`);
+            const itemRow = document.getElementById(`sub-item-${opt.id}`);
+            const isStandard = standards.includes(opt.id);
+
+            // Remove classes
+            itemRow.classList.remove('standard-fitted');
+            itemRow.classList.remove('active');
+
+            // Add classes
+            if (isStandard) {
+                // Standard items are checked (forced by logic above)
+                itemRow.classList.add('standard-fitted');
+            } 
+            
+            if (cb.checked) itemRow.classList.add('active');
+        });
+
+        // 3. Show/Hide Drawbacks based on status
+        OPTIONS.forEach(opt => {
+            const cb = document.getElementById(`sub-cb-${opt.id}`);
+            const drawbackContainer = document.getElementById(`sub-drawback-${opt.id}`);
+            const select = document.getElementById(`sub-drawback-select-${opt.id}`);
+            const descSpan = document.getElementById(`sub-drawback-desc-${opt.id}`);
+            
+            // Logic: Checked AND NOT Standard -> Show Select
+            // Checked AND Standard -> Show Desc (No penalty)
+            if (cb.checked && !standards.includes(opt.id)) {
+                drawbackContainer.classList.add('visible');
+                select.style.display = 'block'; 
+                descSpan.textContent = ""; 
+            } else if (cb.checked && standards.includes(opt.id)) {
+                drawbackContainer.classList.add('visible'); 
+                select.style.display = 'none';
+                descSpan.textContent = "Standard Fitted (No Penalty)";
+            } else {
+                drawbackContainer.classList.remove('visible');
+                descSpan.textContent = "";
+                select.style.display = 'none'; 
+            }
+        });
+
+        // 4. Generate Equipment Notes
+        let notesHtml = "";
+        const stdItems = [];
+        const extraItems = [];
+
+        OPTIONS.forEach(opt => {
+            const cb = document.getElementById(`sub-cb-${opt.id}`);
+            if (cb.checked) {
+                if (standards.includes(opt.id)) {
+                    stdItems.push(opt);
+                } else {
+                    extraItems.push(opt);
+                }
+            }
+        });
+
+        if (stdItems.length > 0) {
+            notesHtml += `<span class="notes-label">Standard:</span> ${stdItems.map(o => o.name).join(", ")}<br>`;
+        }
+        if (extraItems.length > 0) {
+            notesHtml += `<span class="notes-label">Additional:</span> ${extraItems.map(o => o.name).join(", ")}<br>`;
+            
+            // Include Drawbacks in notes
+            let extraDrawbacks = [];
+            extraItems.forEach(opt => {
+                const select = document.getElementById(`sub-drawback-select-${opt.id}`);
+                const drawbackId = select.value;
+
+                if (drawbackId) {
+                    const drawback = Object.values(DRAWBACKS).flat().find(d => d.id === drawbackId);
+                    if (drawback) {
+                        // Format: "Option Name: Drawback Name"
+                        extraDrawbacks.push(`<strong>- [${drawback.name}]</strong>`);
+                    }
+                }
+            });
+
+            if (extraDrawbacks.length > 0) {
+                 notesHtml += `<br><span style="color:#ff6b6b; font-weight:bold; font-style:italic;">Drawbacks:</span><br>`;
+                 notesHtml += extraDrawbacks.join("<br>");
+            }
+        }
+
+        if (notesHtml === "") notesHtml = "--";
+
+        document.getElementById('out-notes').innerHTML = notesHtml;
+
+        // 5. Determine Base Data
+        let baseData = TYPES[typeKey];
+
+        // 6. Get Modifiers
+        let descKey = document.getElementById('descriptor').value;
+        let burdenKey = document.getElementById('burden').value;
+        let stageKey = document.getElementById('stage').value;
+        let userKey = document.getElementById('user').value;
+
+        const descData = MODIFIERS.descriptor[descKey];
+        const burdenData = MODIFIERS.burden[burdenKey];
+        const stageData = MODIFIERS.stage[stageKey];
+        const userData = USERS[userKey];
+
+        // 7. Calculate Tech Level
+        let tl = baseData.tl + descData.tl + burdenData.tl + stageData.tl + userData.tl;
+
+        // 8. Calculate Mass & Cost
+        let mass = baseData.mass * descData.mass * burdenData.mass * stageData.mass;
+        let cost = baseData.cost * descData.cost * burdenData.cost * stageData.cost;
+
+        // 9. Calculate Armor Values
+        const stats = ['ar', 'ca', 'fl', 'ra', 'so', 'ps', 'ins', 'seal'];
+        let finalStats = {};
+        
+        stats.forEach(stat => {
+            let val = baseData[stat];
+            const dMod = descData[stat];
+            if (typeof dMod === 'string' && dMod.startsWith('x')) {
+                val = val * parseFloat(dMod.substring(1));
+            } else if (dMod !== 0 && dMod !== "0") {
+                val = val + parseFloat(dMod);
+            }
+            val += burdenData[stat];
+            val += stageData[stat];
+            finalStats[stat] = Math.floor(val);
+        });
+
+        // 10. QREBS
+        let qrebsStr = "50000";
+        let qParts = [];
+        let bMod = 0;
+
+        if (baseData.qrebs && baseData.qrebs.b) bMod += baseData.qrebs.b;
+        if (burdenData.b) bMod += burdenData.b;
+        if (stageData.b) bMod += stageData.b;
+        
+        // Drawbacks affecting QREBS (Only from ADDED options)
+        OPTIONS.forEach(opt => {
+            if (document.getElementById(`sub-cb-${opt.id}`).checked && !standards.includes(opt.id)) {
+                const select = document.getElementById(`sub-drawback-select-${opt.id}`);
+                const drawbackId = select.value;
+                if (drawbackId) {
+                    Object.values(DRAWBACKS).flat().find(d => {
+                        if(d.id === drawbackId && d.effect && d.effect.qrebsB) {
+                            bMod += d.effect.qrebsB;
+                        }
+                    });
+                }
+            }
+        });
+
+        if (bMod !== 0) qParts.push(`B=${bMod}`);
+        if (qParts.length > 0) qrebsStr = qParts.join(" ");
+
+        // 11. Name Construction
+        let longNameParts = [];
+        if (stageKey) longNameParts.push(stageKey);
+        if (burdenKey) longNameParts.push(burdenKey);
+        if (descKey) longNameParts.push(descKey);
+        longNameParts.push(baseData.name);
+        if (userKey) longNameParts.push(userData.name);
+        
+        const longName = longNameParts.join(" ") + `-${tl}`;
+
+        let model = "";
+        if (baseData.type === "System") {
+            // System logic
+            let modelParts = [];
+            if (stageKey) modelParts.push(`(${stageData.abbrev})`);
+            if (burdenKey) modelParts.push(`(${burdenData.abbrev})`);
+            if (descKey) modelParts.push(descData.abbrev);
+            modelParts.push(typeKey);
+            if (userKey) modelParts.push(userData.abbrev);
+            model = modelParts.join("") + `-${tl}`;
+        } else {
+            // Items: Use Name - TL
+            model = baseData.name + `-${tl}`;
+        }
+
+        // 12. System Evaluation
+        let evalStats = { str: 0, dex: 0, end: 0, strMult: 1, dexMod: 0, endMod: 0 };
+        if (baseData.eval) {
+            if (typeof baseData.eval.str === 'string' && baseData.eval.str.startsWith('x')) {
+                evalStats.strMult = parseFloat(baseData.eval.str.substring(1));
+            } else {
+                evalStats.str = baseData.eval.str;
+            }
+            evalStats.dex = baseData.eval.dex || 0;
+            evalStats.end = baseData.eval.end || 0;
+        }
+        if (burdenKey === 'Oversize') evalStats.strMult = 100;
+        if (burdenKey === 'Titan') evalStats.strMult = 1000;
+        
+        // Apply Effects from Options
+        OPTIONS.forEach(opt => {
+            if (document.getElementById(`sub-cb-${opt.id}`).checked) {
+                if (opt.effect) {
+                    if (opt.effect.dex) evalStats.dex += opt.effect.dex;
+                    if (opt.effect.stamina) evalStats.stamina = true;
+                }
+                
+                // Apply Drawbacks ONLY from ADDED options
+                const isAdded = !standards.includes(opt.id);
+                if (isAdded) {
+                    const select = document.getElementById(`sub-drawback-select-${opt.id}`);
+                    const drawbackId = select.value;
+                    if (drawbackId) {
+                        const drawback = Object.values(DRAWBACKS).flat().find(d => d.id === drawbackId);
+                        if (drawback && drawback.effect) {
+                            if (drawback.effect.end) evalStats.end += drawback.effect.end;
+                            if (drawback.effect.strHalf) evalStats.strMult = evalStats.strMult / 2;
+                            if (drawback.effect.dexIsAgi) evalStats.dexIsAgi = true;
+                            if (drawback.effect.stamina) evalStats.stamina = true;
+                        }
+                    }
+                }
+            }
+        });
+
+        let strStr = evalStats.strMult > 1 ? `x${evalStats.strMult}` : (evalStats.str !== 0 ? `${evalStats.str}` : "");
+        let dexStr = evalStats.dex !== 0 ? `${evalStats.dex > 0 ? '+' : ''}${evalStats.dex}` : "";
+        let endStr = evalStats.end !== 0 ? `${evalStats.end > 0 ? '+' : ''}${evalStats.end}` : "";
+        if (evalStats.stamina) endStr = "Stamina";
+        
+        // 13. DOM Update
+        document.getElementById('out-longname').textContent = longName;
+        document.getElementById('out-model').textContent = model;
+        document.getElementById('out-tl').textContent = tl;
+        document.getElementById('out-cost').textContent = `Cr ${Math.floor(cost).toLocaleString()}`;
+        document.getElementById('out-mass').textContent = `${Math.floor(mass)} kg`;
+        
+        const armorContainer = document.getElementById('out-armor-values');
+        armorContainer.innerHTML = '';
+        const labels = { ar:'Ar', ca:'Ca', fl:'Fl', ra:'Ra', so:'So', ps:'Ps', ins:'In', seal:'Se' };
+        
+        stats.forEach(s => {
+            const val = finalStats[s];
+            if (val > 0 || (s==='ar' && val===0)) {
+                const pill = document.createElement('div');
+                pill.className = 'armor-pill';
+                pill.textContent = `${labels[s]}=${val}`;
+                armorContainer.appendChild(pill);
+            }
+        });
+
+        document.getElementById('out-qrebs').textContent = qrebsStr;
+        document.getElementById('out-str').textContent = strStr || "-";
+        document.getElementById('out-dex').textContent = dexStr || "-";
+        document.getElementById('out-end').textContent = endStr || "-";
+        document.getElementById('out-skill').textContent = baseData.skill || "N/A";
+
+        // Drawback descriptions
+        OPTIONS.forEach(opt => {
+            const select = document.getElementById(`sub-drawback-select-${opt.id}`);
+            // Only update description if it's an Added option and has a value
+            const isAdded = document.getElementById(`sub-cb-${opt.id}`).checked && !standards.includes(opt.id);
+            
+            if (isAdded) {
+                 const selectedDrawback = Object.values(DRAWBACKS).flat().find(d => d.id === select.value);
+                 const descSpan = document.getElementById(`sub-drawback-desc-${opt.id}`);
+                 if (selectedDrawback) {
+                    descSpan.textContent = selectedDrawback.desc;
+                 } else {
+                    descSpan.textContent = "";
+                 }
+            }
+        });
+    }
+
+    function updatePremade() {
+        // Stack Logic
+        const bodyKey = document.getElementById('premade-body').value;
+        const headKey = document.getElementById('premade-head').value;
+        const breathKey = document.getElementById('premade-breather').value;
+
+        const selectedItems = [];
+        if (bodyKey) selectedItems.push(TYPES[bodyKey]);
+        if (headKey) selectedItems.push(TYPES[headKey]);
+        if (breathKey) selectedItems.push(TYPES[breathKey]);
+
+        // Notes
+        let notes = "--";
+        if (selectedItems.length > 0) {
+            notes = selectedItems.map(i => i.name).join(", ");
+        }
+        document.getElementById('out-notes').textContent = notes;
+
+        if (selectedItems.length === 0) {
+            // Clear display
+            document.getElementById('out-longname').textContent = "Select Items";
+            document.getElementById('out-model').textContent = "-";
+            document.getElementById('out-tl').textContent = "-";
+            document.getElementById('out-cost').textContent = "-";
+            document.getElementById('out-mass').textContent = "-";
+            document.getElementById('out-armor-values').innerHTML = '';
+            document.getElementById('out-qrebs').textContent = "-";
+            document.getElementById('out-str').textContent = "-";
+            document.getElementById('out-dex').textContent = "-";
+            document.getElementById('out-end').textContent = "-";
+            document.getElementById('out-skill').textContent = "-";
+            return;
+        }
+
+        // Aggregate Stats
+        let tl = 0;
+        let mass = 0;
+        let cost = 0;
+        let finalStats = { ar: 0, ca: 0, fl: 0, ra: 0, so: 0, ps: 0, ins: 0, seal: 0 };
+        
+        let names = [];
+
+        selectedItems.forEach(item => {
+            names.push(item.name);
+            if (item.tl > tl) tl = item.tl;
+            mass += item.mass;
+            cost += item.cost;
+            finalStats.ar += item.ar;
+            finalStats.ca += item.ca;
+            finalStats.fl += item.fl;
+            finalStats.ra += item.ra;
+            finalStats.so += item.so;
+            finalStats.ps += item.ps;
+            finalStats.ins += item.ins;
+            finalStats.seal += item.seal;
+        });
+
+        // Display
+        document.getElementById('out-longname').textContent = names.join(", ") + `-${tl}`;
+        document.getElementById('out-model').textContent = "Composite";
+        document.getElementById('out-tl').textContent = tl;
+        document.getElementById('out-cost').textContent = `Cr ${cost.toLocaleString()}`;
+        document.getElementById('out-mass').textContent = `${mass} kg`;
+        
+        const armorContainer = document.getElementById('out-armor-values');
+        armorContainer.innerHTML = '';
+        const labels = { ar:'Ar', ca:'Ca', fl:'Fl', ra:'Ra', so:'So', ps:'Ps', ins:'In', seal:'Se' };
+        const stats = ['ar', 'ca', 'fl', 'ra', 'so', 'ps', 'ins', 'seal'];
+
+        stats.forEach(s => {
+            const val = finalStats[s];
+            if (val > 0 || (s==='ar' && val===0)) {
+                const pill = document.createElement('div');
+                pill.className = 'armor-pill';
+                pill.textContent = `${labels[s]}=${val}`;
+                armorContainer.appendChild(pill);
+            }
+        });
+
+        document.getElementById('out-qrebs').textContent = "50000"; 
+
+        // System Performance: Items do not have Str/Dex/End modifiers
+        document.getElementById('out-str').textContent = "-";
+        document.getElementById('out-dex').textContent = "-";
+        document.getElementById('out-end').textContent = "-";
+        document.getElementById('out-skill').textContent = "N/A";
+    }
+
+    function resetForm() {
+        document.getElementById('type-custom').value = "D";
+        previousTypeKey = "D"; // Reset tracking
+        
+        document.getElementById('premade-body').value = "";
+        document.getElementById('premade-head').value = "";
+        document.getElementById('premade-breather').value = "";
+        
+        document.getElementById('descriptor').value = "";
+        document.getElementById('burden').value = "";
+        document.getElementById('stage').value = "";
+        document.getElementById('user').value = "";
+        
+        // Reset Subsystem Checkboxes
+        document.querySelectorAll('input[type="checkbox"][id^="sub-cb"]').forEach(cb => {
+            cb.checked = false;
+        });
+        document.querySelectorAll('.drawback-container[id^="sub-drawback"]').forEach(dc => {
+            dc.classList.remove('visible');
+        });
+        
+        updateArmor();
+    }
+
+    window.onload = init;
+
+</script>
+</body>
+</html>

@@ -1,136 +1,311 @@
-import pandas as pd
-import numpy as np
-
-cat = { 
-    ## [code,type,tl,range,mass,B,H1,D1,v1,cr]
-    #artillery
-    1:  ['G', 'Gun',            6, 4,   9.0,  1, '*',      2, 2,  5000],
-    2:  ['Ga','Gattling',       7, 4,  40.0,  2, '*',      3, 2,  8000],
-    3:  ['C', 'Cannon',         6, 6, 200.0,  4, '*',      4, 2, 10000],
-    4:  ['aC','Autocannon',     8, 6, 300.0,  4, '*',      5, 3, 30000],
-    #longguns
-    5:  ['R', 'Rifle',          5, 5,   4.0,  0, 'Bullet', 2, 2,   500],
-    6:  ['Ca','Carbine',        5, 4,   3.0, -1, 'Bullet', 1, 1,   400],
-    #Handguns
-    7:  ['P', 'Pistol',         5, 2,   1.1,  0, 'Bullet', 1, 1,   150],
-    8:  ['R', 'Revolver',       4, 2,   1.25, 0, 'Bullet', 1, 1,   100],
-    #Other weapons
-    9:  ['S', 'Shotgun',        4, 2,   4.0,  0, 'Frag',   2, 2,   300],
-    10: ['Mg','Machinegun',     6, 5,   8.0,  1, 'Bullet', 4, 4,  3000],
-    11: ['Pj','Projector',      9, 0,   1.0,  0, '*',      1, 1,   300],
-    12: ['D', 'Designator',     7, 5,  10.0,  1, '*',      1, 0,  2000],
-    #Launchers
-    13: ['L', 'Launcher',       6, 3,  10.0,  1, '*',      1, 0,  1000],
-    14: ['mL','Multi-Launcher', 8, 5,   8.0,  1, '*',      1, 0,  3000]
-}
-artillery = {
-    1: ['aF', 'Anti-Flyer', 4,6,6.0,0,'Frag',  1,'Blast',3,4,3.0],
-    2: ['aT', 'Anti-Tank',  0,5,8.0,0,'Pen',   3,'Blast',3,6,2.0],
-    3: ['A',  'Assault',    2,4,0.8,0,'Bang',  1,'Blast',2,3,1.5],
-    4: ['F',  'Fusion',     7,4,2.3,0,'Pen',   4,'Burn', 4,8,6.0],
-    5: ['G',  'Gauss',      7,4,0.9,0,'Bullet',3,'',     0,3,2.0],
-    6: ['P',  'Plasma',     5,4,2.5,0,'Pen',   3,'Burn', 3,6,2.0]
-}
-longgun = {
-    0:  ['',  'blank',      0,0,1.0, 0,'',      0,      '',    0,0,1.0],
-    1:  ['Ac','Accelerator',4,0,0.6, 0,'Bullet',2,      '',    0,2,3.0],
-    2:  ['A', 'Assault',    2,4,0.8, 0,'Blast', 2,      'Bang',1,3,1.5],
-    3:  ['B', 'Battle',     1,5,1.0, 1,'Bullet',1,      '',    0,1,0.8],
-    4:  ['C', 'Combat',     2,3,0.9, 0,'Frag',  2,      '',    0,2,1.5],
-    5:  ['D', 'Dart',       1,4,0.6, 0,'Tranq', '1-2-3','',    0,1,0.9],
-    6:  ['P', 'Poison Dart',1,4,1.0, 0,'Poison','1-2-3','',    0,1,0.9],
-    7:  ['G', 'Gauss',      7,0,0.9, 0,'Bullet',3,      '',    0,3,2.0],
-    8:  ['H', 'Hunting',    0,3,0.9,-1,'Bullet',1,      '',    0,1,1.2],
-    9:  ['L', 'Laser',      5,0,1.2, 0,'Burn',  2,      'Pen', 2,4,6.0],
-    10: ['Sp','Splat',      2,4,1.3, 1,'Bullet',1,      '',    0,1,2.4],
-    11: ['S', 'Survival',   0,2,0.5, 0,'Bullet',1,      '',    0,1,1.2]
-}
-handgun ={
-    0: ['',  'blank',      0,0,1.0,0,'',      0,'',   0,0,1.0],
-    1: ['Ac','Accelerator',4,0,0.6,0,'Bullet',2,'',   0,2,3.0],
-    2: ['L', 'Laser',      5,0,1.2,0,'Burn',  2,'Pen',2,4,6.0],
-    3: ['M', 'Machine',    0,2,1.2,0,'Bullet',2,'',   0,0,1.5],
-    4: ['G', 'Gauss',      8,+3,0.6,0,'Bullet',3,'',   0,3,4.0]
-}
-shot = {
-    0: ['', 'blank',  0,0,1.0,0,'',      0,'',     0,0,1.0],
-    1: ['A','Assault',2,4,0.8,0,'Bang',  1,'Blast',2,3,2.0],
-    2: ['H','Hunting',0,3,0.9,0,'Bullet',1,'',     0,1,1.2]
-}
-mg = {
-    0: ['',  'blank',     0,0,1.0,0,'',       0,'',     0, 0,1.0],
-    1: ['aF','Anti-Flyer',4,6,6.0,0,'Frag',   1,'Blast',3, 4,3.0],
-    2: ['A', 'Assault',   2,4,0.8,0,'Bang',   1,'Blast',2, 3,2.0],
-    3: ['S', 'Sub',      -1,3,0.3,0,'Bullet',-1,'',     0,-1,0.9]
-}
-spray = {
-    0: ['A','Acid',      0,3,1.0,1,'Corrode',     2, 'Pen',   '1-2-3',      4,3.0],
-    1: ['H','Fire',      0,1,0.9,0,'Burn',   '1-2-3','Pen',   '1-2-3','2-4-6',2.0],
-    2: ['P','Poison Gas',0,2,1.0,0,'Gas',    '1-2-3','Poison','1-2-3','2-4-6',3.0],
-    3: ['S','Stench',    3,2,0.4,0,'Stench', '1-2-3','',            0,'1-2-3',1.2]
-}
-exotic = {
-    0: ['Emp','EMP',     1,3,1.0,0,'EMP',  '1-2-3','',         0,       1, 4.0],
-    1: ['F','Flash',    -1,2,0.5,0,'Flash','1-2-3','',         0,       2, 1.5],
-    2: ['C','Freeze',    1,3,1.0,1,'Cold', '1-2-3','',         0,       2, 3.0],
-    3: ['G','Grav',      5,2,3.0,0,'Grav', '1-2-3','',         0,       3,20.0],
-    4: ['L','Laser',     5,0,1.2,0,'Burn', '1-2-3','Pen', '1-2-3','2-4-6', 6.0],
-    5: ['M','Mag',       4,1,2.0,0,'EMP',  '1-2-3','Mag', '1-2-3','2-4-6',15.0],
-    6: ['Psi','Psi Amp', 4,2,1.0,0,'Psi',  '1-2-3','',          0,'1-2-3', 9.0],
-    7: ['R','Rad',       1,4,1.0,2,'Rad',  '1-2-3','',          0,'1-2-3', 8.0],
-    8: ['Sh','Shock',    0,2,0.5,0,'Elec', '1-2-3','Pain','1-2-3','2-4-6', 2.0],
-    9: ['S','Sonic',     3,2,0.6,0,'Sound','1-2-3','Bang','1-2-3','2-4-6', 1.1]
-}
-launcher = {
-    0: ['aF', 'AF Missile', 4,7,4.0,0,'Frag',2,'Blast',3,5,3.0],
-    1: ['aT', 'AT Missile', 3,4,1.0,1,'Frag',2,'Pen',  3,5,2.0],
-    2: ['Gr', 'Grenade',    1,4,0.8,0,'Frag',2,'Blast',2,4,1.0],
-    3: ['M',  'Missile',    1,6,2.2,0,'Frag',2,'Pen',  2,4,5.0],
-    4: ['RAM','RAM Grenade',2,6,1.0,0,'Frag',2,'Blast',2,4,3.0],
-    5: ['R',  'Rocket',     1,5,3.0,0,'Frag',2,'Pen',  2,4,1.0]
+# Chart 3: Category & Type
+CHART_3_TYPES = {
+    "Artillery": {
+        "G": { "name": "Gun", "tl": 6, "range": 4, "mass": 9, "qrebs": "+1", "h1": "*", "d1": "2", "cost": 5000, "desc": "Artillery Gun" },
+        "Ga": { "name": "Gatling", "tl": 7, "range": 4, "mass": 40, "qrebs": "+2", "h1": "*", "d1": "3", "cost": 8000, "desc": "Gatling" },
+        "C": { "name": "Cannon", "tl": 6, "range": 6, "mass": 200, "qrebs": "+4", "h1": "*", "d1": "4", "cost": 10000, "desc": "Cannon" },
+        "aC": { "name": "AutoCannon", "tl": 8, "range": 6, "mass": 300, "qrebs": "+4", "h1": "*", "d1": "5", "cost": 30000, "desc": "AutoCannon" }
+    },
+    "Long Guns": {
+        "R": { "name": "Rifle", "tl": 5, "range": 5, "mass": 4, "qrebs": "0", "h1": "Bullet", "d1": "2", "cost": 500, "desc": "Rifle" },
+        "C": { "name": "Carbine", "tl": 5, "range": 4, "mass": 3, "qrebs": "-", "h1": "Bullet", "d1": "1", "cost": 400, "desc": "Carbine" }
+    },
+    "Handguns": {
+        "P": { "name": "Pistol", "tl": 5, "range": 2, "mass": 1.1, "qrebs": "0", "h1": "Bullet", "d1": "1", "cost": 150, "desc": "Pistol" },
+        "Re": { "name": "Revolver", "tl": 4, "range": 2, "mass": 1.25, "qrebs": "0", "h1": "Bullet", "d1": "1", "cost": 100, "desc": "Revolver" }
+    },
+    "Shotguns": {
+        "S": { "name": "Shotgun", "tl": 4, "range": 2, "mass": 4, "qrebs": "0", "h1": "Frag", "d1": "2", "cost": 300, "desc": "Shotgun" }
+    },
+    "Machineguns": {
+        "Mg": { "name": "Machinegun", "tl": 6, "range": 5, "mass": 8, "qrebs": "+1", "h1": "Bullet", "d1": "4", "cost": 3000, "desc": "Machinegun" }
+    },
+    "Projectors": {
+        "Pj": { "name": "Projector", "tl": 9, "range": 0, "mass": 1, "qrebs": "0", "h1": "*", "d1": "1", "cost": 300, "desc": "Projector" }
+    },
+    "Designators": {
+        "D": { "name": "Designator", "tl": 7, "range": 5, "mass": 10, "qrebs": "+1", "h1": "*", "d1": "1", "cost": 2000, "desc": "Designator" }
+    },
+    "Launchers": {
+        "L": { "name": "Launcher", "tl": 6, "range": 3, "mass": 10, "qrebs": "+1", "h1": "*", "d1": "1", "cost": 1000, "desc": "Launcher" },
+        "mL": { "name": "Multi-Launcher", "tl": 8, "range": 5, "mass": 8, "qrebs": "+1", "h1": "*", "d1": "1", "cost": 3000, "desc": "Multi-Launcher" }
+    }
 }
 
-burden = {
-    0: ['',   'blank',          0, 0, 1.0, 0,'',0, 0,'',                    0,1.0],
-    1: ['aD', 'Anti-Designator',3,+1, 3.0, 3,'',0, 1,'Not Pitols, Shotguns',0,3.0],
-    2: ['B',  'Body',           2, 1, 0.5,-4,'',0,-1,'Only Pistols',        0,3.0],
-    3: ['D',  'Disposable',     3, 0, 0.9,-1,'Q= -2',0, 0,'',               0,0.5],
-    4: ['H',  'Heavy',          0, 1, 1.3, 3,'',0, 1,'Not Lasers',          0,2.0],
-    5: ['Lt', 'Light',          0,-1, 0.7,-1,'',0,-1,'Not Lasers',          0,1.1],
-    6: ['M',  'Magnum',         1, 1, 1.1, 1,'',0, 1,'Only Pistols',        0,1.1],
-    7: ['M',  'Medium',         0, 0, 1.0, 0,'',0, 0,'Not Pistols',         0,1.0],
-    8: ['R',  'Recoilless',     1, 1, 1.2, 0,'',0, 1,'',                    0,3.0],
-    9: ['Sn', 'Snub',           1, 2, 0.7,-3,'',0, 1,'',                    0,1.5],
-    10:['Vh', 'Very Heavy',     0, 5, 4.0, 4,'',0, 5,'',                    0,5.0],
-    11:['Vl', 'Very Light',     1,-2, 0.6,-2,'',0,-1,'',                    0,2.0],
-    12:['VrF','VRF',            2, 0,14.0, 5,'',0, 1,'Only Guns and MGs',   0,9.0]
+# Chart 4: Descriptors
+CHART_4_DESCRIPTORS = {
+    "Artillery": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "aF": { "name": "Anti-Flyer", "tl": 4, "range": 6, "mass": 6.0, "qrebs": 0, "h2": "Frag", "d2": "1", "h3": "Blast", "d3": "3", "cost": 3.0 },
+        "aT": { "name": "Anti-Tank", "tl": 5, "range": 8, "mass": 8.0, "qrebs": 0, "h2": "Pen", "d2": "3", "h3": "Blast", "d3": "3", "cost": 2.0 },
+        "A": { "name": "Assault", "tl": 2, "range": 4, "mass": 0.8, "qrebs": 0, "h2": "Bang", "d2": "1", "h3": "Blast", "d3": "2", "cost": 1.5 },
+        "F": { "name": "Fusion", "tl": 7, "range": 4, "mass": 2.3, "qrebs": 0, "h2": "Pen", "d2": "4", "h3": "Burn", "d3": "4", "cost": 6.0 },
+        "G": { "name": "Gauss", "tl": 7, "range": 4, "mass": 0.9, "qrebs": 0, "h2": "Bullet", "d2": "3", "h3": "", "d3": "", "cost": 2.0 },
+        "P": { "name": "Plasma", "tl": 5, "range": 4, "mass": 2.5, "qrebs": 0, "h2": "Pen", "d2": "3", "h3": "Burn", "d3": "3", "cost": 2.0 }
+    },
+    "Long Guns": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "Ac": { "name": "Accelerator", "tl": 4, "range": 0, "mass": 0.6, "qrebs": 0, "h2": "Bullet", "d2": "2", "h3": "", "d3": "", "cost": 3.0 },
+        "A": { "name": "Assault", "tl": 2, "range": 4, "mass": 0.8, "qrebs": 0, "h2": "Blast", "d2": "2", "h3": "Bang", "d3": "1", "cost": 1.5 },
+        "B": { "name": "Battle", "tl": 1, "range": 5, "mass": 1.0, "qrebs": "+1", "h2": "Bullet", "d2": "1", "h3": "", "d3": "", "cost": 0.8 },
+        "C": { "name": "Combat", "tl": 2, "range": 3, "mass": 0.9, "qrebs": 0, "h2": "Frag", "d2": "2", "h3": "", "d3": "", "cost": 1.5 },
+        "D": { "name": "Dart", "tl": 1, "range": 4, "mass": 0.6, "qrebs": 0, "h2": "Tranq", "d2": "1-2-3", "h3": "", "d3": "", "cost": 0.9 },
+        "PD": { "name": "Poison Dart", "tl": 1, "range": 4, "mass": 1.0, "qrebs": 0, "h2": "Poison", "d2": "1-2-3", "h3": "", "d3": "", "cost": 0.9 },
+        "G": { "name": "Gauss", "tl": 7, "range": 4, "mass": 0.9, "qrebs": 0, "h2": "Bullet", "d2": "3", "h3": "", "d3": "", "cost": 2.0 },
+        "H": { "name": "Hunting", "tl": 0, "range": 3, "mass": 0.9, "qrebs": "-1", "h2": "Bullet", "d2": "1", "h3": "", "d3": "", "cost": 1.2 },
+        "L": { "name": "Laser", "tl": 5, "range": 0, "mass": 1.2, "qrebs": 0, "h2": "Burn", "d2": "2", "h3": "Pen", "d3": "2", "cost": 6.0 },
+        "Sp": { "name": "Splat", "tl": 2, "range": 4, "mass": 1.3, "qrebs": "+1", "h2": "Bullet", "d2": "1", "h3": "", "d3": "", "cost": 2.4 },
+        "S": { "name": "Survival", "tl": 0, "range": 2, "mass": 0.5, "qrebs": 0, "h2": "Bullet", "d2": "1", "h3": "", "d3": "", "cost": 1.2 }
+    },
+    "Handguns": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "Ac": { "name": "Accelerator", "tl": 4, "range": 0, "mass": 0.6, "qrebs": 0, "h2": "Bullet", "d2": "2", "h3": "", "d3": "", "cost": 3.0 },
+        "G": { "name": "Gauss", "tl": 7, "range": 4, "mass": 0.9, "qrebs": 0, "h2": "Bullet", "d2": "3", "h3": "", "d3": "", "cost": 2.0 },
+        "L": { "name": "Laser", "tl": 5, "range": 0, "mass": 1.2, "qrebs": 0, "h2": "Burn", "d2": "2", "h3": "Pen", "d3": "2", "cost": 2.0 },
+        "M": { "name": "Machine", "tl": 2, "range": 0, "mass": 1.2, "qrebs": 0, "h2": "Bullet", "d2": "2", "h3": "", "d3": "", "cost": 1.5 }
+    },
+    "Shotguns": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "A": { "name": "Assault", "tl": 2, "range": 4, "mass": 0.8, "qrebs": 0, "h2": "Bang", "d2": "1", "h3": "Blast", "d3": "2", "cost": 2.0 },
+        "H": { "name": "Hunting", "tl": 0, "range": 3, "mass": 0.9, "qrebs": 0, "h2": "Bullet", "d2": "1", "h3": "", "d3": "", "cost": 1.2 }
+    },
+    "Machineguns": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "aF": { "name": "Anti-Flyer", "tl": 4, "range": 6, "mass": 6.0, "qrebs": 0, "h2": "Frag", "d2": "1", "h3": "Blast", "d3": "3", "cost": 3.0 },
+        "A": { "name": "Assault", "tl": 2, "range": 4, "mass": 0.8, "qrebs": 0, "h2": "Bang", "d2": "1", "h3": "Blast", "d3": "2", "cost": 1.5 },
+        "S": { "name": "Sub", "tl": -1, "range": 3, "mass": 0.3, "qrebs": 0, "h2": "Bullet", "d2": "-1", "h3": "", "d3": "", "cost": 0.9 }
+    },
+    "Projectors": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "A": { "name": "Acid", "tl": 0, "range": 3, "mass": 1.0, "qrebs": "+1", "h2": "Corrode", "d2": "2", "h3": "Pen", "d3": "1-2-3", "cost": 3.0 },
+        "H": { "name": "Fire", "tl": 0, "range": 1, "mass": 0.9, "qrebs": 0, "h2": "Burn", "d2": "1-2-3", "h3": "Pen", "d3": "1-2-3", "cost": 2.0 },
+        "P": { "name": "Poison Gas", "tl": 0, "range": 2, "mass": 1.0, "qrebs": 0, "h2": "Gas", "d2": "1-2-3", "h3": "Poison", "d3": "1-2-3", "cost": 3.0 },
+        "S": { "name": "Stench", "tl": 3, "range": 2, "mass": 0.4, "qrebs": 0, "h2": "Stench", "d2": "1-2-3", "h3": "", "d3": "", "cost": 1.2 },
+        "Emp": { "name": "EMP", "tl": 1, "range": 3, "mass": 1.0, "qrebs": 0, "h2": "EMP", "d2": "1-2-3", "h3": "", "d3": "", "cost": 4.0 },
+        "F": { "name": "Flash", "tl": -1, "range": 2, "mass": 0.5, "qrebs": 0, "h2": "Flash", "d2": "1-2-3", "h3": "", "d3": "", "cost": 1.5 },
+        "C": { "name": "Freeze", "tl": 1, "range": 3, "mass": 1.0, "qrebs": "+1", "h2": "Cold", "d2": "1-2-3", "h3": "", "d3": "", "cost": 3.0 },
+        "G": { "name": "Grav", "tl": 5, "range": 2, "mass": 3.0, "qrebs": 0, "h2": "Grav", "d2": "1-2-3", "h3": "", "d3": "", "cost": 20.0 },
+        "L": { "name": "Laser", "tl": 5, "range": 0, "mass": 1.2, "qrebs": 0, "h2": "Burn", "d2": "1-2-3", "h3": "Pen", "d3": "1-2-3", "cost": 6.0 },
+        "M": { "name": "Mag", "tl": 4, "range": 1, "mass": 2.0, "qrebs": 0, "h2": "EMP", "d2": "1-2-3", "h3": "Mag", "d3": "1-2-3", "cost": 15.0 },
+        "Psi": { "name": "Psi Amp", "tl": 4, "range": 2, "mass": 1.0, "qrebs": 0, "h2": "Psi", "d2": "1-2-3", "h3": "", "d3": "", "cost": 9.0 },
+        "R": { "name": "Rad", "tl": 1, "range": 4, "mass": 1.0, "qrebs": "+2", "h2": "Rad", "d2": "1-2-3", "h3": "", "d3": "", "cost": 8.0 },
+        "Sh": { "name": "Shock", "tl": 0, "range": 2, "mass": 0.5, "qrebs": 0, "h2": "Elec", "d2": "1-2-3", "h3": "Pain", "d3": "1-2-3", "cost": 2.0 },
+        "Sonic": { "name": "Sonic", "tl": 3, "range": 2, "mass": 0.6, "qrebs": 0, "h2": "Sound", "d2": "1-2-3", "h3": "Bang", "d3": "1-2-3", "cost": 1.1 }
+    },
+    "Designators": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "A": { "name": "Acid", "tl": 0, "range": 3, "mass": 1.0, "qrebs": "+1", "h2": "Corrode", "d2": "2", "h3": "Pen", "d3": "1-2-3", "cost": 3.0 },
+        "H": { "name": "Fire", "tl": 0, "range": 1, "mass": 0.9, "qrebs": 0, "h2": "Burn", "d2": "1-2-3", "h3": "Pen", "d3": "1-2-3", "cost": 2.0 },
+        "P": { "name": "Poison Gas", "tl": 0, "range": 2, "mass": 1.0, "qrebs": 0, "h2": "Gas", "d2": "1-2-3", "h3": "Poison", "d3": "1-2-3", "cost": 3.0 },
+        "S": { "name": "Stench", "tl": 3, "range": 2, "mass": 0.4, "qrebs": 0, "h2": "Stench", "d2": "1-2-3", "h3": "", "d3": "", "cost": 1.2 },
+        "Emp": { "name": "EMP", "tl": 1, "range": 3, "mass": 1.0, "qrebs": 0, "h2": "EMP", "d2": "1-2-3", "h3": "", "d3": "", "cost": 4.0 },
+        "F": { "name": "Flash", "tl": -1, "range": 2, "mass": 0.5, "qrebs": 0, "h2": "Flash", "d2": "1-2-3", "h3": "", "d3": "", "cost": 1.5 },
+        "C": { "name": "Freeze", "tl": 1, "range": 3, "mass": 1.0, "qrebs": "+1", "h2": "Cold", "d2": "1-2-3", "h3": "", "d3": "", "cost": 3.0 },
+        "G": { "name": "Grav", "tl": 5, "range": 2, "mass": 3.0, "qrebs": 0, "h2": "Grav", "d2": "1-2-3", "h3": "", "d3": "", "cost": 20.0 },
+        "L": { "name": "Laser", "tl": 5, "range": 0, "mass": 1.2, "qrebs": 0, "h2": "Burn", "d2": "1-2-3", "h3": "Pen", "d3": "1-2-3", "cost": 6.0 },
+        "M": { "name": "Mag", "tl": 4, "range": 1, "mass": 2.0, "qrebs": 0, "h2": "EMP", "d2": "1-2-3", "h3": "Mag", "d3": "1-2-3", "cost": 15.0 },
+        "Psi": { "name": "Psi Amp", "tl": 4, "range": 2, "mass": 1.0, "qrebs": 0, "h2": "Psi", "d2": "1-2-3", "h3": "", "d3": "", "cost": 9.0 },
+        "R": { "name": "Rad", "tl": 1, "range": 4, "mass": 1.0, "qrebs": "+2", "h2": "Rad", "d2": "1-2-3", "h3": "", "d3": "", "cost": 8.0 },
+        "Sh": { "name": "Shock", "tl": 0, "range": 2, "mass": 0.5, "qrebs": 0, "h2": "Elec", "d2": "1-2-3", "h3": "Pain", "d3": "1-2-3", "cost": 2.0 },
+        "Sonic": { "name": "Sonic", "tl": 3, "range": 2, "mass": 0.6, "qrebs": 0, "h2": "Sound", "d2": "1-2-3", "h3": "Bang", "d3": "1-2-3", "cost": 1.1 }
+    },
+    "Launchers": {
+        "": { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 },
+        "aF": { "name": "AF Missile", "tl": 4, "range": 7, "mass": 4.0, "qrebs": 0, "h2": "Frag", "d2": "2", "h3": "Blast", "d3": "3", "cost": 3.0 },
+        "aT": { "name": "AT Missile", "tl": 3, "range": 4, "mass": 1.0, "qrebs": "+1", "h2": "Frag", "d2": "2", "h3": "Pen", "d3": "3", "cost": 2.0 },
+        "Gr": { "name": "Grenade", "tl": 1, "range": 4, "mass": 0.8, "qrebs": 0, "h2": "Frag", "d2": "2", "h3": "Blast", "d3": "2", "cost": 1.0 },
+        "M": { "name": "Missile", "tl": 1, "range": 6, "mass": 2.2, "qrebs": 0, "h2": "Frag", "d2": "2", "h3": "Pen", "d3": "2", "cost": 5.0 },
+        "RAM": { "name": "RAM Grenade", "tl": 2, "range": 6, "mass": 1.0, "qrebs": 0, "h2": "Frag", "d2": "2", "h3": "Blast", "d3": "2", "cost": 3.0 },
+        "R": { "name": "Rocket", "tl": -1, "range": 5, "mass": 3.0, "qrebs": 0, "h2": "Frag", "d2": "2", "h3": "Pen", "d3": "2", "cost": 1.0 }
+    }
 }
-stage = {
 
+# Chart 5: Burden
+CHART_5_BURDEN = {
+    "aD": { "name": "Anti-Designator", "tl": 3, "range": 1, "mass": 3.0, "qrebs": 3, "d2Mod": 1, "cost": 3.0 },
+    "B": { "name": "Body", "tl": 2, "range": 1, "mass": 0.5, "qrebs": -4, "d2Mod": -1, "cost": 3.0 },
+    "D": { "name": "Disposable", "tl": 3, "range": 0, "mass": 0.9, "qrebs": -1, "d2Mod": 0, "cost": 0.5 },
+    "H": { "name": "Heavy", "tl": 0, "range": 1, "mass": 1.3, "qrebs": 3, "d2Mod": 1, "cost": 2.0 },
+    "Lt": { "name": "Light", "tl": 0, "range": -1, "mass": 0.7, "qrebs": -1, "d2Mod": -1, "cost": 1.1 },
+    "M": { "name": "Magnum", "tl": 1, "range": 1, "mass": 1.1, "qrebs": 1, "d2Mod": 1, "cost": 1.1 },
+    "Med": { "name": "Medium", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "d2Mod": 0, "cost": 1.0 },
+    "R": { "name": "Recoilless", "tl": 1, "range": 1, "mass": 1.2, "qrebs": 0, "d2Mod": 1, "cost": 3.0 },
+    "Sn": { "name": "Snub", "tl": 1, "range": 2, "mass": 0.7, "qrebs": -3, "d2Mod": 1, "cost": 1.5 },
+    "Vh": { "name": "Vheavy", "tl": 0, "range": 5, "mass": 4.0, "qrebs": 4, "d2Mod": 5, "cost": 5.0 },
+    "Vl": { "name": "Vlight", "tl": 1, "range": -2, "mass": 0.6, "qrebs": -2, "d2Mod": -1, "cost": 2.0 },
+    "Vrf": { "name": "VRF", "tl": 2, "range": 0, "mass": 14.0, "qrebs": 5, "d2Mod": 1, "cost": 9.0 }
 }
-user = {
 
+# Chart 5: Stage
+CHART_5_STAGE = {
+    "A": { "name": "Advanced", "tl": 3, "range": 0, "mass": 0.8, "qrebs": -3, "d2Mod": 2, "d3Mod": 0, "cost": 2.0 },
+    "Alt": { "name": "Alternate", "tl": 0, "range": 1, "mass": 1.1, "qrebs": 0, "d2Mod": 0, "d3Mod": 0, "cost": 1.1 },
+    "B": { "name": "Basic", "tl": 0, "range": 0, "mass": 1.3, "qrebs": 1, "d2Mod": 0, "d3Mod": 0, "cost": 0.7 },
+    "E": { "name": "Early", "tl": -1, "range": -1, "mass": 1.7, "qrebs": 1, "d2Mod": 0, "d3Mod": 0, "cost": 1.2 },
+    "Exp": { "name": "Experimental", "tl": -3, "range": -1, "mass": 2.0, "qrebs": 3, "d2Mod": 0, "d3Mod": 0, "cost": 4.0 },
+    "Im": { "name": "Improved", "tl": 1, "range": 1, "mass": 1.0, "qrebs": -1, "d2Mod": 1, "d3Mod": 0, "cost": 1.1 },
+    "Mod": { "name": "Modified", "tl": 2, "range": 0, "mass": 0.9, "qrebs": 0, "d2Mod": 0, "d3Mod": 0, "cost": 1.2 },
+    "P": { "name": "Prototype", "tl": -2, "range": -1, "mass": 1.9, "qrebs": 2, "d2Mod": 0, "d3Mod": 0, "cost": 3.0 },
+    "Pr": { "name": "Precision", "tl": 6, "range": 3, "mass": 4.0, "qrebs": 2, "d2Mod": 0, "d3Mod": 0, "cost": 5.0 },
+    "R": { "name": "Remote", "tl": 1, "range": 0, "mass": 1.0, "qrebs": 0, "d2Mod": 0, "d3Mod": 0, "cost": 7.0 },
+    "Sn": { "name": "Sniper", "tl": 1, "range": 1, "mass": 1.1, "qrebs": 1, "d2Mod": 0, "d3Mod": 0, "cost": 2.0 },
+    "St": { "name": "Standard", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "d2Mod": 0, "d3Mod": 0, "cost": 1.0 },
+    "T": { "name": "Target", "tl": 0, "range": 0, "mass": 1.1, "qrebs": 1, "d2Mod": 0, "d3Mod": 0, "cost": 1.5 },
+    "Ul": { "name": "Ultimate", "tl": 4, "range": 4, "mass": 0.7, "qrebs": -4, "d2Mod": 2, "d3Mod": 0, "cost": 1.4 }
 }
-portability = {
 
+# Chart 5: User
+CHART_5_USER = {
+    "M": { "name": "Man", "mass": 1.0, "qrebs": 0, "code": "M" },
+    "U": { "name": "Universal", "mass": 1.1, "qrebs": 1, "code": "U" },
+    "V": { "name": "Vargr", "mass": 1.0, "qrebs": 0, "code": "V" },
+    "K": { "name": "K’kree", "mass": 1.3, "qrebs": 2, "code": "K" },
+    "H": { "name": "Hiver (Grasper)", "mass": 1.0, "qrebs": -1, "code": "H" },
+    "A": { "name": "Aslan (Paw)", "mass": 1.0, "qrebs": -1, "code": "A" },
+    "G": { "name": "Gripper", "mass": 1.0, "qrebs": -2, "code": "G" },
+    "T": { "name": "Vegan (Tentacle)", "mass": 1.0, "qrebs": -2, "code": "T" },
+    "S": { "name": "Socket", "mass": 1.0, "qrebs": -2, "code": "S" }
 }
 
-def gunmaker():
-    gun = ""
-    print("ID | Code | Descriptor")
-    for key in cat:
-        print("{:^3}|{:^6}| {:<}".format(key,cat[key][0],cat[key][1]))
+# Chart 7: Installable Options
+CHART_7_OPTIONS = {
+    "a": "Low Signature Visual (Camouflaged)",
+    "b": "Low Signature Metal (Plastic)",
+    "c": "Quiet (Silenced)",
+    "d": "Folding Stock (Close Quarters)",
+    "e": "Stable Platform (Gyro)",
+    "f": "Flash Suppressor",
+    "g": "Hot Environment Adapted",
+    "h": "Corrosion Environment Adapted",
+    "i": "Cold Environment Adapted",
+    "j": "Magnification Sights (+1 Range)"
+}
+
+def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, user_code, portability_mode, selected_options):
+    type_data = CHART_3_TYPES[category][type_code]
+    desc_data = CHART_4_DESCRIPTORS[category].get(desc_code, { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 })
+    user_data = CHART_5_USER.get(user_code, CHART_5_USER["M"])
+
+    # 1. TL
+    tl = type_data["tl"] + desc_data["tl"]
+    for code in burden_codes: tl += CHART_5_BURDEN[code]["tl"]
+    for code in stage_codes: tl += CHART_5_STAGE[code]["tl"]
+
+    # 2. Range
+    range_val = desc_data["range"] if desc_data["range"] != 0 else type_data["range"]
+    for code in burden_codes: range_val += CHART_5_BURDEN[code]["range"]
+    for code in stage_codes: range_val += CHART_5_STAGE[code]["range"]
+    if range_val < 0: range_val = 0
+
+    # 3. Mass
+    mass = type_data["mass"] * desc_data["mass"] * user_data["mass"]
+    for code in burden_codes: mass *= CHART_5_BURDEN[code]["mass"]
+    for code in stage_codes: mass *= CHART_5_STAGE[code]["mass"]
+
+    # 4. Cost
+    cost = type_data["cost"] * desc_data["cost"]
+    for code in burden_codes: cost *= CHART_5_BURDEN[code]["cost"]
+    for code in stage_codes: cost *= CHART_5_STAGE[code]["cost"]
+
+    # 5. QREBS
+    b_val = 0
+    if isinstance(desc_data.get("qrebs"), int): b_val += desc_data["qrebs"]
+    elif isinstance(desc_data.get("qrebs"), str): 
+        try: b_val += int(desc_data["qrebs"].replace('+',''))
+        except: pass
+        
+    for code in burden_codes: b_val += CHART_5_BURDEN[code]["qrebs"]
+    for code in stage_codes: b_val += CHART_5_STAGE[code]["qrebs"]
     
-    while True:
+    qrebs = "50000"
+    if b_val != 0:
+        qrebs = f"B{'+' if b_val > 0 else ''}{b_val}"
+
+    # 6. Effects
+    effect_map = {}
+    def add_to_map(etype, dice):
+        if not etype or etype == "*" or etype == "": return
         try:
-            choose = int(input("Choose Weapon Type [1-14]:"))
-        except ValueError:
-            print("Invalid input!")
-            continue
-        if choose <= 0 or choose >14:
-            print("Please choose from between 1 and 14.")
-            continue
-        else:
-            break
-    print(cat[choose])
-    return gun
+            new_num = int(dice)
+            if etype in effect_map and isinstance(effect_map[etype], int):
+                effect_map[etype] += new_num
+            else:
+                effect_map[etype] = new_num
+        except:
+            effect_map[etype] = dice
+
+    add_to_map(type_data["h1"], type_data["d1"])
+    
+    d2_mod = sum(CHART_5_BURDEN[c].get("d2Mod", 0) for c in burden_codes) + sum(CHART_5_STAGE[c].get("d2Mod", 0) for c in stage_codes)
+    d3_mod = sum(CHART_5_STAGE[c].get("d3Mod", 0) for c in stage_codes)
+
+    if desc_data.get("h2"):
+        d2_val = desc_data.get("d2", "0")
+        try:
+            d2_val = str(int(d2_val) + d2_mod)
+        except: pass
+        add_to_map(desc_data["h2"], d2_val)
+
+    if desc_data.get("h3"):
+        d3_val = desc_data.get("d3", "0")
+        try:
+            d3_val = str(int(d3_val) + d3_mod)
+        except: pass
+        add_to_map(desc_data["h3"], d3_val)
+
+    # 7. Portability
+    portability = portability_mode
+    if portability == "auto":
+        if mass < 20: portability = ""
+        elif mass < 200: portability = "Crewed"
+        elif mass < 500: portability = "Turret"
+        elif mass < 1000: portability = "Vehicle Mount"
+        else: portability = "Fixed"
+
+    # 8. Names
+    parts = []
+    for c in stage_codes: parts.append(CHART_5_STAGE[c]["name"])
+    for c in burden_codes: parts.append(CHART_5_BURDEN[c]["name"])
+    if desc_data["name"]: parts.append(desc_data["name"])
+    parts.append(type_data["name"])
+    if user_data["name"] != "Man": parts.append(user_data["name"])
+    if portability: parts.append(portability)
+    parts.append(f"TL {tl}")
+    long_name = " ".join(filter(None, parts))
+
+    model_parts = stage_codes + burden_codes + ([desc_code] if desc_code else []) + [type_code]
+    model = "".join(model_parts) + f"-{tl}"
+
+    # 9. Controls
+    controls = {"off": True, "single": False, "burst": False, "full": False, "p123": False, "override": False}
+
+    # 1-2-3 Group (Fusion, Plasma, Laser, Poison Dart, or any Projector/Designator)
+    # Fusion: F, Plasma: P, Laser: L, Poison Dart: PD
+    is_p123 = (category in ["Projectors", "Designators"]) or (desc_code in ["F", "P", "L", "PD"])
+
+    if is_p123:
+        controls["p123"] = True
+    else:
+        controls["single"] = True
+        
+        # Burst Capable: Accelerator (Ac), Assault (A), Gauss (G)
+        # Types: Gatling (Ga), Autocannon (aC), Multi-Launcher (mL)
+        if desc_code in ["Ac", "A", "G"] or type_code in ["Ga", "aC", "mL"]:
+            controls["burst"] = True
+            
+        # Full Auto Capable: Anti-Flyer (aF), Assault (A), Gauss (G), Splat (Sp), Machine (M), Sub (S)
+        if desc_code in ["aF", "A", "G", "Sp", "M", "S"]:
+            controls["full"] = True
+
+    return {
+        "model": model,
+        "long_name": long_name,
+        "tl": tl,
+        "range": range_val,
+        "mass": mass,
+        "cost": cost,
+        "qrebs": qrebs,
+        "effects": effect_map,
+        "controls": controls,
+        "options": [CHART_7_OPTIONS[o] for o in selected_options]
+    }

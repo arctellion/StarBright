@@ -1,4 +1,4 @@
-import numpy as np
+import random
 import travtools.converters as cnv
 import travtools.system as sy
 import travtools.dice as dd
@@ -50,7 +50,7 @@ def trade_goods(n):
     goods = ""
     l = len(n) 
     if l > 1:
-        z = np.random.randint(0, (l-1))
+        z = random.randint(0, (l-1))
     else: 
         z = 0
     i = dd.die_roll()-1
@@ -340,19 +340,21 @@ def trade_gds(n, skill = {'Steward':0, 'Admin':0, 'Streetwise':0, 'Liaison':0}, 
         low = 0
 
     i = 0
-    freight = ['None']*days
-    cargo = ['None']*days
+    freight = []
+    cargo = []
     frttot = 0
     while i < days:
         amount = dd.flux() + pop
-        if amount < 0:
-            amount = 0
-        frttot += amount
-        frtprc = amount * 1000
-        freight[i] = '{}dt of {} at Cr{:,}'.format(amount,trade_goods(trades),frtprc)
-        cargo[i] = '100dt of ' + trade_goods(trades)
+        if amount > 0:
+            frttot += amount
+            frtprc = amount * 1000
+            freight.append('{}dt of {} at Cr{:,}'.format(amount,trade_goods(trades),frtprc))
+        
+        # Spec cargo is generated once per day regardless of freight
+        cargo.append('100dt of ' + trade_goods(trades))
         i += 1
-    frt = "\n|=> ".join(freight)
+
+    frt = "\n|=> ".join(freight) if freight else "None found"
     cgo = "\n|=> ".join(cargo)
     trd = "During the last {} days you find:\n".format(days)
     trd = trd + "* High Passengers: {} at Cr10,000 +/- Cr1,000 depending on demand\n".format(high)

@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThingMaker - Equipment Creation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title .icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.375rem;
+        }
+
+        .label-hint {
+            font-weight: 400;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            color: var(--text);
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2.5rem;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tab {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .result-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.625rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .result-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .result-value.highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .protection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .protection-item {
+            background: var(--bg);
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .protection-type {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .protection-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 1.5rem 0;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .info-box h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .coatings-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .coating-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--bg);
+            padding: 0.375rem 0.625rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .coating-tag button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+            margin-left: 0.25rem;
+        }
+
+        .coating-tag button:hover {
+            color: var(--danger);
+        }
+
+        .cost-breakdown {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            padding: 0.375rem 0;
+        }
+
+        .cost-row.total {
+            border-top: 2px solid #86efac;
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preset-btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .signature-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .signature-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            background: #fef3c7;
+            padding: 0.375rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background: var(--text);
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .qreb-display {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
+        .qreb-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .qreb-letter {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .qreb-value {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .main-layout {
+                display: block;
+            }
+            
+            .card {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid var(--border);
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>ThingMaker</h1>
+        <p>Equipment Creation System - Design and define your equipment</p>
+    </header>
+
+    <div class="container">
+        <div class="main-layout">
+            <div class="left-panel">
+                <!-- Function Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        Function & Identification
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label>Equipment Name</label>
+                        <input type="text" id="equipmentName" placeholder="Enter equipment name (e.g., Tablet Computer)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Simple Name</label>
+                        <input type="text" id="simpleName" placeholder="Brief identifier (e.g., Imager, Viewer)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Function Type</label>
+                        <select id="functionType">
+                            <option value="">Select function type...</option>
+                            <option value="enabler">Enabler - Allows activity to take place</option>
+                            <option value="protector">Protector - Shields from external forces</option>
+                            <option value="enhancer">Enhancer - Increases/channels abilities</option>
+                            <option value="resolver">Resolver - Completes tasks independently</option>
+                            <option value="entangler">Entangler - Inhibits/restricts activity</option>
+                            <option value="cultural">Cultural Item - Status symbol</option>
+                            <option value="value">Value Item - Intrinsic worth</option>
+                            <option value="analog">Analog - Mimics natural function</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description / Task Enabler</label>
+                        <textarea id="description" placeholder="Describe what the equipment does and its expected benefit..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Tech Level Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        Tech Level
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label>Base Tech Level (TL)</label>
+                        <div class="row">
+                            <select id="techLevel" onchange="updateEraInfo()">
+                                <option value="0">TL 0 - Stone Age</option>
+                                <option value="1">TL 1 - Bronze Age</option>
+                                <option value="2">TL 2 - Middle Ages</option>
+                                <option value="3">TL 3 - Age of Sail</option>
+                                <option value="4">TL 4 - Industrial Revolution (1800 AD)</option>
+                                <option value="5">TL 5 - Mechanization (1850 AD)</option>
+                                <option value="6">TL 6 - Nuclear Age (1930 AD)</option>
+                                <option value="7">TL 7 - Early Space (1975 AD)</option>
+                                <option value="8">TL 8 - Middle Space (2000 AD)</option>
+                                <option value="9">TL 9 - Late Space (2020 AD)</option>
+                                <option value="10" selected>TL 10 - Imperial Year 0</option>
+                                <option value="11">TL 11 - Imperial Year 300</option>
+                                <option value="12">TL 12 - Imperial Year 550</option>
+                                <option value="13">TL 13 - Imperial Year 850</option>
+                                <option value="14">TL 14 - Imperial Year 1100</option>
+                                <option value="15">TL 15 - Darrian (Circa 1902)</option>
+                                <option value="16">TL 16 - The Far Future</option>
+                                <option value="17">TL 17</option>
+                                <option value="18">TL 18</option>
+                                <option value="19">TL 19</option>
+                                <option value="20">TL 20</option>
+                                <option value="21">TL 21+ - Fantastic Technology</option>
+                            </select>
+                        </div>
+                        <div id="eraInfo" class="info-box" style="margin-top: 0.75rem;">
+                            <h4>Industrial Revolution (1800 AD)</h4>
+                            <p>Mass production, steam power, basic chemistry</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>TL Stage Effect</label>
+                        <select id="tlStage">
+                            <option value="standard">Standard Production</option>
+                            <option value="prototype">Prototype (x0.25 cost)</option>
+                            <option value="experimental">Experimental (x0.5 cost)</option>
+                            <option value="military">Military/Government (x1.5 cost)</option>
+                            <option value="civilian">Civilian Grade (x0.75 cost)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Size & Profile Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        </svg>
+                        Size & Profile
+                    </h2>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Size (Greatest Dimension)</label>
+                            <div class="slider-container">
+                                <input type="range" id="sizeSlider" class="slider" min="-3" max="9" step="0.1" value="3" oninput="updateSizeFromSlider()">
+                                <span class="slider-value" id="sizeValue">3</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Exact Size</label>
+                            <input type="number" id="exactSize" step="0.1" value="3" onchange="updateSliderFromSize()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Profile (Shape)</label>
+                        <select id="profile" onchange="calculateDimensions()">
+                            <option value="cube">Cube - L = W = H</option>
+                            <option value="sphere">Sphere - W = H = L/1.4</option>
+                            <option value="cylinder">Cylinder - W = H = L/2</option>
+                            <option value="disk">Disk - W = H = L/10</option>
+                            <option value="rod">Rod - W = H = L/14</option>
+                            <option value="thicksheet">Thick Sheet - W = H = L/20</option>
+                            <option value="slab">Slab - W = H = L/5</option>
+                            <option value="pyramid">Pyramid - W = H = L/6</option>
+                            <option value="vthick">Very Thick - W = H = L/7</option>
+                            <option value="thick">Thick - W = H = L/8</option>
+                            <option value="typical">Typical - Humanoid proportions</option>
+                            <option value="thin">Thin - W = H = L/10</option>
+                            <option value="vthin">Very Thin - W = H = L/11</option>
+                            <option value="flat">Flat - W = H = L/12</option>
+                            <option value="vflat">Very Flat - W = H = L/20</option>
+                            <option value="sheet">Sheet - W = H = L/50</option>
+                            <option value="hvyfabric">Heavy Fabric - W = H = L/100</option>
+                            <option value="fabric">Fabric - W = H = L/300</option>
+                            <option value="lightfabric">Light Fabric - W = H = L/1000</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Length (meters)</label>
+                            <input type="number" id="length" step="0.001" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Width (meters)</label>
+                            <input type="number" id="width" step="0.001" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Height/Thickness (meters)</label>
+                            <input type="number" id="height" step="0.001" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="setSizePreset(0.3)">Microscopic (0.3)</button>
+                        <button class="preset-btn" onclick="setSizePreset(1)">Small (1)</button>
+                        <button class="preset-btn" onclick="setSizePreset(2)">Handheld (2)</button>
+                        <button class="preset-btn" onclick="setSizePreset(3)">Tablet (3)</button>
+                        <button class="preset-btn" onclick="setSizePreset(4)">Carryable (4)</button>
+                        <button class="preset-btn" onclick="setSizePreset(5)">Human-sized (5)</button>
+                        <button class="preset-btn" onclick="setSizePreset(6)">Furniture (6)</button>
+                        <button class="preset-btn" onclick="setSizePreset(7)">Vehicle (7)</button>
+                    </div>
+                </div>
+
+                <!-- Density & Construction Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        Density & Construction
+                    </h2>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Density Material</label>
+                            <select id="density" onchange="calculateMass()">
+                                <option value="0.1">Flimsy (0.1)</option>
+                                <option value="0.2">Container (0.2)</option>
+                                <option value="0.3">Textile (0.3)</option>
+                                <option value="0.4">Foamed/Hollow (0.4)</option>
+                                <option value="0.5">Wood (0.5)</option>
+                                <option value="0.6" selected>Standard (0.6)</option>
+                                <option value="0.7">Lightened (0.7)</option>
+                                <option value="0.8">Internal Mechanism (0.8)</option>
+                                <option value="0.9">Light (0.9)</option>
+                                <option value="1.0">Standard+ (1.0) - Water</option>
+                                <option value="1.1">Dense (1.1)</option>
+                                <option value="1.5">Very Dense (1.5)</option>
+                                <option value="2.0">Dirt/Earth (2.0)</option>
+                                <option value="2.5">Brick (2.5)</option>
+                                <option value="3.0">Ceramic (3.0)</option>
+                                <option value="4.0">Aluminum (4.0)</option>
+                                <option value="6.0">Titanium/Lite Metal (6.0)</option>
+                                <option value="8.0">Steel (8.0)</option>
+                                <option value="10.5">Dense+ (10.5)</option>
+                                <option value="11.0">Lead (11.0)</option>
+                                <option value="19.3">Gold (19.3)</option>
+                                <option value="22.5">Iridium (22.5)</option>
+                                <option value="10^7">Starstuff (10^7)</option>
+                                <option value="10^15">Neutronium (10^15)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Construction Type</label>
+                            <select id="construction" onchange="calculateMass()">
+                                <option value="0.1">Container (0.1)</option>
+                                <option value="0.2">Foamed (0.2)</option>
+                                <option value="0.3">Hollow (0.3)</option>
+                                <option value="0.5">Lightened (0.5)</option>
+                                <option value="0.7">Ruggedized (0.7)</option>
+                                <option value="0.8" selected>Internal Mechanism (0.8)</option>
+                                <option value="1.0">Solid (1.0)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Coatings (max <span id="maxCoatings">3</span>)</label>
+                        <div class="coatings-list" id="coatingsList">
+                            <span style="color: var(--text-light); font-size: 0.875rem;">No coatings applied</span>
+                        </div>
+                        <div class="checkbox-group" style="margin-top: 0.5rem;">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingArmored" onchange="addCoating('Armored', 3, 3)"> Armored (Ar)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingEMProof" onchange="addCoating('EM-proof', 6, 6)"> EM-Proof (Ca)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingFlashproof" onchange="addCoating('Flashproof', 6, 6)"> Flashproof (Fl)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingRadproof" onchange="addCoating('Radproof', 3, 3)"> Radproof (Ra)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingSoundproof" onchange="addCoating('Soundproof', 6, 6)"> Soundproof (So)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingPsiproof" onchange="addCoating('Psiproof', 6, 6)"> Psiproof (Ps)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingInsulated" onchange="addCoating('Insulated', 6, 6)"> Insulated (In)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coatingSealed" onchange="addCoating('Sealed', 6, 6)"> Sealed (Se)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Power Supply Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M6 7V5a2 2 0 012-2h8a2 2 0 012 2v2"/>
+                            <path d="M12 12v4"/>
+                        </svg>
+                        Power Supply
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label>Power Type</label>
+                        <select id="powerType" onchange="updatePowerOptions()">
+                            <option value="none">No Power Required</option>
+                            <option value="powercell">Power Cell (Portable)</option>
+                            <option value="ambient">Ambient Panel (Solar/Light)</option>
+                            <option value="fuelcell">Fuel Cell (Independent)</option>
+                            <option value="generator">Generator (Fuel Powered)</option>
+                            <option value="fusion">Fusion Plus (Heavy Use)</option>
+                            <option value="plugin">Plug In (Grid Connection)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="powerOptions" style="display: none;">
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Power Size</label>
+                                <input type="number" id="powerSize" step="0.5" value="2">
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (hours)</label>
+                                <input type="number" id="powerDuration" step="1" value="24">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Signature (Emissions)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigElectric" onchange="updateSignatures()"> Electric
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigGravitic" onchange="updateSignatures()"> Gravitic
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigMagnetic" onchange="updateSignatures()"> Magnetic
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigEM" onchange="updateSignatures()"> EM (Radio)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigLight" onchange="updateSignatures()"> Light
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigSound" onchange="updateSignatures()"> Sound
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="sigHeat" onchange="updateSignatures()"> Heat
+                            </label>
+                        </div>
+                        <div class="signature-display" id="signatureDisplay"></div>
+                    </div>
+                </div>
+
+                <!-- QREBS Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 8v4a10 10 0 11-5.93-9.14"/>
+                            <path d="M22 4L12 14.01l-3-3"/>
+                        </svg>
+                        Quality & Modifiers (QREBS)
+                    </h2>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Quality (Q)</label>
+                            <select id="qVal">
+                                <option value="5">Excellent (5)</option>
+                                <option value="4" selected>Good (4)</option>
+                                <option value="3">Average (3)</option>
+                                <option value="2">Fair (2)</option>
+                                <option value="1">Poor (1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Reliability (R)</label>
+                            <select id="rVal">
+                                <option value="5">Excellent (5)</option>
+                                <option value="4" selected>Good (4)</option>
+                                <option value="3">Average (3)</option>
+                                <option value="2">Fair (2)</option>
+                                <option value="1">Poor (1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Endurance (E)</label>
+                            <select id="eVal">
+                                <option value="5">Excellent (5)</option>
+                                <option value="4" selected>Good (4)</option>
+                                <option value="3">Average (3)</option>
+                                <option value="2">Fair (2)</option>
+                                <option value="1">Poor (1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Build (B)</label>
+                            <select id="bVal">
+                                <option value="5">Excellent (5)</option>
+                                <option value="4" selected>Good (4)</option>
+                                <option value="3">Average (3)</option>
+                                <option value="2">Fair (2)</option>
+                                <option value="1">Poor (1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Servicability (S)</label>
+                            <select id="sVal">
+                                <option value="5">Excellent (5)</option>
+                                <option value="4" selected>Good (4)</option>
+                                <option value="3">Average (3)</option>
+                                <option value="2">Fair (2)</option>
+                                <option value="1">Poor (1)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Features</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="certified"> Certified
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="battlefieldOverride"> Battlefield Override
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="ruggedized"> Ruggedized
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="protectiveCase"> Protective Case
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Range & Controls Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        Range & Controls
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label>Range Category</label>
+                        <select id="rangeCategory" onchange="updateRangeEffects()">
+                            <option value="none">N/A - No Range</option>
+                            <option value="personal" selected>Personal (R=0)</option>
+                            <option value="short">Short (R=2) - Portable</option>
+                            <option value="medium">Medium (R=4)</option>
+                            <option value="long">Long (R=6)</option>
+                            <option value="distant">Very Distant (R=7) - Transportable</option>
+                            <option value="orbital">Orbital (R=10)</option>
+                            <option value="space">Space Attack (R=12) - Installed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Control Type</label>
+                        <select id="controlType">
+                            <option value="simple">Simple - Basic knobs/cables</option>
+                            <option value="integral" selected>Integral - Keyboard/display</option>
+                            <option value="panel">Control Panel + Data Port</option>
+                            <option value="console">Console + Control Panel</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Value Enhancement</label>
+                        <select id="valueEnhancement">
+                            <option value="standard">Standard</option>
+                            <option value="premium">Premium (x2 cost)</option>
+                            <option value="luxury">Luxury (x5 cost)</option>
+                            <option value="budget">Budget (x0.5 cost)</option>
+                            <option value="salvage">Salvage (x0.25 cost)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Base Value Section -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                        </svg>
+                        Cost & Value
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label>Base Value (Credits)</label>
+                        <input type="number" id="baseValue" step="100" value="1000" onchange="calculateFinalCost()">
+                    </div>
+                    
+                    <div class="info-box">
+                        <h4>Cost Guidelines</h4>
+                        <p>Simple tools: Cr10-100 | Standard equipment: Cr100-1000 | Complex devices: Cr1,000-10,000 | Advanced tech: Cr10,000+</p>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-block" onclick="generateEquipment()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/>
+                        </svg>
+                        Generate Equipment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="right-panel">
+                <div class="card" id="resultsCard">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Equipment Results
+                    </h2>
+                    
+                    <div id="resultsContent">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <p>Configure your equipment parameters and click "Generate Equipment" to see results</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipment Checklist -->
+                <div class="card no-print">
+                    <h2 class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        ThingMaker Checklist
+                    </h2>
+                    
+                    <div class="result-section">
+                        <div class="result-row">
+                            <span class="result-label">1. Function</span>
+                            <span class="result-value" id="checklist1">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">2. Base TL</span>
+                            <span class="result-value" id="checklist2">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">3. Size</span>
+                            <span class="result-value" id="checklist3">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">4. Profile</span>
+                            <span class="result-value" id="checklist4">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">5. Density</span>
+                            <span class="result-value" id="checklist5">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">6. Construction</span>
+                            <span class="result-value" id="checklist6">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">7. Dimensions</span>
+                            <span class="result-value" id="checklist7">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">8. Volume</span>
+                            <span class="result-value" id="checklist8">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">9. Mass</span>
+                            <span class="result-value" id="checklist9">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">10. Protection</span>
+                            <span class="result-value" id="checklist10">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">11. Other (Controls)</span>
+                            <span class="result-value" id="checklist11">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">12. Cost</span>
+                            <span class="result-value" id="checklist12">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">13. Power Supply</span>
+                            <span class="result-value" id="checklist13">-</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">14. Signature</span>
+                            <span class="result-value" id="checklist14">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let coatings = [];
+        let signatures = [];
+        let generatedData = null;
+
+        // Size chart for conversion
+        const sizeChart = {
+            '-3': 0.0003, '-2': 0.0007, '-1': 0.002, '0': 0.007, '1': 0.020,
+            '2': 0.075, '3': 0.20, '4': 0.75, '5': 1.5, '6': 7.5,
+            '7': 20, '8': 75, '9': 200
+        };
+
+        // Profile divisors
+        const profileDivisors = {
+            'cube': { w: 1, h: 1 },
+            'sphere': { w: 1.4, h: 1.4 },
+            'cylinder': { w: 2, h: 2 },
+            'disk': { w: 10, h: 10 },
+            'rod': { w: 14, h: 14 },
+            'thicksheet': { w: 20, h: 20 },
+            'slab': { w: 5, h: 5 },
+            'pyramid': { w: 6, h: 6 },
+            'vthick': { w: 7, h: 7 },
+            'thick': { w: 8, h: 8 },
+            'typical': { w: 9, h: 9 },
+            'thin': { w: 10, h: 10 },
+            'vthin': { w: 11, h: 11 },
+            'flat': { w: 12, h: 12 },
+            'vflat': { w: 20, h: 20 },
+            'sheet': { w: 50, h: 50 },
+            'hvyfabric': { w: 100, h: 100 },
+            'fabric': { w: 300, h: 300 },
+            'lightfabric': { w: 1000, h: 1000 }
+        };
+
+        // Era information
+        const eraInfo = {
+            '0': { name: 'Stone Age', desc: 'Basic tools, stone, wood, bone' },
+            '1': { name: 'Bronze Age', desc: 'Copper and bronze metallurgy' },
+            '2': { name: 'Middle Ages', desc: 'Iron, steel, basic chemistry' },
+            '3': { name: 'Age of Sail', desc: 'Navigation, gunpowder' },
+            '4': { name: 'Industrial Revolution (1800 AD)', desc: 'Steam power, mass production' },
+            '5': { name: 'Mechanization (1850 AD)', desc: 'Early industrialization' },
+            '6': { name: 'Nuclear Age (1930 AD)', desc: 'Nuclear physics, advanced chemistry' },
+            '7': { name: 'Early Space (1975 AD)', desc: 'Space travel, computing' },
+            '8': { name: 'Middle Space (2000 AD)', desc: 'Advanced computing, robotics' },
+            '9': { name: 'Late Space (2020 AD)', desc: 'AI, biotechnology' },
+            '10': { name: 'Imperial Year 0', desc: 'Interstellar civilization begins' },
+            '11': { name: 'Imperial Year 300', desc: 'Mature interstellar tech' },
+            '12': { name: 'Imperial Year 550', desc: 'Advanced materials' },
+            '13': { name: 'Imperial Year 850', desc: 'Exotic technologies' },
+            '14': { name: 'Imperial Year 1100', desc: 'Very advanced tech' },
+            '15': { name: 'Darrian (Circa 1902)', desc: 'Alternate timeline tech' },
+            '16': { name: 'The Far Future', desc: 'Fantastic technology' },
+            '17': { name: 'TL 17', desc: 'Near-limits of physics' },
+            '18': { name: 'TL 18', desc: 'Beyond conventional physics' },
+            '19': { name: 'TL 19', desc: 'Transcendent technology' },
+            '20': { name: 'TL 20', desc: 'Ultimate technology' },
+            '21': { name: 'TL 21+ - Fantastic Technology', desc: 'Technology indistinguishable from magic' }
+        };
+
+        // Update era info display
+        function updateEraInfo() {
+            const tl = document.getElementById('techLevel').value;
+            const era = eraInfo[tl];
+            document.getElementById('eraInfo').innerHTML = `
+                <h4>${era.name}</h4>
+                <p>${era.desc}</p>
+            `;
+            calculateDimensions();
+        }
+
+        // Size conversion helpers
+        function sizeToMeters(size) {
+            // Linear interpolation between known points
+            const sizes = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const meters = [0.0003, 0.0007, 0.002, 0.007, 0.020, 0.075, 0.20, 0.75, 1.5, 7.5, 20, 75, 200];
+            
+            if (size <= -3) return 0.0003;
+            if (size >= 9) return 200;
+            
+            const lowerIndex = Math.floor(size) - (-3);
+            const upperIndex = lowerIndex + 1;
+            const fraction = size - Math.floor(size);
+            
+            if (lowerIndex < 0) lowerIndex = 0;
+            if (upperIndex > meters.length - 1) upperIndex = meters.length - 1;
+            
+            return meters[lowerIndex] + (meters[upperIndex] - meters[lowerIndex]) * fraction;
+        }
+
+        function updateSizeFromSlider() {
+            const size = parseFloat(document.getElementById('sizeSlider').value);
+            document.getElementById('sizeValue').textContent = size.toFixed(1);
+            document.getElementById('exactSize').value = size.toFixed(1);
+            calculateDimensions();
+        }
+
+        function updateSliderFromSize() {
+            const size = parseFloat(document.getElementById('exactSize').value);
+            document.getElementById('sizeSlider').value = size;
+            document.getElementById('sizeValue').textContent = size.toFixed(1);
+            calculateDimensions();
+        }
+
+        function setSizePreset(size) {
+            document.getElementById('sizeSlider').value = size;
+            document.getElementById('exactSize').value = size;
+            document.getElementById('sizeValue').textContent = size.toFixed(1);
+            calculateDimensions();
+        }
+
+        // Calculate dimensions based on size and profile
+        function calculateDimensions() {
+            const size = parseFloat(document.getElementById('exactSize').value) || 3;
+            const profile = document.getElementById('profile').value;
+            const divisors = profileDivisors[profile];
+            
+            const length = sizeToMeters(size);
+            const width = length / divisors.w;
+            const height = length / divisors.h;
+            
+            document.getElementById('length').value = length.toFixed(4);
+            document.getElementById('width').value = width.toFixed(4);
+            document.getElementById('height').value = height.toFixed(4);
+            
+            calculateMass();
+        }
+
+        // Calculate volume and mass
+        function calculateMass() {
+            const length = parseFloat(document.getElementById('length').value) || 0.2;
+            const width = parseFloat(document.getElementById('width').value) || 0.2;
+            const height = parseFloat(document.getElementById('height').value) || 0.02;
+            const density = parseFloat(document.getElementById('density').value);
+            const construction = parseFloat(document.getElementById('construction').value);
+            
+            // Calculate volume in cubic meters
+            const volumeM3 = length * width * height;
+            const volumeLiters = volumeM3 * 1000;
+            
+            // Calculate mass
+            const mass = volumeLiters * density * construction;
+            
+            // Calculate protection
+            let baseProtection = density;
+            const constructionVal = parseFloat(document.getElementById('construction').value);
+            
+            // Update max coatings based on size
+            const maxCoatings = Math.max(1, Math.floor(parseFloat(document.getElementById('exactSize').value)));
+            document.getElementById('maxCoatings').textContent = maxCoatings;
+            
+            return { volumeM3, volumeLiters, mass, baseProtection, constructionVal };
+        }
+
+        // Add coating
+        function addCoating(name, constructionBonus, protectionBonus) {
+            const maxCoatings = Math.max(1, Math.floor(parseFloat(document.getElementById('exactSize').value)));
+            
+            const existingIndex = coatings.findIndex(c => c.name === name);
+            
+            if (existingIndex >= 0) {
+                coatings.splice(existingIndex, 1);
+            } else if (coatings.length < maxCoatings) {
+                coatings.push({ name, constructionBonus, protectionBonus });
+            } else {
+                // Uncheck the checkbox
+                const checkboxId = 'coating' + name.replace('-', '').replace(' ', '');
+                document.getElementById(checkboxId).checked = false;
+                alert(`Maximum ${maxCoatings} coatings allowed for this size`);
+                return;
+            }
+            
+            updateCoatingsDisplay();
+        }
+
+        function updateCoatingsDisplay() {
+            const list = document.getElementById('coatingsList');
+            if (coatings.length === 0) {
+                list.innerHTML = '<span style="color: var(--text-light); font-size: 0.875rem;">No coatings applied</span>';
+            } else {
+                list.innerHTML = coatings.map(c => `
+                    <span class="coating-tag">
+                        ${c.name} (+${c.constructionBonus}/${c.protectionBonus})
+                        <button onclick="removeCoating('${c.name}')">&times;</button>
+                    </span>
+                `).join('');
+            }
+            
+            // Update checkboxes
+            coatings.forEach(c => {
+                const checkboxId = 'coating' + c.name.replace('-', '').replace(' ', '');
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) checkbox.checked = true;
+            });
+            
+            calculateMass();
+        }
+
+        function removeCoating(name) {
+            const index = coatings.findIndex(c => c.name === name);
+            if (index >= 0) {
+                coatings.splice(index, 1);
+                const checkboxId = 'coating' + name.replace('-', '').replace(' ', '');
+                document.getElementById(checkboxId).checked = false;
+                updateCoatingsDisplay();
+            }
+        }
+
+        // Update power options visibility
+        function updatePowerOptions() {
+            const powerType = document.getElementById('powerType').value;
+            const optionsDiv = document.getElementById('powerOptions');
+            
+            if (powerType === 'none') {
+                optionsDiv.style.display = 'none';
+            } else {
+                optionsDiv.style.display = 'block';
+                
+                // Set defaults based on power type
+                const powerSize = document.getElementById('powerSize');
+                const powerDuration = document.getElementById('powerDuration');
+                
+                switch(powerType) {
+                    case 'powercell':
+                        powerSize.value = Math.max(1, parseFloat(document.getElementById('exactSize').value) - 1);
+                        powerDuration.value = Math.round(24 * parseInt(document.getElementById('techLevel').value) / 10);
+                        break;
+                    case 'ambient':
+                        powerSize.value = 1;
+                        powerDuration.value = -1; // Continuous
+                        break;
+                    case 'fuelcell':
+                        powerSize.value = 3;
+                        powerDuration.value = -1; // Independent
+                        break;
+                    case 'generator':
+                        powerSize.value = 4;
+                        powerDuration.value = -1; // Independent
+                        break;
+                    case 'fusion':
+                        powerSize.value = 3.5;
+                        powerDuration.value = -1; // Independent
+                        break;
+                    case 'plugin':
+                        powerSize.value = 1;
+                        powerDuration.value = -1; // Grid connected
+                        break;
+                }
+            }
+        }
+
+        // Update signatures
+        function updateSignatures() {
+            signatures = [];
+            
+            if (document.getElementById('sigElectric').checked) signatures.push('Electric');
+            if (document.getElementById('sigGravitic').checked) signatures.push('Gravitic');
+            if (document.getElementById('sigMagnetic').checked) signatures.push('Magnetic');
+            if (document.getElementById('sigEM').checked) signatures.push('EM (Radio)');
+            if (document.getElementById('sigLight').checked) signatures.push('Light');
+            if (document.getElementById('sigSound').checked) signatures.push('Sound');
+            if (document.getElementById('sigHeat').checked) signatures.push('Heat');
+            
+            const display = document.getElementById('signatureDisplay');
+            if (signatures.length === 0) {
+                display.innerHTML = '<span style="color: var(--text-light); font-size: 0.875rem;">No signatures selected</span>';
+            } else {
+                display.innerHTML = signatures.map(s => `<span class="signature-badge">${s}</span>`).join('');
+            }
+        }
+
+        // Update range effects
+        function updateRangeEffects() {
+            // This is mainly for display - actual effects are calculated in generateEquipment
+        }
+
+        // Calculate final cost
+        function calculateFinalCost() {
+            return parseFloat(document.getElementById('baseValue').value) || 1000;
+        }
+
+        // Generate equipment
+        function generateEquipment() {
+            // Gather all input values
+            const data = {
+                name: document.getElementById('equipmentName').value || 'Unnamed Equipment',
+                simpleName: document.getElementById('simpleName').value || 'Device',
+                functionType: document.getElementById('functionType').value || 'enabler',
+                description: document.getElementById('description').value || 'A piece of equipment.',
+                
+                techLevel: parseInt(document.getElementById('techLevel').value),
+                tlStage: document.getElementById('tlStage').value,
+                
+                size: parseFloat(document.getElementById('exactSize').value),
+                profile: document.getElementById('profile').value,
+                
+                density: parseFloat(document.getElementById('density').value),
+                densityLabel: document.getElementById('density').options[document.getElementById('density').selectedIndex].text,
+                construction: parseFloat(document.getElementById('construction').value),
+                constructionLabel: document.getElementById('construction').options[document.getElementById('construction').selectedIndex].text,
+                
+                length: parseFloat(document.getElementById('length').value),
+                width: parseFloat(document.getElementById('width').value),
+                height: parseFloat(document.getElementById('height').value),
+                
+                coatings: [...coatings],
+                powerType: document.getElementById('powerType').value,
+                powerSize: parseFloat(document.getElementById('powerSize').value),
+                powerDuration: parseInt(document.getElementById('powerDuration').value),
+                
+                signatures: [...signatures],
+                
+                qVal: parseInt(document.getElementById('qVal').value),
+                rVal: parseInt(document.getElementById('rVal').value),
+                eVal: parseInt(document.getElementById('eVal').value),
+                bVal: parseInt(document.getElementById('bVal').value),
+                sVal: parseInt(document.getElementById('sVal').value),
+                
+                rangeCategory: document.getElementById('rangeCategory').value,
+                controlType: document.getElementById('controlType').value,
+                valueEnhancement: document.getElementById('valueEnhancement').value,
+                
+                baseValue: parseFloat(document.getElementById('baseValue').value),
+                
+                certified: document.getElementById('certified').checked,
+                battlefieldOverride: document.getElementById('battlefieldOverride').checked,
+                ruggedized: document.getElementById('ruggedized').checked,
+                protectiveCase: document.getElementById('protectiveCase').checked
+            };
+
+            // Calculate derived values
+            const calc = calculateMass();
+            data.volumeM3 = calc.volumeM3;
+            data.volumeLiters = calc.volumeLiters;
+            data.mass = calc.mass;
+            
+            // Calculate protection with coatings
+            let totalConstruction = data.construction;
+            let protectionAr = data.density;
+            let protectionCa = 1;
+            let protectionFl = 1;
+            let protectionRa = 1;
+            let protectionSo = 1;
+            let protectionPs = 1;
+            let protectionIn = 1;
+            let protectionSe = 1;
+            
+            // Armor protection from density
+            if (data.density > 1) {
+                protectionAr = data.density;
+            }
+            
+            // Apply construction protection modifiers
+            const construction = parseFloat(document.getElementById('construction').value);
+            const density = parseFloat(document.getElementById('density').value);
+            
+            // Base protection
+            data.protection = {
+                Ar: density,
+                Ca: 1,
+                Fl: 1,
+                Ra: 1,
+                So: 1,
+                Ps: 1,
+                In: 1,
+                Se: 1
+            };
+            
+            // Apply construction effects
+            if (construction === 1.0) {
+                data.protection.Ar += 3;
+            } else if (construction === 0.8) {
+                data.protection.Ar += 1;
+            } else if (construction === 0.5) {
+                data.protection.Ar = Math.floor(data.protection.Ar * 0.5);
+            } else if (construction === 0.2) {
+                data.protection.Ar = Math.floor(data.protection.Ar * 0.33);
+            }
+            
+            // Apply coatings
+            data.coatings.forEach(coating => {
+                totalConstruction += coating.constructionBonus * 0.1;
+                
+                switch(coating.name) {
+                    case 'Armored': data.protection.Ar += 3; break;
+                    case 'EM-proof': data.protection.Ca += 6; break;
+                    case 'Flashproof': data.protection.Fl += 6; break;
+                    case 'Radproof': data.protection.Ra += 3; break;
+                    case 'Soundproof': data.protection.So += 6; break;
+                    case 'Psiproof': data.protection.Ps += 6; break;
+                    case 'Insulated': data.protection.In += 6; break;
+                    case 'Sealed': data.protection.Se += 6; break;
+                }
+            });
+            
+            // Minimum protection
+            Object.keys(data.protection).forEach(key => {
+                data.protection[key] = Math.max(1, data.protection[key]);
+            });
+
+            // Calculate cost with all modifiers
+            let cost = data.baseValue;
+            
+            // Define cost multipliers
+            const tlModifiers = {
+                'prototype': 0.25,
+                'experimental': 0.5,
+                'standard': 1.0,
+                'civilian': 0.75,
+                'military': 1.5
+            };
+            
+            const valueModifiers = {
+                'salvage': 0.25,
+                'budget': 0.5,
+                'standard': 1.0,
+                'premium': 2.0,
+                'luxury': 5.0
+            };
+            
+            const qrebSum = data.qVal + data.rVal + data.eVal + data.bVal + data.sVal;
+            const qrebMultiplier = 0.8 + (qrebSum - 15) * 0.02;
+            
+            const rangeMultipliers = {
+                'personal': 0.5,
+                'short': 1.0,
+                'medium': 2.0,
+                'long': 4.0,
+                'distant': 8.0,
+                'orbital': 20.0,
+                'space': 50.0
+            };
+            
+            // TL Stage modifiers
+            cost *= tlModifiers[data.tlStage] || 1.0;
+            
+            // Value enhancement modifiers
+            cost *= valueModifiers[data.valueEnhancement] || 1.0;
+            
+            // QREBS multiplier
+            cost *= Math.max(0.5, qrebMultiplier);
+            
+            // Range effects on cost
+            cost *= rangeMultipliers[data.rangeCategory] || 1.0;
+            
+            // Store cost multipliers in data for display
+            data.costMultipliers = {
+                tlStage: tlModifiers[data.tlStage] || 1.0,
+                grade: valueModifiers[data.valueEnhancement] || 1.0,
+                qreb: qrebMultiplier,
+                range: rangeMultipliers[data.rangeCategory] || 1.0
+            };
+            
+            data.qrebSum = qrebSum;
+            
+            // Feature costs
+            if (data.certified) cost *= 1.25;
+            if (data.battlefieldOverride) cost *= 1.15;
+            if (data.ruggedized) cost *= 1.3;
+            if (data.protectiveCase) cost *= 1.2;
+            
+            // Power supply cost
+            if (data.powerType !== 'none') {
+                cost += data.powerSize * 100;
+            }
+            
+            data.finalCost = Math.round(cost);
+            
+            // Signature strength
+            data.signatureStrength = data.powerSize ? data.powerSize + 2 : 2;
+
+            // Store and display results
+            generatedData = data;
+            displayResults(data);
+            updateChecklist(data);
+        }
+
+        function displayResults(data) {
+            const content = document.getElementById('resultsContent');
+            
+            // Profile display name
+            const profileNames = {
+                'cube': 'Cube', 'sphere': 'Sphere', 'cylinder': 'Cylinder',
+                'disk': 'Disk', 'rod': 'Rod', 'thicksheet': 'Thick Sheet',
+                'slab': 'Slab', 'pyramid': 'Pyramid', 'vthick': 'Very Thick',
+                'thick': 'Thick', 'typical': 'Typical Humanoid', 'thin': 'Thin',
+                'vthin': 'Very Thin', 'flat': 'Flat', 'vflat': 'Very Flat',
+                'sheet': 'Sheet', 'hvyfabric': 'Heavy Fabric',
+                'fabric': 'Fabric', 'lightfabric': 'Light Fabric'
+            };
+
+            // Function type display
+            const functionNames = {
+                'enabler': 'Enabler', 'protector': 'Protector',
+                'enhancer': 'Enhancer', 'resolver': 'Resolver',
+                'entangler': 'Entangler', 'cultural': 'Cultural Item',
+                'value': 'Value Item', 'analog': 'Analog'
+            };
+
+            // Power type display
+            const powerNames = {
+                'powercell': 'Power Cell', 'ambient': 'Ambient Panel',
+                'fuelcell': 'Fuel Cell', 'generator': 'Generator',
+                'fusion': 'Fusion Plus', 'plugin': 'Plug In', 'none': 'None'
+            };
+
+            // Duration text
+            let durationText = 'N/A';
+            if (data.powerDuration > 0) {
+                durationText = `${data.powerDuration} hours`;
+            } else if (data.powerDuration === -1) {
+                durationText = data.powerType === 'ambient' ? 'Continuous (while lit)' : 'Independent';
+            }
+
+            content.innerHTML = `
+                <div class="result-section">
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary);">${data.name}</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1rem;">${data.simpleName} - ${functionNames[data.functionType] || 'Enabler'}</p>
+                    <p style="margin-bottom: 1rem;">${data.description}</p>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="result-section">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem;">Physical Properties</h4>
+                    <div class="result-row">
+                        <span class="result-label">Tech Level</span>
+                        <span class="result-value">TL ${data.techLevel}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Size</span>
+                        <span class="result-value">${data.size.toFixed(1)} (${(sizeToMeters(data.size) * 100).toFixed(1)} cm)</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Profile</span>
+                        <span class="result-value">${profileNames[data.profile] || data.profile}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Dimensions</span>
+                        <span class="result-value">${(data.length * 100).toFixed(1)} × ${(data.width * 100).toFixed(1)} × ${(data.height * 100).toFixed(1)} cm</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Volume</span>
+                        <span class="result-value">${data.volumeLiters.toFixed(2)} L (${data.volumeM3.toFixed(4)} m³)</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Mass</span>
+                        <span class="result-value">${data.mass.toFixed(2)} kg</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Density</span>
+                        <span class="result-value">${data.densityLabel}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Construction</span>
+                        <span class="result-value">${data.constructionLabel}</span>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="result-section">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem;">Protection</h4>
+                    <div class="protection-grid">
+                        <div class="protection-item">
+                            <div class="protection-type">Ar</div>
+                            <div class="protection-value">${data.protection.Ar}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">Ca</div>
+                            <div class="protection-value">${data.protection.Ca}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">Fl</div>
+                            <div class="protection-value">${data.protection.Fl}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">Ra</div>
+                            <div class="protection-value">${data.protection.Ra}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">So</div>
+                            <div class="protection-value">${data.protection.So}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">Ps</div>
+                            <div class="protection-value">${data.protection.Ps}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">In</div>
+                            <div class="protection-value">${data.protection.In}</div>
+                        </div>
+                        <div class="protection-item">
+                            <div class="protection-type">Se</div>
+                            <div class="protection-value">${data.protection.Se}</div>
+                        </div>
+                    </div>
+                    ${data.coatings.length > 0 ? `
+                        <div style="margin-top: 0.75rem;">
+                            <span style="font-size: 0.75rem; color: var(--text-light);">Coatings:</span>
+                            ${data.coatings.map(c => `<span class="coating-tag">${c.name}</span>`).join(' ')}
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="result-section">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem;">Power & Signature</h4>
+                    <div class="result-row">
+                        <span class="result-label">Power Supply</span>
+                        <span class="result-value">${powerNames[data.powerType] || 'None'}</span>
+                    </div>
+                    ${data.powerType !== 'none' ? `
+                        <div class="result-row">
+                            <span class="result-label">Power Size</span>
+                            <span class="result-value">${data.powerSize}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Duration</span>
+                            <span class="result-value">${durationText}</span>
+                        </div>
+                    ` : ''}
+                    <div class="result-row">
+                        <span class="result-label">Signature</span>
+                        <span class="result-value">${data.signatures.length > 0 ? data.signatures.join(', ') : 'None'}</span>
+                    </div>
+                    ${data.signatures.length > 0 ? `
+                        <div class="result-row">
+                            <span class="result-label">Signature Strength</span>
+                            <span class="result-value">${data.signatureStrength}</span>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="result-section">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem;">QREBS</h4>
+                    <div class="qreb-display">
+                        <div class="qreb-item">
+                            <div class="qreb-letter">Q</div>
+                            <div class="qreb-value">${data.qVal}</div>
+                        </div>
+                        <div class="qreb-item">
+                            <div class="qreb-letter">R</div>
+                            <div class="qreb-value">${data.rVal}</div>
+                        </div>
+                        <div class="qreb-item">
+                            <div class="qreb-letter">E</div>
+                            <div class="qreb-value">${data.eVal}</div>
+                        </div>
+                        <div class="qreb-item">
+                            <div class="qreb-letter">B</div>
+                            <div class="qreb-value">${data.bVal}</div>
+                        </div>
+                        <div class="qreb-item">
+                            <div class="qreb-letter">S</div>
+                            <div class="qreb-value">${data.sVal}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="result-section">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem;">Configuration</h4>
+                    <div class="result-row">
+                        <span class="result-label">Range</span>
+                        <span class="result-value">${data.rangeCategory}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Controls</span>
+                        <span class="result-value">${data.controlType}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Grade</span>
+                        <span class="result-value">${data.valueEnhancement}</span>
+                    </div>
+                    ${data.certified ? '<div class="result-row"><span class="result-label">Certified</span><span class="result-value">Yes</span></div>' : ''}
+                    ${data.battlefieldOverride ? '<div class="result-row"><span class="result-label">Battlefield Override</span><span class="result-value">Yes</span></div>' : ''}
+                    ${data.ruggedized ? '<div class="result-row"><span class="result-label">Ruggedized</span><span class="result-value">Yes (TL hits)</span></div>' : ''}
+                    ${data.protectiveCase ? '<div class="result-row"><span class="result-label">Protective Case</span><span class="result-value">Yes</span></div>' : ''}
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="cost-breakdown">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem;">Cost Breakdown</h4>
+                    <div class="cost-row">
+                        <span>Base Value</span>
+                        <span>Cr${data.baseValue.toLocaleString()}</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>TL Stage (${data.tlStage})</span>
+                        <span>×${data.costMultipliers.tlStage.toFixed(2)}x</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Grade (${data.valueEnhancement})</span>
+                        <span>×${data.costMultipliers.grade.toFixed(2)}x</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>QREBS (${data.qrebSum})</span>
+                        <span>×${data.costMultipliers.qreb.toFixed(2)}x</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Range (${data.rangeCategory})</span>
+                        <span>×${data.costMultipliers.range.toFixed(2)}x</span>
+                    </div>
+                    ${data.powerType !== 'none' ? `
+                        <div class="cost-row">
+                            <span>Power System</span>
+                            <span>+Cr${Math.round(data.powerSize * 100).toLocaleString()}</span>
+                        </div>
+                    ` : ''}
+                    ${data.certified ? '<div class="cost-row"><span>Certified</span><span>+25%</span></div>' : ''}
+                    ${data.battlefieldOverride ? '<div class="cost-row"><span>Battlefield Override</span><span>+15%</span></div>' : ''}
+                    ${data.ruggedized ? '<div class="cost-row"><span>Ruggedized</span><span>+30%</span></div>' : ''}
+                    ${data.protectiveCase ? '<div class="cost-row"><span>Protective Case</span><span>+20%</span></div>' : ''}
+                    <div class="cost-row total">
+                        <span>Final Cost</span>
+                        <span>Cr${data.finalCost.toLocaleString()}</span>
+                    </div>
+                </div>
+
+                <div class="export-options">
+                    <button class="btn btn-secondary" onclick="exportJSON()">Export JSON</button>
+                    <button class="btn btn-secondary" onclick="exportText()">Export Text</button>
+                    <button class="btn btn-secondary" onclick="printCard()">Print</button>
+                </div>
+            `;
+        }
+
+        function updateChecklist(data) {
+            const profileNames = {
+                'cube': 'Cube', 'sphere': 'Sphere', 'cylinder': 'Cylinder',
+                'disk': 'Disk', 'rod': 'Rod', 'thicksheet': 'Thick Sheet',
+                'slab': 'Slab', 'pyramid': 'Pyramid', 'vthick': 'Very Thick',
+                'thick': 'Thick', 'typical': 'Typical Humanoid', 'thin': 'Thin',
+                'vthin': 'Very Thin', 'flat': 'Flat', 'vflat': 'Very Flat',
+                'sheet': 'Sheet', 'hvyfabric': 'Heavy Fabric',
+                'fabric': 'Fabric', 'lightfabric': 'Light Fabric'
+            };
+
+            const functionNames = {
+                'enabler': 'Enabler', 'protector': 'Protector',
+                'enhancer': 'Enhancer', 'resolver': 'Resolver',
+                'entangler': 'Entangler', 'cultural': 'Cultural Item',
+                'value': 'Value Item', 'analog': 'Analog'
+            };
+
+            document.getElementById('checklist1').textContent = functionNames[data.functionType] || 'Enabler';
+            document.getElementById('checklist2').textContent = `TL ${data.techLevel}`;
+            document.getElementById('checklist3').textContent = data.size.toFixed(1);
+            document.getElementById('checklist4').textContent = profileNames[data.profile] || data.profile;
+            document.getElementById('checklist5').textContent = data.density;
+            document.getElementById('checklist6').textContent = data.construction;
+            document.getElementById('checklist7').textContent = `${(data.length*100).toFixed(0)}×${(data.width*100).toFixed(0)}×${(data.height*100).toFixed(0)}cm`;
+            document.getElementById('checklist8').textContent = `${data.volumeLiters.toFixed(2)} L`;
+            document.getElementById('checklist9').textContent = `${data.mass.toFixed(2)} kg`;
+            document.getElementById('checklist10').textContent = `Ar${data.protection.Ar} Ca${data.protection.Ca} Fl${data.protection.Fl} Ra${data.protection.Ra} So${data.protection.So} Ps${data.protection.Ps} In${data.protection.In} Se${data.protection.Se}`;
+            document.getElementById('checklist11').textContent = data.controlType;
+            document.getElementById('checklist12').textContent = `Cr${data.finalCost.toLocaleString()}`;
+            
+            const powerNames = {
+                'powercell': 'Power Cell', 'ambient': 'Ambient Panel',
+                'fuelcell': 'Fuel Cell', 'generator': 'Generator',
+                'fusion': 'Fusion Plus', 'plugin': 'Plug In', 'none': 'None'
+            };
+            document.getElementById('checklist13').textContent = data.powerType !== 'none' ? `${powerNames[data.powerType]} (${data.powerSize})` : 'None';
+            document.getElementById('checklist14').textContent = data.signatures.length > 0 ? data.signatures.join(', ') : 'None';
+        }
+
+        function exportJSON() {
+            if (!generatedData) {
+                alert('Please generate equipment first');
+                return;
+            }
+            
+            const json = JSON.stringify(generatedData, null, 2);
+            downloadFile(json, `${generatedData.name.replace(/\s+/g, '_')}.json`, 'application/json');
+        }
+
+        function exportText() {
+            if (!generatedData) {
+                alert('Please generate equipment first');
+                return;
+            }
+            
+            const profileNames = {
+                'cube': 'Cube', 'sphere': 'Sphere', 'cylinder': 'Cylinder',
+                'disk': 'Disk', 'rod': 'Rod', 'thicksheet': 'Thick Sheet',
+                'slab': 'Slab', 'pyramid': 'Pyramid', 'vthick': 'Very Thick',
+                'thick': 'Thick', 'typical': 'Typical Humanoid', 'thin': 'Thin',
+                'vthin': 'Very Thin', 'flat': 'Flat', 'vflat': 'Very Flat',
+                'sheet': 'Sheet', 'hvyfabric': 'Heavy Fabric',
+                'fabric': 'Fabric', 'lightfabric': 'Light Fabric'
+            };
+
+            const text = `
+THINGMAKER EQUIPMENT DESIGN
+============================
+Name: ${generatedData.name}
+Simple Name: ${generatedData.simpleName}
+Type: ${generatedData.functionType}
+
+TECHNICAL SPECIFICATIONS
+------------------------
+Tech Level: TL ${generatedData.techLevel}
+Size: ${generatedData.size.toFixed(1)}
+Profile: ${profileNames[generatedData.profile]}
+Dimensions: ${(generatedData.length*100).toFixed(1)} × ${(generatedData.width*100).toFixed(1)} × ${(generatedData.height*100).toFixed(1)} cm
+Volume: ${generatedData.volumeLiters.toFixed(2)} L
+Mass: ${generatedData.mass.toFixed(2)} kg
+Density: ${generatedData.density}
+Construction: ${generatedData.construction}
+
+PROTECTION
+----------
+Ar: ${generatedData.protection.Ar} | Ca: ${generatedData.protection.Ca} | Fl: ${generatedData.protection.Fl}
+Ra: ${generatedData.protection.Ra} | So: ${generatedData.protection.So} | Ps: ${generatedData.protection.Ps}
+In: ${generatedData.protection.In} | Se: ${generatedData.protection.Se}
+
+POWER & SIGNATURE
+-----------------
+Power: ${generatedData.powerType}
+Power Size: ${generatedData.powerSize}
+Duration: ${generatedData.powerDuration}
+Signatures: ${generatedData.signatures.join(', ') || 'None'}
+Signature Strength: ${generatedData.signatureStrength}
+
+QUALITY (QREBS)
+---------------
+Quality: ${generatedData.qVal} | Reliability: ${generatedData.rVal}
+Endurance: ${generatedData.eVal} | Build: ${generatedData.bVal} | Servicability: ${generatedData.sVal}
+
+CONFIGURATION
+-------------
+Range: ${generatedData.rangeCategory}
+Controls: ${generatedData.controlType}
+Grade: ${generatedData.valueEnhancement}
+TL Stage: ${generatedData.tlStage}
+${generatedData.certified ? '✓ Certified' : ''}
+${generatedData.battlefieldOverride ? '✓ Battlefield Override' : ''}
+${generatedData.ruggedized ? '✓ Ruggedized' : ''}
+${generatedData.protectiveCase ? '✓ Protective Case' : ''}
+
+COST: Cr${generatedData.finalCost.toLocaleString()}
+            `.trim();
+            
+            downloadFile(text, `${generatedData.name.replace(/\s+/g, '_')}.txt`, 'text/plain');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function printCard() {
+            window.print();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateEraInfo();
+            calculateDimensions();
+            updatePowerOptions();
+            updateSignatures();
+        });
+    </script>
+</body>
+</html>
