@@ -1,0 +1,378 @@
+Help on class ExpansionTile in module flet.controls.material.expansion_tile:
+
+class ExpansionTile(flet.controls.layout_control.LayoutControl, flet.controls.adaptive_control.AdaptiveControl)
+ |  ExpansionTile(
+ |      title: Union[str, ForwardRef('Control')],
+ |      controls: Optional[list[flet.controls.control.Control]] = None,
+ |      subtitle: Union[str, ForwardRef('Control'), NoneType] = None,
+ |      leading: Union[flet.controls.icon_data.IconData, ForwardRef('Control'), NoneType] = None,
+ |      trailing: Union[flet.controls.icon_data.IconData, ForwardRef('Control'), NoneType] = None,
+ |      controls_padding: Union[int, float, flet.controls.padding.Padding, NoneType] = None,
+ |      tile_padding: Union[int, float, flet.controls.padding.Padding, NoneType] = None,
+ |      affinity: Optional[flet.controls.material.expansion_tile.TileAffinity] = None,
+ |      expanded_alignment: Optional[flet.controls.alignment.Alignment] = None,
+ |      expanded_cross_axis_alignment: flet.controls.types.CrossAxisAlignment = <CrossAxisAlignment.CENTER: 'center'>,
+ |      clip_behavior: Optional[flet.controls.types.ClipBehavior] = None,
+ |      maintain_state: bool = False,
+ |      text_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      icon_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      shape: Optional[flet.controls.buttons.OutlinedBorder] = None,
+ |      bgcolor: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_bgcolor: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_icon_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_text_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_shape: Optional[flet.controls.buttons.OutlinedBorder] = None,
+ |      dense: Optional[bool] = None,
+ |      enable_feedback: bool = True,
+ |      show_trailing_icon: bool = True,
+ |      min_tile_height: Union[int, float, NoneType] = None,
+ |      expanded: bool = False,
+ |      visual_density: Optional[flet.controls.types.VisualDensity] = None,
+ |      animation_style: Optional[flet.controls.animation.AnimationStyle] = None,
+ |      on_change: Union[Callable[[], Any], Callable[[flet.controls.control_event.Event[ForwardRef('ExpansionTile')]], Any], NoneType] = None,
+ |      *,
+ |      data: Any = None,
+ |      key: Union[flet.controls.keys.ValueKey, flet.controls.keys.ScrollKey, str, int, float, bool, NoneType] = None,
+ |      ref: dataclasses.InitVar[typing.Optional[flet.controls.ref.Ref[ForwardRef('BaseControl')]]] = None,
+ |      expand: Union[bool, int, NoneType] = None,
+ |      expand_loose: bool = False,
+ |      col: Union[dict[Union[str, flet.controls.types.ResponsiveRowBreakpoint], Union[int, float]], int, float] = 12,
+ |      opacity: Union[int, float] = 1.0,
+ |      tooltip: Union[str, flet.controls.material.tooltip.Tooltip, NoneType] = None,
+ |      badge: Union[str, flet.controls.material.badge.Badge, NoneType] = None,
+ |      visible: bool = True,
+ |      disabled: bool = False,
+ |      rtl: bool = False,
+ |      adaptive: Optional[bool] = None,
+ |      width: Union[int, float, NoneType] = None,
+ |      height: Union[int, float, NoneType] = None,
+ |      left: Union[int, float, NoneType] = None,
+ |      top: Union[int, float, NoneType] = None,
+ |      right: Union[int, float, NoneType] = None,
+ |      bottom: Union[int, float, NoneType] = None,
+ |      align: Optional[flet.controls.alignment.Alignment] = None,
+ |      margin: Union[int, float, flet.controls.margin.Margin, NoneType] = None,
+ |      rotate: Union[int, float, flet.controls.transform.Rotate, NoneType] = None,
+ |      scale: Union[int, float, flet.controls.transform.Scale, NoneType] = None,
+ |      offset: Union[flet.controls.transform.Offset, tuple[Union[int, float], Union[int, float]], NoneType] = None,
+ |      aspect_ratio: Union[int, float, NoneType] = None,
+ |      animate_opacity: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_size: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_position: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_align: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_margin: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_rotation: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_scale: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_offset: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      on_animation_end: Union[Callable[[], Any], Callable[[flet.controls.control_event.Event[ForwardRef('LayoutControl')]], Any], NoneType] = None
+ |  ) -> None
+ |
+ |  A single-line ListTile with an expansion arrow icon that expands or collapses the
+ |  tile to reveal or hide its controls.
+ |
+ |  ```python
+ |  ft.ExpansionTile(
+ |      width=400,
+ |      title="Account",
+ |      subtitle="Manage profile and security",
+ |      expanded=True,
+ |      controls=[
+ |          ft.ListTile(title=ft.Text("Profile")),
+ |          ft.ListTile(title=ft.Text("Security")),
+ |      ],
+ |  )
+ |  ```
+ |
+ |  Method resolution order:
+ |      ExpansionTile
+ |      flet.controls.layout_control.LayoutControl
+ |      flet.controls.adaptive_control.AdaptiveControl
+ |      flet.controls.control.Control
+ |      flet.controls.base_control.BaseControl
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __eq__(self, other)
+ |      Return self==value.
+ |
+ |  __init__(
+ |      self,
+ |      title: Union[str, ForwardRef('Control')],
+ |      controls: Optional[list[flet.controls.control.Control]] = None,
+ |      subtitle: Union[str, ForwardRef('Control'), NoneType] = None,
+ |      leading: Union[flet.controls.icon_data.IconData, ForwardRef('Control'), NoneType] = None,
+ |      trailing: Union[flet.controls.icon_data.IconData, ForwardRef('Control'), NoneType] = None,
+ |      controls_padding: Union[int, float, flet.controls.padding.Padding, NoneType] = None,
+ |      tile_padding: Union[int, float, flet.controls.padding.Padding, NoneType] = None,
+ |      affinity: Optional[flet.controls.material.expansion_tile.TileAffinity] = None,
+ |      expanded_alignment: Optional[flet.controls.alignment.Alignment] = None,
+ |      expanded_cross_axis_alignment: flet.controls.types.CrossAxisAlignment = <CrossAxisAlignment.CENTER: 'center'>,
+ |      clip_behavior: Optional[flet.controls.types.ClipBehavior] = None,
+ |      maintain_state: bool = False,
+ |      text_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      icon_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      shape: Optional[flet.controls.buttons.OutlinedBorder] = None,
+ |      bgcolor: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_bgcolor: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_icon_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_text_color: Union[str, flet.controls.colors.Colors, flet.controls.cupertino.cupertino_colors.CupertinoColors, NoneType] = None,
+ |      collapsed_shape: Optional[flet.controls.buttons.OutlinedBorder] = None,
+ |      dense: Optional[bool] = None,
+ |      enable_feedback: bool = True,
+ |      show_trailing_icon: bool = True,
+ |      min_tile_height: Union[int, float, NoneType] = None,
+ |      expanded: bool = False,
+ |      visual_density: Optional[flet.controls.types.VisualDensity] = None,
+ |      animation_style: Optional[flet.controls.animation.AnimationStyle] = None,
+ |      on_change: Union[Callable[[], Any], Callable[[flet.controls.control_event.Event[ForwardRef('ExpansionTile')]], Any], NoneType] = None,
+ |      *,
+ |      data: Any = None,
+ |      key: Union[flet.controls.keys.ValueKey, flet.controls.keys.ScrollKey, str, int, float, bool, NoneType] = None,
+ |      ref: dataclasses.InitVar[typing.Optional[flet.controls.ref.Ref[ForwardRef('BaseControl')]]] = None,
+ |      expand: Union[bool, int, NoneType] = None,
+ |      expand_loose: bool = False,
+ |      col: Union[dict[Union[str, flet.controls.types.ResponsiveRowBreakpoint], Union[int, float]], int, float] = 12,
+ |      opacity: Union[int, float] = 1.0,
+ |      tooltip: Union[str, flet.controls.material.tooltip.Tooltip, NoneType] = None,
+ |      badge: Union[str, flet.controls.material.badge.Badge, NoneType] = None,
+ |      visible: bool = True,
+ |      disabled: bool = False,
+ |      rtl: bool = False,
+ |      adaptive: Optional[bool] = None,
+ |      width: Union[int, float, NoneType] = None,
+ |      height: Union[int, float, NoneType] = None,
+ |      left: Union[int, float, NoneType] = None,
+ |      top: Union[int, float, NoneType] = None,
+ |      right: Union[int, float, NoneType] = None,
+ |      bottom: Union[int, float, NoneType] = None,
+ |      align: Optional[flet.controls.alignment.Alignment] = None,
+ |      margin: Union[int, float, flet.controls.margin.Margin, NoneType] = None,
+ |      rotate: Union[int, float, flet.controls.transform.Rotate, NoneType] = None,
+ |      scale: Union[int, float, flet.controls.transform.Scale, NoneType] = None,
+ |      offset: Union[flet.controls.transform.Offset, tuple[Union[int, float], Union[int, float]], NoneType] = None,
+ |      aspect_ratio: Union[int, float, NoneType] = None,
+ |      animate_opacity: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_size: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_position: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_align: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_margin: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_rotation: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_scale: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      animate_offset: Union[bool, int, flet.controls.animation.Animation, NoneType] = None,
+ |      on_animation_end: Union[Callable[[], Any], Callable[[flet.controls.control_event.Event[ForwardRef('LayoutControl')]], Any], NoneType] = None
+ |  ) -> None
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  __post_init__ = new_post_init(self: ~T, *args) from flet.controls.base_control._apply_control.<locals>
+ |      Set the type and isolation only if explicitly provided.
+ |
+ |  __replace__ = _replace(self, /, **changes) from dataclasses
+ |
+ |  __repr__(self)
+ |      Return repr(self).
+ |
+ |  before_update(self)
+ |      This method is called every time when this control is being updated.
+ |
+ |      /// details | Note
+ |      Make sure not to call/request an `update()` here.
+ |      ///
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |
+ |  __annotations__ = {'affinity': typing.Optional[flet.controls.material....
+ |
+ |  __dataclass_fields__ = {'_c': Field(name='_c',type=<class 'str'>,defau...
+ |
+ |  __dataclass_params__ = _DataclassParams(init=True,repr=True,eq=True,or...
+ |
+ |  __hash__ = None
+ |
+ |  __match_args__ = ('title', 'controls', 'subtitle', 'leading', 'trailin...
+ |
+ |  affinity = None
+ |
+ |  animation_style = None
+ |
+ |  bgcolor = None
+ |
+ |  clip_behavior = None
+ |
+ |  collapsed_bgcolor = None
+ |
+ |  collapsed_icon_color = None
+ |
+ |  collapsed_shape = None
+ |
+ |  collapsed_text_color = None
+ |
+ |  controls = None
+ |
+ |  controls_padding = None
+ |
+ |  dense = None
+ |
+ |  enable_feedback = True
+ |
+ |  expanded = False
+ |
+ |  expanded_alignment = None
+ |
+ |  expanded_cross_axis_alignment = <CrossAxisAlignment.CENTER: 'center'>
+ |
+ |  icon_color = None
+ |
+ |  leading = None
+ |
+ |  maintain_state = False
+ |
+ |  min_tile_height = None
+ |
+ |  on_change = None
+ |
+ |  shape = None
+ |
+ |  show_trailing_icon = True
+ |
+ |  subtitle = None
+ |
+ |  text_color = None
+ |
+ |  tile_padding = None
+ |
+ |  trailing = None
+ |
+ |  visual_density = None
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from flet.controls.layout_control.LayoutControl:
+ |
+ |  align = None
+ |
+ |  animate_align = None
+ |
+ |  animate_margin = None
+ |
+ |  animate_offset = None
+ |
+ |  animate_opacity = None
+ |
+ |  animate_position = None
+ |
+ |  animate_rotation = None
+ |
+ |  animate_scale = None
+ |
+ |  animate_size = None
+ |
+ |  aspect_ratio = None
+ |
+ |  bottom = None
+ |
+ |  height = None
+ |
+ |  left = None
+ |
+ |  margin = None
+ |
+ |  offset = None
+ |
+ |  on_animation_end = None
+ |
+ |  right = None
+ |
+ |  rotate = None
+ |
+ |  scale = None
+ |
+ |  top = None
+ |
+ |  width = None
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from flet.controls.adaptive_control.AdaptiveControl:
+ |
+ |  adaptive = None
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from flet.controls.control.Control:
+ |
+ |  badge = None
+ |
+ |  col = 12
+ |
+ |  disabled = False
+ |
+ |  expand = None
+ |
+ |  expand_loose = False
+ |
+ |  opacity = 1.0
+ |
+ |  rtl = False
+ |
+ |  tooltip = None
+ |
+ |  visible = True
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from flet.controls.base_control.BaseControl:
+ |
+ |  __str__(self)
+ |      Return str(self).
+ |
+ |  before_event(
+ |      self,
+ |      e: flet.controls.control_event.Event[ForwardRef('BaseControl')]
+ |  )
+ |
+ |  build(self)
+ |      Called once during control initialization to define its child controls.
+ |      self.page is available in this method.
+ |
+ |  did_mount(self)
+ |
+ |  init(self)
+ |
+ |  is_isolated(self)
+ |
+ |  update(self) -> None
+ |      # public methods
+ |
+ |  will_unmount(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from flet.controls.base_control.BaseControl:
+ |
+ |  page
+ |      The page to which this control belongs to.
+ |
+ |  parent
+ |      The direct ancestor(parent) of this control.
+ |
+ |      It defaults to `None` and will only have a value when this control is mounted
+ |      (added to the page tree).
+ |
+ |      The `Page` control (which is the root of the tree) is an exception - it always
+ |      has `parent=None`.
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from flet.controls.base_control.BaseControl:
+ |
+ |  __dict__
+ |      dictionary for instance variables
+ |
+ |  __weakref__
+ |      list of weak references to the object
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from flet.controls.base_control.BaseControl:
+ |
+ |  data = None
+ |
+ |  key = None
+ |
+ |  ref = None
+

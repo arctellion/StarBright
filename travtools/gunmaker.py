@@ -206,6 +206,10 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
     cost = type_data["cost"] * desc_data["cost"]
     for code in burden_codes: cost *= CHART_5_BURDEN[code]["cost"]
     for code in stage_codes: cost *= CHART_5_STAGE[code]["cost"]
+    
+    # Options Cost: Each option adds 10% of the base cost
+    if selected_options:
+        cost += (cost * 0.10) * len(selected_options)
 
     # 5. QREBS
     b_val = 0
@@ -276,25 +280,77 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
     model_parts = stage_codes + burden_codes + ([desc_code] if desc_code else []) + [type_code]
     model = "".join(model_parts) + f"-{tl}"
 
-    # 9. Controls
-    controls = {"off": True, "single": False, "burst": False, "full": False, "p123": False, "override": False}
+    
+    # 9. Controls (Ported from HTML CHART_8 Logic)
+    # Changing logic from HTML to be more consistent with the rules.
+    CHART_8_CONTROLS = {
+        "Base_Artillery": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
+        "Base_Rifle_Carbine": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
+        "Base_Pistol_Revolver": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
+        "Base_Shotgun": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
+        "Base_Machinegun": { "off": True, "single": False, "burst": False, "full": True, "p123": False, "override": False },
+        "Base_Projector_Designator": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
+        "Base_Launcher": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
 
-    # 1-2-3 Group (Fusion, Plasma, Laser, Poison Dart, or any Projector/Designator)
-    # Fusion: F, Plasma: P, Laser: L, Poison Dart: PD
-    is_p123 = (category in ["Projectors", "Designators"]) or (desc_code in ["F", "P", "L", "PD"])
+        # "Desc_Assault": { "off": False, "single": False, "burst": True, "full": True, "p123": False, "override": False },
+        # "Desc_Plasma_Fusion": { "off": False, "single": False, "burst": False, "full": False, "p123": True, "override": False },
+        # "Desc_Laser": { "off": False, "single": False, "burst": False, "full": False, "p123": True, "override": False },
+    }
 
-    if is_p123:
-        controls["p123"] = True
-    else:
-        controls["single"] = True
+    def merge_controls(base, merger):
+        return {
+            "off": base["off"] or merger["off"],
+            "single": base["single"] or merger["single"],
+            "burst": base["burst"] or merger["burst"],
+            "full": base["full"] or merger["full"],
+            "p123": base["p123"] or merger["p123"],
+            "override": base["override"] or merger["override"]
+        }
+
+    # Determine Base Key
+    base_key = ""
+    if category == "Artillery": base_key = "Base_Artillery"
+    elif category == "Long Guns": base_key = "Base_Rifle_Carbine"
+    elif category == "Handguns": base_key = "Base_Pistol_Revolver"
+    elif category == "Shotguns": base_key = "Base_Shotgun"
+    elif category == "Machineguns": base_key = "Base_Machinegun"
+    elif category in ["Projectors", "Designators"]: base_key = "Base_Projector_Designator"
+    elif category == "Launchers": base_key = "Base_Launcher"
+
+    controls = CHART_8_CONTROLS.get(base_key, { "off": False, "single": False, "burst": False, "full": False, "p123": False, "override": False }).copy()
+
+    # Apply Descriptor Logic (Exact HTML Parity)
+    if desc_code:
+        # Assault (A) or Combat (C) -> Desc_Assault
+        if desc_code == "A" or desc_code == "C":
+            controls = merge_controls(controls, CHART_8_CONTROLS["Desc_Assault"])
         
-        # Burst Capable: Accelerator (Ac), Assault (A), Gauss (G)
-        # Types: Gatling (Ga), Autocannon (aC), Multi-Launcher (mL)
-        if desc_code in ["Ac", "A", "G"] or type_code in ["Ga", "aC", "mL"]:
-            controls["burst"] = True
+        # Plasma (P) or Fusion (F) -> Desc_Plasma_Fusion
+        if desc_code == "P" or desc_code == "F":
+             controls = merge_controls(controls, CHART_8_CONTROLS["Desc_Plasma_Fusion"])
+
+        # Laser (L) -> Desc_Laser
+        if desc_code == "L":
+             controls = merge_controls(controls, CHART_8_CONTROLS["Desc_Laser"])
+        
+        # Gauss (G) -> Special
+        if desc_code == "G":
+            if category in ["Artillery", "Long Guns", "Handguns"]:
+                controls["burst"] = True
+                controls["full"] = True
+            else:
+                controls["p123"] = True
+        
+        # Machine (M) -> Full
+        if desc_code == "M":
+            controls["full"] = True
             
-        # Full Auto Capable: Anti-Flyer (aF), Assault (A), Gauss (G), Splat (Sp), Machine (M), Sub (S)
-        if desc_code in ["aF", "A", "G", "Sp", "M", "S"]:
+        # Splat (Sp) -> Full
+        if desc_code == "Sp":
+            controls["full"] = True
+            
+        # Sub (S) -> Full (only Machineguns)
+        if desc_code == "S" and category == "Machineguns":
             controls["full"] = True
 
     return {
@@ -305,6 +361,7 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
         "mass": mass,
         "cost": cost,
         "qrebs": qrebs,
+        "qrebs_mod": b_val,
         "effects": effect_map,
         "controls": controls,
         "options": [CHART_7_OPTIONS[o] for o in selected_options]

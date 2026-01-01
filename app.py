@@ -6,6 +6,7 @@ import travtools.system as ts
 import travtools.dice as dd
 import travtools.gunmaker as gm
 import travtools.armourmaker as am
+import travtools.qrebs as qrebs_gen
 import random
 from views.components import glass_card
 
@@ -46,7 +47,15 @@ class NumericSpinner(ft.Row):
             if val < self.min_val: self.text_field.value = str(self.min_val)
             if val > self.max_val: self.text_field.value = str(self.max_val)
         except:
-            pass
+            self.text_field.value = str(self.min_val)
+            
+    @property
+    def value(self):
+        return int(self.text_field.value)
+    
+    @value.setter
+    def value(self, val):
+        self.text_field.value = str(val)
         self.update()
 
     @property
@@ -201,9 +210,26 @@ def main(page: ft.Page):
     ], spacing=5, visible=False)
     gm_res_wx = ft.Text("Wx: ...", color=ft.Colors.CYAN_200, selectable=True)
     
+    gm_qrebs_result = ft.Column(spacing=5)
+    gm_seed_input = ft.TextField(label="Seed", width=150, text_size=12, height=40, content_padding=10)
+    
     burden_cbs = {}
     stage_cbs = {}
     option_cbs = {}
+    
+    # State tracking
+    is_generated = [False]
+    latest_gm_burden = [0] 
+
+    def randomize_gm_qrebs(e):
+        import numpy as np
+        # Generate new seed if empty or explicitly requested (logic could handle "empty" as request for new)
+        # Here we just check validity. If the user cleared it, we make a new one.
+        if not gm_seed_input.value:
+            gm_seed_input.value = str(list(np.random.randint(0, 100000, 1))[0])
+        
+        is_generated[0] = True
+        update_gm_output(None)
 
     def update_gm_output(e):
         if not gm_type.value: return
@@ -215,6 +241,28 @@ def main(page: ft.Page):
         
         res = gm.calculate_weapon(cat, t_code, d_code, b_codes, s_codes, gm_user.value, gm_port.value, o_codes)
         
+        # Update latest burden
+        latest_gm_burden[0] = res.get('qrebs_mod', 0)
+        
+        # QREBS Logic
+        qrebs_display = res['qrebs']
+        
+        if is_generated[0]:
+            try:
+                seed_val = int(gm_seed_input.value)
+                q_res = qrebs_gen.generate_qrebs(seed=seed_val, modifiers={'b': latest_gm_burden[0]})
+                
+                # Update QREBS Result View
+                gm_qrebs_result.controls = [
+                    ft.Text(f"Instance Code: {q_res['code']}", size=20, weight=ft.FontWeight.BOLD, color=ft.Colors.CYAN_200),
+                    ft.Text(q_res['text'], size=14, color=ft.Colors.GREY_300)
+                ]
+                
+                # Override display value
+                qrebs_display = q_res['code']
+            except ValueError:
+                pass # Invalid seed, skip update
+        
         gm_res_model.value = res['model']
         gm_res_name.value = res['long_name']
         gm_res_stats.controls = [
@@ -222,7 +270,7 @@ def main(page: ft.Page):
             ft.Text(f"Range: {res['range']}", size=16),
             ft.Text(f"Mass: {res['mass']:.2f} kg", size=16),
             ft.Text(f"Cost: Cr {int(res['cost']):,}", size=16),
-            ft.Text(f"QREBS: {res['qrebs']}", size=16),
+            ft.Text(f"QREBS: {qrebs_display}", size=16, color=ft.Colors.CYAN_200 if is_generated[0] else None),
         ]
         
         gm_res_effects.controls = [ft.Text(f"{k}: {v}", size=14, color=ft.Colors.GREY_400) for k, v in res['effects'].items()]
@@ -240,7 +288,7 @@ def main(page: ft.Page):
         gm_res_options_group.visible = len(res['options']) > 0
         
         eff_str = " ".join([f"{k}-{v}" for k, v in res['effects'].items()])
-        gm_res_wx.value = f"Wx: R={res['range']} Cr{int(res['cost']):,} {res['mass']:.1f}kg B={res['qrebs']} {eff_str}"
+        gm_res_wx.value = f"Wx: R={res['range']} Cr{int(res['cost']):,} {res['mass']:.1f}kg B={qrebs_display} {eff_str}"
         page.update()
 
     def update_gm_desc(e):
@@ -451,7 +499,19 @@ def main(page: ft.Page):
                         ft.Text("Controls", size=18, weight=ft.FontWeight.W_500),
                         gm_res_controls,
                         gm_res_options_group,
-                        ft.Container(gm_res_wx, padding=15, bgcolor=ft.Colors.BLACK, border_radius=10, border=ft.Border.all(1, ft.Colors.WHITE10))
+                        ft.Container(gm_res_wx, padding=15, bgcolor=ft.Colors.BLACK, border_radius=10, border=ft.Border.all(1, ft.Colors.WHITE10)),
+                        ft.Divider(color=ft.Colors.WHITE10),
+                        ft.Text("Production Quality", size=18, weight=ft.FontWeight.W_500),
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    gm_seed_input,
+                                    ft.FilledButton("Randomize", icon=ft.Icons.CASINO, on_click=randomize_gm_qrebs, expand=True),
+                                ]),
+                                gm_qrebs_result
+                            ], spacing=10),
+                            padding=10, bgcolor=ft.Colors.BLACK54, border_radius=10
+                        )
                     ], spacing=10),
                     title="Weapon Profile", color=ft.Colors.GREEN_400
                 )
@@ -490,6 +550,129 @@ def main(page: ft.Page):
     am_sub_cbs = {}
     last_am_type = "D"
 
+    def get_qrebs_view():
+        # --- Generator Tab Content ---
+        # Use ListView for better performance/reliability with lists
+        gen_output = ft.Column(spacing=10, scroll=ft.ScrollMode.AUTO, height=400)
+        gen_qty = NumericSpinner("Quantity", value=1, min_val=1, max_val=20)
+        
+        def on_generate_qrebs(e):
+            try:
+                count = int(gen_qty.value)
+                gen_output.controls.clear()
+                
+                new_controls = []
+                for i in range(count):
+                    res = qrebs_gen.generate_qrebs(seed=None)
+                    
+                    card = ft.ExpansionTile(
+                        title=ft.Text(f"Code: {res['code']}", size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.CYAN_200),
+                        subtitle=ft.Text("Click to see details", size=12, color=ft.Colors.GREY_500),
+                        controls=[
+                            ft.Container(
+                                content=ft.Text(res['text'], size=14, color=ft.Colors.GREY_300),
+                                padding=15, bgcolor=ft.Colors.BLACK54,
+                                border_radius=10
+                            )
+                        ],
+                        expanded= (count == 1),
+                        collapsed_text_color=ft.Colors.WHITE,
+                        text_color=ft.Colors.CYAN_100
+                    )
+                    new_controls.append(card)
+                
+                gen_output.controls = new_controls
+                gen_output.update() 
+                page.update()
+            except Exception as ex:
+                gen_output.controls = [ft.Text(f"Error: {ex}", color=ft.Colors.RED)]
+                gen_output.update()
+            
+        gen_view = ft.Column([
+            glass_card(
+                ft.Column([
+                    ft.Text("Batch Generator", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Row([gen_qty, ft.FilledButton("Generate", icon=ft.Icons.AUTO_AWESOME, on_click=on_generate_qrebs)]),
+                    ft.Divider(color=ft.Colors.WHITE10),
+                    gen_output
+                ]),
+                title="QREBS Generator", color=ft.Colors.PURPLE_400
+            )
+        ], visible=False) 
+
+        # --- Decoder Tab Content ---
+        dec_input = ft.TextField(label="Enter QREBS Code (e.g. 52364)", max_length=5, text_style=ft.TextStyle(letter_spacing=2))
+        dec_output = ft.Column()
+        
+        def on_decode_qrebs(e):
+            try:
+                code = dec_input.value.upper()
+                
+                if len(code) != 5:
+                    dec_output.controls = [ft.Text("Please enter a 5-character code.", color=ft.Colors.RED_400)]
+                else:
+                    res = qrebs_gen.decode_qrebs(code)
+                    
+                    if res['valid']:
+                        dec_output.controls = [
+                            ft.Container(
+                                content=ft.Text(res['text'], size=16),
+                                padding=20,
+                                border=ft.Border.all(1, ft.Colors.GREEN_400),
+                                border_radius=10,
+                                bgcolor=ft.Colors.BLACK54
+                            )
+                        ]
+                    else:
+                        dec_output.controls = [ft.Text(res['text'], color=ft.Colors.RED_400)]
+                
+                dec_output.update() 
+                page.update()
+            except Exception as ex:
+                dec_output.controls = [ft.Text(f"Error: {ex}", color=ft.Colors.RED)]
+                dec_output.update()
+            
+        dec_view = ft.Column([
+            glass_card(
+                ft.Column([
+                    ft.Text("Code Decoder", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Row([dec_input, ft.FilledButton("Decode", icon=ft.Icons.TRANSLATE, on_click=on_decode_qrebs)]),
+                    ft.Divider(color=ft.Colors.WHITE10),
+                    dec_output
+                ]),
+                title="QREBS Decoder", color=ft.Colors.TEAL_400
+            )
+        ], visible=True) 
+        
+        # --- Custom Switcher ---
+        def switch_tab(e):
+            try:
+                if e.control.data == "gen":
+                    gen_view.visible = True
+                    dec_view.visible = False
+                    btn_gen.style = ft.ButtonStyle(bgcolor=ft.Colors.PURPLE_700)
+                    btn_dec.style = None
+                else:
+                    gen_view.visible = False
+                    dec_view.visible = True
+                    btn_gen.style = None
+                    btn_dec.style = ft.ButtonStyle(bgcolor=ft.Colors.TEAL_700)
+                
+                gen_view.update()
+                dec_view.update()
+                page.update()
+            except Exception as ex:
+                pass
+
+        btn_gen = ft.FilledButton("Generate", icon=ft.Icons.ADD_BOX_OUTLINED, data="gen", on_click=switch_tab)
+        btn_dec = ft.FilledButton("Decode", icon=ft.Icons.QR_CODE_SCANNER, data="dec", on_click=switch_tab, style=ft.ButtonStyle(bgcolor=ft.Colors.TEAL_700))
+
+        return ft.Column([
+            ft.Row([btn_gen, btn_dec], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Divider(color=ft.Colors.WHITE10),
+            gen_view,
+            dec_view
+        ], expand=True)
     def get_am_view():
         nonlocal am_selected_opts, am_selected_drawbacks, am_mode, am_current_sub_cat
         am_core_card = None
@@ -1012,8 +1195,10 @@ def main(page: ft.Page):
         elif index == 4:
             main_content.content = get_travel_view()
         elif index == 5:
-            main_content.content = get_gm_view()
+            main_content.content = get_qrebs_view()
         elif index == 6:
+            main_content.content = get_gm_view()
+        elif index == 7:
             main_content.content = get_am_view()
         page.update()
 
@@ -1042,6 +1227,11 @@ def main(page: ft.Page):
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.FLIGHT_TAKEOFF, selected_icon=ft.Icons.FLIGHT_TAKEOFF, label="Travel"
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.QR_CODE_2_OUTLINED,
+                selected_icon=ft.Icons.QR_CODE_2,
+                label="QREBS Tool",
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.HANDYMAN, selected_icon=ft.Icons.HANDYMAN, label="GunMaker"

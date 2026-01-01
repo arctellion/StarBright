@@ -41,6 +41,7 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 
 * write more utility modules
 * add more functionality
+* fix gunmaker controls logic, not quite in sync with rules.
 * extra maker tools (e.g. thingmaker, beastmaker, etc.)
 * other sutff...
 
