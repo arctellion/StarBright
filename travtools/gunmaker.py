@@ -288,23 +288,25 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
         "Base_Rifle_Carbine": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
         "Base_Pistol_Revolver": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
         "Base_Shotgun": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
-        "Base_Machinegun": { "off": True, "single": False, "burst": False, "full": True, "p123": False, "override": False },
+        "Base_Machinegun": { "off": True, "single": True, "burst": False, "full": True, "p123": False, "override": False },
         "Base_Projector_Designator": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
         "Base_Launcher": { "off": True, "single": True, "burst": False, "full": False, "p123": False, "override": False },
 
-        # "Desc_Assault": { "off": False, "single": False, "burst": True, "full": True, "p123": False, "override": False },
-        # "Desc_Plasma_Fusion": { "off": False, "single": False, "burst": False, "full": False, "p123": True, "override": False },
-        # "Desc_Laser": { "off": False, "single": False, "burst": False, "full": False, "p123": True, "override": False },
+        "Desc_Assault": { "off": False, "single": False, "burst": True, "full": True, "p123": False, "override": False },
+        "Desc_Plasma_Fusion": { "off": False, "single": False, "burst": False, "full": False, "p123": True, "override": False },
+        "Desc_Laser": { "off": False, "single": False, "burst": False, "full": False, "p123": True, "override": False },
     }
 
     def merge_controls(base, merger):
+        if not base: base = { "off": False, "single": False, "burst": False, "full": False, "p123": False, "override": False }
+        if not merger: return base
         return {
-            "off": base["off"] or merger["off"],
-            "single": base["single"] or merger["single"],
-            "burst": base["burst"] or merger["burst"],
-            "full": base["full"] or merger["full"],
-            "p123": base["p123"] or merger["p123"],
-            "override": base["override"] or merger["override"]
+            "off": base.get("off", False) or merger.get("off", False),
+            "single": base.get("single", False) or merger.get("single", False),
+            "burst": base.get("burst", False) or merger.get("burst", False),
+            "full": base.get("full", False) or merger.get("full", False),
+            "p123": base.get("p123", False) or merger.get("p123", False),
+            "override": base.get("override", False) or merger.get("override", False)
         }
 
     # Determine Base Key
@@ -315,7 +317,7 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
     elif category == "Shotguns": base_key = "Base_Shotgun"
     elif category == "Machineguns": base_key = "Base_Machinegun"
     elif category in ["Projectors", "Designators"]: base_key = "Base_Projector_Designator"
-    elif category == "Launchers": base_key = "Base_Launcher"
+    elif category == "Launchers": base_key = "Base_Artillery" # HTML Parity: Launchers use Artillery base
 
     controls = CHART_8_CONTROLS.get(base_key, { "off": False, "single": False, "burst": False, "full": False, "p123": False, "override": False }).copy()
 
@@ -335,7 +337,7 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
         
         # Gauss (G) -> Special
         if desc_code == "G":
-            if category in ["Artillery", "Long Guns", "Handguns"]:
+            if category in ["Artillery", "Long Guns", "Machineguns"]:
                 controls["burst"] = True
                 controls["full"] = True
             else:
@@ -362,6 +364,7 @@ def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, 
         "cost": cost,
         "qrebs": qrebs,
         "qrebs_mod": b_val,
+        "base_qrebs": type_data.get("qrebs", ""),
         "effects": effect_map,
         "controls": controls,
         "options": [CHART_7_OPTIONS[o] for o in selected_options]
