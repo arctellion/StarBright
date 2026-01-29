@@ -338,3 +338,17 @@ def fun_subsector(seed, density=0.5):
                     'ext': ext
                 })
     return systems
+
+def fun_sector(seed, density=0.5):
+    """
+    Generates a sector (16 subsectors).
+    Returns a dictionary of subsectors, where each key is a subsector name/index.
+    """
+    sector_data = {}
+    # Sector is typically 4x4 subsectors
+    # Subsectors are A-P
+    names = "ABCDEFGHIJKLMNOP"
+    for i, name in enumerate(names):
+        sub_seed = seed + (i * 10000) # Ensure distinct seeds for each subsector
+        sector_data[name] = fun_subsector(sub_seed, density)
+    return sector_data
