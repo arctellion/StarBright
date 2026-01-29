@@ -27,3 +27,22 @@ def dice_detailed(n):
 def die_roll():
     """Rolls a single d6."""
     return random.randint(1, 6)
+
+def roll_string(s):
+    """
+    Parses and rolls a string like '2d6+3' or '1d6'.
+    Returns (total, [individual_rolls], modifier)
+    """
+    import re
+    s = s.lower().replace(" ", "")
+    match = re.match(r"(\d+)d(\d+)([+-]\d+)?", s)
+    if not match:
+        raise ValueError("Invalid dice format. Use XdY+Z")
+    
+    num_dice = int(match.group(1))
+    sides = int(match.group(2))
+    modifier = int(match.group(3)) if match.group(3) else 0
+    
+    rolls = [random.randint(1, sides) for _ in range(num_dice)]
+    total = sum(rolls) + modifier
+    return total, rolls, modifier

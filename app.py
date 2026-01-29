@@ -13,6 +13,7 @@ from views.system_view import SystemView
 from views.gun_view import GunView
 from views.armour_view import ArmourView
 from views.qrebs_view import QrebsView
+from views.dice_view import DiceView
 from views.components import Styles
 
 def main(page: ft.Page):
@@ -29,7 +30,8 @@ def main(page: ft.Page):
         "Systems": SystemView,
         "Guns": GunView,
         "Armor": ArmourView,
-        "QREBS": QrebsView
+        "QREBS": QrebsView,
+        "Dice Roller": DiceView
     }
     
     # Cache for instantiated views
@@ -38,37 +40,78 @@ def main(page: ft.Page):
     # Main content container
     main_container = ft.Container(expand=True, padding=20)
     
-    def on_nav_change(e):
-        index = int(e.control.selected_index)
-        label = e.control.destinations[index].label
-        
-        # Lazy Loading Logic
+    def set_view(label):
         if label not in instantiated_views:
             view_class = view_classes[label]
             view_instance = view_class(page)
             instantiated_views[label] = view_instance
         
-        # Swap content
         main_container.content = instantiated_views[label]
         page.update()
 
-    # --- Sidebar Navigation ---
-    rail = ft.NavigationRail(
-        selected_index=0,
-        label_type=ft.NavigationRailLabelType.ALL,
-        min_width=100,
-        min_extended_width=200,
+    def nav_item(label, icon, disabled=False):
+        color = ft.Colors.GREY_600 if disabled else ft.Colors.WHITE70
+        
+        def on_click(_):
+            if not disabled:
+                mapping = {"System": "Systems"}
+                target = mapping.get(label, label)
+                set_view(target)
+
+        return ft.Container(
+            content=ft.Row([
+                ft.Icon(icon, size=18, color=color),
+                ft.Text(label, size=14, color=color, weight=ft.FontWeight.W_500)
+            ], spacing=10),
+            padding=ft.Padding(20, 10, 0, 10),
+            on_click=on_click,
+            ink=not disabled,
+            border_radius=8
+        )
+
+    sidebar = ft.Container(
+        content=ft.Column([
+            ft.Container(
+                content=ft.Text("STARBRIGHT", size=24, weight=ft.FontWeight.W_900, color=Styles.AMBER, italic=True),
+                padding=20,
+                alignment=ft.Alignment(0, 0)
+            ),
+            ft.ExpansionTile(
+                title=ft.Text("Galaxy Engine", size=14, weight=ft.FontWeight.BOLD),
+                expanded=True,
+                controls=[
+                    nav_item("System", ft.Icons.LANGUAGE), 
+                    nav_item("SubSector", ft.Icons.GRID_VIEW, disabled=True),
+                    nav_item("Sector", ft.Icons.MAP, disabled=True),
+                ]
+            ),
+            ft.ExpansionTile(
+                title=ft.Text("Trading", size=14, weight=ft.FontWeight.BOLD),
+                controls=[
+                    nav_item("Trade", ft.Icons.MONETIZATION_ON),
+                    nav_item("Buying", ft.Icons.SHOPPING_CART, disabled=True),
+                    nav_item("Selling", ft.Icons.SELL, disabled=True),
+                ]
+            ),
+            ft.ExpansionTile(
+                title=ft.Text("Makers", size=14, weight=ft.FontWeight.BOLD),
+                controls=[
+                    nav_item("Guns", ft.Icons.CONSTRUCTION),
+                    nav_item("Armor", ft.Icons.SHIELD),
+                ]
+            ),
+            ft.ExpansionTile(
+                title=ft.Text("Utilities", size=14, weight=ft.FontWeight.BOLD),
+                controls=[
+                    nav_item("Dice Roller", ft.Icons.CASINO),
+                    nav_item("Travel", ft.Icons.FLIGHT_TAKEOFF),
+                    nav_item("QREBS", ft.Icons.QR_CODE),
+                ]
+            ),
+        ], scroll=ft.ScrollMode.AUTO),
+        width=250,
         bgcolor=Styles.CARD_BG,
-        indicator_color=Styles.BLUE,
-        destinations=[
-            ft.NavigationRailDestination(icon=ft.Icons.MONETIZATION_ON_OUTLINED, selected_icon=ft.Icons.MONETIZATION_ON, label="Trade"),
-            ft.NavigationRailDestination(icon=ft.Icons.FLIGHT_TAKEOFF_OUTLINED, selected_icon=ft.Icons.FLIGHT_TAKEOFF, label="Travel"),
-            ft.NavigationRailDestination(icon=ft.Icons.LANGUAGE_OUTLINED, selected_icon=ft.Icons.LANGUAGE, label="Systems"),
-            ft.NavigationRailDestination(icon=ft.Icons.CONSTRUCTION_OUTLINED, selected_icon=ft.Icons.CONSTRUCTION, label="Guns"),
-            ft.NavigationRailDestination(icon=ft.Icons.SHIELD_OUTLINED, selected_icon=ft.Icons.SHIELD, label="Armor"),
-            ft.NavigationRailDestination(icon=ft.Icons.QR_CODE_OUTLINED, selected_icon=ft.Icons.QR_CODE, label="QREBS"),
-        ],
-        on_change=on_nav_change
+        padding=10
     )
 
     # Load initial view (Trade)
@@ -79,7 +122,7 @@ def main(page: ft.Page):
     # --- Main Layout ---
     page.add(
         ft.Row([
-            rail,
+            sidebar,
             ft.VerticalDivider(width=1, color=ft.Colors.WHITE10),
             main_container
         ], expand=True)
