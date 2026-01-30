@@ -37,7 +37,6 @@ class StarBrightApp(QMainWindow):
         
         # Trading
         trade_menu = menubar.addMenu("Trading")
-        self.add_nav_action(trade_menu, "Trade (Legacy)", self.show_trade)
         self.add_nav_action(trade_menu, "Buying", self.show_buy)
         self.add_nav_action(trade_menu, "Selling", self.show_sell)
         
@@ -82,11 +81,6 @@ class StarBrightApp(QMainWindow):
     def show_sector(self):
         from views.galaxy_qt import SectorQtView
         self.switch_view("Sector", SectorQtView)
-
-    def show_trade(self):
-        # We don't have a specific legacy trade_qt yet, but we can reuse part of it or leave as is
-        # For now, let's just point to Buy/Sell as the replacement
-        self.show_buy()
 
     def show_buy(self):
         from views.trade_qt import BuyQtView
