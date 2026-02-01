@@ -66,7 +66,7 @@ class DiceQtView(QWidget):
         # Result Display
         self.result_frame = GlassFrame("Result")
         self.result_frame.setMinimumHeight(200)
-        self.result_text = QLabel("Roll for Initiative")
+        self.result_text = QLabel("Dice Roll")
         self.result_text.setStyleSheet(f"font-size: 48px; font-weight: 900; color: {Styles.AMBER}; border: none; background: transparent;")
         self.result_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
