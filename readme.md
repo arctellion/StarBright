@@ -42,6 +42,9 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 - **`commerce.py`**: Pricing algorithms for speculative trade and freight.
 - **`gunmaker.py`**: Weapon design logic and chart data.
 - **`armourmaker.py`**: Armor calculation and subsystem datasets.
+- **`names.py`**: Name generation logic.
+- **`names_data.json`**: Name data for name generation.
+- **`travel.py`**: Travel time and distance calculations.
 
 ---
 
@@ -52,8 +55,6 @@ To run StarBright, the following Python modules are required:
 ```bash
 pip install PyQt6 numpy
 ```
-
-*(Note: The legacy version still exists in the codebase and requires `flet`.)*
 
 ---
 
@@ -70,8 +71,6 @@ python main_qt.py
 ## 📁 Project Structure
 
 * `main_qt.py` - Primary application entry point (PyQt6).
-* `app.py` - Legacy application entry point (Flet).
 * `travtools/` - Core logic and calculation libraries.
 * `views/` - UI view implementations (prefixed with `_qt` for the modern version).
-* `html_demos/` - Proof-of-concept single-page applications.
 * `screenshots/` - Visual previews of the application.
