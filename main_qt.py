@@ -50,6 +50,7 @@ class StarBrightApp(QMainWindow):
         self.add_nav_action(utils_menu, "Dice Roller", self.show_dice)
         self.add_nav_action(utils_menu, "Travel", self.show_travel)
         self.add_nav_action(utils_menu, "QREBS", self.show_qrebs)
+        self.add_nav_action(utils_menu, "Name Generator", self.show_names)
 
     def add_nav_action(self, menu, label, callback, disabled=False):
         action = QAction(label, self)
@@ -109,6 +110,10 @@ class StarBrightApp(QMainWindow):
     def show_qrebs(self):
         from views.utils_qt import QrebsQtView
         self.switch_view("QREBS", QrebsQtView)
+
+    def show_names(self):
+        from views.names_qt import NamesQtView
+        self.switch_view("Name Generator", NamesQtView)
 
     def show_initial_view(self):
         self.show_dice()

@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLab
 from PyQt6.QtCore import Qt
 import random
 import travtools.system as ts
+import travtools.names as names
 from views.qt_components import Styles, GlassFrame
 
 class SystemQtView(QWidget):
@@ -62,7 +63,9 @@ class SystemQtView(QWidget):
             trade = ts.fun_trade(uwp)
             ext = ts.fun_ext(uwp, pbg, bases, trade)
             
-            self.uwp_label.setText(f"UWP: {uwp}")
+            planet_name = names.generate_planet_name("0000", uwp)
+            
+            self.uwp_label.setText(f"{planet_name} [{uwp}]")
             details = f"<b>PBG:</b> {pbg}<br><b>Bases:</b> {bases if bases else 'None'}<br><b>Trade:</b> {trade}<br><b>Extensions:</b> {ext}"
             self.details_label.setText(details)
         except Exception as ex:
@@ -96,8 +99,8 @@ class SubsectorQtView(QWidget):
         input_layout.addWidget(self.density_slider)
         input_layout.addWidget(btn_generate)
         
-        self.table = QTableWidget(0, 3)
-        self.table.setHorizontalHeaderLabels(["Coord", "UWP", "Trade Codes"])
+        self.table = QTableWidget(0, 4)
+        self.table.setHorizontalHeaderLabels(["Name", "Coord", "UWP", "Trade Codes"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet(f"background-color: #000; gridline-color: {Styles.BORDER_COLOR}; color: {Styles.WHITE_TEXT};")
         
@@ -116,11 +119,12 @@ class SubsectorQtView(QWidget):
             for s in systems:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
-                self.table.setItem(row, 0, QTableWidgetItem(s['coord']))
+                self.table.setItem(row, 0, QTableWidgetItem(s['name']))
+                self.table.setItem(row, 1, QTableWidgetItem(s['coord']))
                 uwp_item = QTableWidgetItem(s['uwp'])
                 uwp_item.setForeground(Qt.GlobalColor.yellow)
-                self.table.setItem(row, 1, uwp_item)
-                self.table.setItem(row, 2, QTableWidgetItem(s['trade']))
+                self.table.setItem(row, 2, uwp_item)
+                self.table.setItem(row, 3, QTableWidgetItem(s['trade']))
         except Exception as ex:
             print(f"Error generating subsector: {ex}")
 
@@ -162,7 +166,7 @@ class SectorQtView(QWidget):
             for name, systems in sector_data.items():
                 summary.append(f"<b>Subsector {name}</b>: {len(systems)} systems")
                 for s in systems[:3]: # Show first 3 systems as example
-                    summary.append(f"  {s['coord']} {s['uwp']} {s['trade']}")
+                    summary.append(f"  {s['name']} ({s['coord']}) {s['uwp']} {s['trade']}")
                 summary.append("  ...")
             
             self.result_area.setHtml("<br>".join(summary))

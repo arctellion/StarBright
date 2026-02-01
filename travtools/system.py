@@ -1,6 +1,7 @@
 import random
 import travtools.converters as cnv
 import travtools.dice as dd
+import travtools.names as names
 
 def fun_uwp(n):
   """
@@ -329,7 +330,10 @@ def fun_subsector(seed, density=0.5):
                 trade = fun_trade(uwp)
                 ext = fun_ext(uwp, pbg, bases, trade)
                 
+                planet_name = names.generate_planet_name(f"{x:02d}{y:02d}", uwp)
+                
                 systems.append({
+                    'name': planet_name,
                     'coord': f"{x:02d}{y:02d}",
                     'uwp': uwp,
                     'pbg': pbg,
