@@ -1,5 +1,6 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QWidget, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMenuBar, QPushButton
+
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 from views.qt_components import Styles
@@ -51,6 +52,50 @@ class StarBrightApp(QMainWindow):
         self.add_nav_action(utils_menu, "Travel", self.show_travel)
         self.add_nav_action(utils_menu, "QREBS", self.show_qrebs)
         self.add_nav_action(utils_menu, "Name Generator", self.show_names)
+
+        # Right-aligned Buttons
+        corner_widget = QWidget()
+        corner_layout = QHBoxLayout(corner_widget)
+        corner_layout.setContentsMargins(0, 0, 0, 0)
+        corner_layout.setSpacing(5)
+
+        about_btn = QPushButton("About")
+        about_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                color: #42A5F5;
+                font-weight: bold;
+                padding: 5px 10px;
+                border: none;
+            }
+            QPushButton:hover {
+                background: #42A5F5;
+                color: #0B0E14;
+            }
+        """)
+        about_btn.clicked.connect(self.show_initial_view)
+
+        exit_btn = QPushButton("Exit")
+        exit_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                color: #ff5555;
+                font-weight: bold;
+                padding: 5px 15px;
+                border: none;
+            }
+            QPushButton:hover {
+                background: #ff5555;
+                color: white;
+            }
+        """)
+        exit_btn.clicked.connect(self.close)
+        
+        corner_layout.addWidget(about_btn)
+        corner_layout.addWidget(exit_btn)
+        menubar.setCornerWidget(corner_widget, Qt.Corner.TopRightCorner)
+
+
 
     def add_nav_action(self, menu, label, callback, disabled=False):
         action = QAction(label, self)
@@ -116,7 +161,9 @@ class StarBrightApp(QMainWindow):
         self.switch_view("Name Generator", NamesQtView)
 
     def show_initial_view(self):
-        self.show_dice()
+        from views.utils_qt import WelcomeQtView
+        self.switch_view("Welcome", WelcomeQtView)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

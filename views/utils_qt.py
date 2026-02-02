@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QGroupBox, QSpinBox
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPainter, QPixmap
+
 from travtools.travel import calculate_travel_time
 import travtools.qrebs as qrebs_gen
 from views.qt_components import Styles, GlassFrame
@@ -115,3 +117,71 @@ class QrebsQtView(QWidget):
         res = qrebs_gen.decode_qrebs(code)
         self.dec_res.setText(res['text'])
         self.dec_res.setStyleSheet(f"background: #000; padding: 10px; border-radius: 5px; color: {Styles.GREEN if res['valid'] else 'red'};")
+
+class WelcomeQtView(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.bg_pixmap = QPixmap("assets/welcome_bg.png")
+        self.init_ui()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        if not self.bg_pixmap.isNull():
+            # Scale pixmap to cover the whole widget
+            scaled_bg = self.bg_pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
+            # Center it
+            x = (self.width() - scaled_bg.width()) // 2
+            y = (self.height() - scaled_bg.height()) // 2
+            painter.drawPixmap(x, y, scaled_bg)
+        super().paintEvent(event)
+
+    def init_ui(self):
+
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        container = GlassFrame("Welcome to StarBright", "Your definitive Traveller RPG companion", Styles.AMBER)
+        container.setMinimumSize(600, 400)
+        container.setStyleSheet(f"background-color: rgba(22, 27, 34, 0.7); border: 1px solid {Styles.BORDER_COLOR}; border-radius: 12px;")
+        
+        # Branding
+        title = QLabel("STARBRIGHT")
+        title.setStyleSheet(f"font-size: 72px; font-weight: 800; color: {Styles.AMBER}; letter-spacing: 15px;")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        subtitle = QLabel("ELECTRONIC DATA PROCESSING - TRAVELLER TOOLBOX")
+        subtitle.setStyleSheet(f"font-size: 14px; color: {Styles.WHITE_TEXT}; letter-spacing: 2px;")
+        subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        info = QLabel(
+            "Select a module from the menu bar above to begin.<br><br>"
+            "<b>Galaxy Engine:</b> Generate stars and subsectors.<br>"
+            "<b>Trading:</b> Buy and sell cargo across the stars.<br>"
+            "<b>Makers:</b> Craft custom weaponry and armor.<br>"
+            "<b>Utilities:</b> Dice, travel math, and more."
+        )
+        info.setStyleSheet(f"font-size: 16px; color: {Styles.WHITE_TEXT}; line-height: 1.6;")
+        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        info.setWordWrap(True)
+        
+        container.layout.addWidget(title)
+        container.layout.addWidget(subtitle)
+        container.layout.addSpacing(40)
+        container.layout.addWidget(info)
+        container.layout.addStretch()
+        
+        # Legal Disclaimer
+        legal_text = (
+            "The Traveller game in all forms is owned by Mongoose Publishing. "
+            "Copyright 1977 – 2024 Mongoose Publishing. "
+            "Traveller is a registered trademark of Mongoose Publishing."
+        )
+        legal_label = QLabel(legal_text)
+        legal_label.setStyleSheet(f"color: {Styles.GREY_TEXT}; font-size: 10px; border: none; background: transparent;")
+        legal_label.setWordWrap(True)
+        legal_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        container.layout.addWidget(legal_label)
+        
+        layout.addWidget(container)
+
+
