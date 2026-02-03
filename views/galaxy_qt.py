@@ -1,18 +1,24 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QScrollArea, QFrame, QGridLayout, QSlider, QTableWidget, QTableWidgetItem, QHeaderView, QTextEdit, QStackedWidget
-from PyQt6.QtCore import Qt, QPointF, QSize
-from PyQt6.QtGui import QPainter, QPen, QColor, QPolygonF, QFont
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, 
+                             QScrollArea, QFrame, QGridLayout, QSlider, QTableWidget, QTableWidgetItem, 
+                             QHeaderView, QTextEdit, QStackedWidget, QDialog)
+from PyQt6.QtCore import Qt, QPointF, QPoint, QSize, pyqtSignal
+from PyQt6.QtGui import QPainter, QPen, QColor, QPolygonF, QFont, QCursor
 import random
 import math
 import travtools.system as ts
 import travtools.names as names
+import travtools.converters as cnv
 from views.qt_components import Styles, GlassFrame
 
 class HexMapWidget(QWidget):
+    systemSelected = pyqtSignal(dict)
+
     def __init__(self, systems=None):
         super().__init__()
         self.systems = systems or []
         self.hex_radius = 35
         self.setMinimumSize(800, 800)
+        self.setMouseTracking(True)
 
 
     def set_systems(self, systems):
@@ -86,6 +92,201 @@ class HexMapWidget(QWidget):
                                  center.y() + self.hex_radius * math.sin(angle_rad)))
         
         painter.drawPolygon(QPolygonF(points))
+
+    def mousePressEvent(self, event):
+        # Determine which hex was clicked
+        click_pos = event.position()
+        
+        best_dist = 20 # Click threshold
+        selected_system = None
+        
+        for s in self.systems:
+            coord = s['coord']
+            x = int(coord[:2])
+            y = int(coord[2:])
+            center = self.hex_to_pixel(x, y)
+            
+            # Simple distance check from center of hex
+            dist = math.sqrt((center.x() - click_pos.x())**2 + (center.y() - click_pos.y())**2)
+            if dist < best_dist:
+                selected_system = s
+                break
+        
+        if selected_system:
+            self.systemSelected.emit(selected_system)
+        
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        # Change cursor when hovering over a system
+        hovering = False
+        for s in self.systems:
+            coord = s['coord']
+            x = int(coord[:2])
+            y = int(coord[2:])
+            center = self.hex_to_pixel(x, y)
+            dist = math.sqrt((center.x() - event.position().x())**2 + (center.y() - event.position().y())**2)
+            if dist < 15:
+                hovering = True
+                break
+        
+        if hovering:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+        else:
+            self.unsetCursor()
+        super().mouseMoveEvent(event)
+
+class SystemDetailDialog(QDialog):
+    def __init__(self, system, parent=None):
+        super().__init__(parent)
+        self.system = system
+        self.setWindowTitle(f"System Details: {system['name']}")
+        self.setMinimumWidth(500)
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        self.setStyleSheet(f"background-color: {Styles.BG_COLOR}; color: {Styles.WHITE_TEXT}; font-family: 'Segoe UI', sans-serif;")
+        
+        # Header
+        header = GlassFrame(self.system['name'], f"Coordinates: {self.system['coord']}", Styles.AMBER)
+        layout.addWidget(header)
+        
+        # UWP Breakdown
+        uwp = self.system['uwp']
+        uwp_frame = GlassFrame("Universal World Profile", uwp, Styles.BLUE)
+        uwp_layout = QGridLayout()
+        uwp_layout.setColumnStretch(1, 1)
+        
+        # UWP Parts: Sp Sz At Hy Po Go La - Tc
+        # Indices:  0  1  2  3  4  5  6    8
+        
+        parts = [
+            ("Starport", uwp[0], self.get_starport_desc(uwp[0])),
+            ("Size", uwp[1], self.get_size_desc(uwp[1])),
+            ("Atmosphere", uwp[2], self.get_atmo_desc(uwp[2])),
+            ("Hydrographics", uwp[3], self.get_hydro_desc(uwp[3])),
+            ("Population", uwp[4], self.get_pop_desc(uwp[4])),
+            ("Government", uwp[5], self.get_gov_desc(uwp[5])),
+            ("Law Level", uwp[6], self.get_law_desc(uwp[6])),
+            ("Tech Level", uwp[8:], self.get_tech_desc(uwp[8:]))
+        ]
+        
+        for i, (label, val, desc) in enumerate(parts):
+            lbl_name = QLabel(f"<b>{label}:</b>")
+            lbl_val = QLabel(f"<span style='color: {Styles.AMBER}; font-weight: bold;'>{val}</span>")
+            lbl_desc = QLabel(f"<span style='color: {Styles.GREY_TEXT}; font-style: italic;'>{desc}</span>")
+            
+            uwp_layout.addWidget(lbl_name, i, 0)
+            uwp_layout.addWidget(lbl_val, i, 1)
+            uwp_layout.addWidget(lbl_desc, i, 2)
+            
+        uwp_frame.layout.addLayout(uwp_layout)
+        layout.addWidget(uwp_frame)
+        
+        # Secondary Details (PBG, Bases, Trade, Ext)
+        sec_frame = GlassFrame("Extended Data", "", Styles.GREEN)
+        sec_layout = QVBoxLayout()
+        
+        sec_layout.addWidget(QLabel(f"<b>PBG:</b> {self.system['pbg']} <span style='color: {Styles.GREY_TEXT}; ml-2'>(Pop Multiplier: {self.system['pbg'][0]}, Belts: {self.system['pbg'][1]}, Gas Giants: {self.system['pbg'][2]})</span>"))
+        sec_layout.addWidget(QLabel(f"<b>Bases:</b> {self.get_bases_desc(self.system['bases'])}"))
+        sec_layout.addWidget(QLabel(f"<b>Trade Classifications:</b> {self.system['trade']}"))
+        sec_layout.addWidget(QLabel(f"<b>Importance & Economic:</b> {self.system['ext']}"))
+        
+        sec_frame.layout.addLayout(sec_layout)
+        layout.addWidget(sec_frame)
+        
+        # Close button
+        btn_close = QPushButton("Close")
+        btn_close.clicked.connect(self.close)
+        layout.addWidget(btn_close)
+
+    def get_starport_desc(self, c):
+        descs = {
+            'A': "Excellent - Refined fuel, shipyard (Overhaul), base",
+            'B': "Good - Refined fuel, shipyard (Repair), base",
+            'C': "Routine - Unrefined fuel, shipyard (Small craft)",
+            'D': "Poor - Unrefined fuel, no shipyard",
+            'E': "Frontier - No fuel, no shipyard",
+            'X': "No Starport"
+        }
+        return descs.get(c, "Unknown")
+        
+    def get_size_desc(self, c):
+        val = cnv.ext_dec(c)
+        if val == 0: return "Asteroid / Small Space Station"
+        if val == 1: return "1,600 km (Triton)"
+        if val == 2: return "3,200 km (Luna)"
+        if val == 3: return "4,800 km (Mercury)"
+        if val == 4: return "6,400 km (Mars)"
+        if val == 5: return "8,000 km"
+        if val == 6: return "9,600 km"
+        if val == 7: return "11,200 km"
+        if val == 8: return "12,800 km (Earth)"
+        if val == 9: return "14,400 km"
+        if val == 10: return "16,000 km"
+        return f"{val*1600:,} km approx"
+
+    def get_atmo_desc(self, c):
+        val = cnv.ext_dec(c)
+        descs = [
+            "None / Vacuum", "Trace", "Very Thin, Tainted", "Very Thin",
+            "Thin, Tainted", "Thin", "Standard", "Standard, Tainted",
+            "Dense", "Dense, Tainted", "Exotic", "Corrosive",
+            "Insidious", "Dense, High", "Ellipsoid", "Thin, Low"
+        ]
+        if val < len(descs): return descs[val]
+        return "Special"
+
+    def get_hydro_desc(self, c):
+        val = cnv.ext_dec(c)
+        if val == 0: return "Desert World (0%)"
+        if val == 10: return "Water World (100%)"
+        return f"Dry/Wet ({val*10}%)"
+
+    def get_pop_desc(self, c):
+        val = cnv.ext_dec(c)
+        if val == 0: return "Unpopulated (Empty)"
+        if val <= 3: return f"Small Colony (Hundreds/Thousands)"
+        if val <= 6: return f"High Density Colony (Millions)"
+        if val <= 8: return f"Planetary Civilization (Hundreds of Millions)"
+        return f"Global Infrastructure (Billions+)"
+
+    def get_gov_desc(self, c):
+        val = cnv.ext_dec(c)
+        descs = [
+            "None / Anarchy", "Company/Corporation", "Participating Democracy", "Self-Perpetuating Oligarchy",
+            "Representative Democracy", "Feudal Technocracy", "Captive Government", "Balkanized",
+            "Civil Service Bureaucracy", "Impersonal Bureaucracy", "Charismatic Dictatorship", "Non-Charismatic Leader",
+            "Charismatic Oligarchy", "Religious Dictatorship", "Religious Autocracy", "Totalitarian Oligarchy"
+        ]
+        if val < len(descs): return descs[val]
+        return "Other"
+
+    def get_law_desc(self, c):
+        val = cnv.ext_dec(c)
+        if val == 0: return "No Law (No weapons prohibited)"
+        if val <= 3: return "Low Law (Heavy weapons restricted)"
+        if val <= 6: return "Moderate Law (Open carry restricted)"
+        if val <= 9: return "High Law (All firearms restricted)"
+        return "Extreme Law (Everything restricted)"
+
+    def get_tech_desc(self, c):
+        val = cnv.ext_dec(c)
+        if val <= 0: return "Stone Age"
+        if val <= 3: return "Industrial (Pre-Space)"
+        if val <= 8: return "Space Age / FTL Capable"
+        if val <= 12: return "Advanced Space Age (Stellar)"
+        return "High Tech (Galactic)"
+
+    def get_bases_desc(self, b):
+        if not b: return "None"
+        parts = []
+        if 'N' in b: parts.append("Naval Base")
+        if 'S' in b: parts.append("Scout Base")
+        if 'W' in b: parts.append("Way Station")
+        if 'D' in b: parts.append("Depot")
+        return ", ".join(parts)
 
 class SubsectorSummaryCard(QFrame):
     def __init__(self, letter, systems, on_click=None):
@@ -245,15 +446,20 @@ class SubsectorQtView(QWidget):
         
         layout.addWidget(frame)
 
+        # Connections
+        self.hex_map.systemSelected.connect(self.show_system_details)
+        self.table.itemDoubleClicked.connect(self.on_table_double_click)
+        self.table.verticalHeader().sectionClicked.connect(self.on_row_header_click)
+
 
     def on_generate_click(self):
         try:
             seed = int(self.seed_input.text() or 0)
             density = self.density_slider.value() / 10.0
-            systems = ts.fun_subsector(seed, density)
+            self.current_systems = ts.fun_subsector(seed, density)
             
             self.table.setRowCount(0)
-            for s in systems:
+            for s in self.current_systems:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
                 self.table.setItem(row, 0, QTableWidgetItem(s['name']))
@@ -263,10 +469,23 @@ class SubsectorQtView(QWidget):
                 self.table.setItem(row, 2, uwp_item)
                 self.table.setItem(row, 3, QTableWidgetItem(s['trade']))
             
-            self.hex_map.set_systems(systems)
+            self.hex_map.set_systems(self.current_systems)
 
         except Exception as ex:
             print(f"Error generating subsector: {ex}")
+
+    def on_table_double_click(self, item):
+        row = item.row()
+        if hasattr(self, 'current_systems') and row < len(self.current_systems):
+            self.show_system_details(self.current_systems[row])
+
+    def on_row_header_click(self, row):
+        if hasattr(self, 'current_systems') and row < len(self.current_systems):
+            self.show_system_details(self.current_systems[row])
+
+    def show_system_details(self, system):
+        dialog = SystemDetailDialog(system, self)
+        dialog.exec()
 
 class SectorQtView(QWidget):
     def __init__(self):
@@ -352,6 +571,11 @@ class SectorQtView(QWidget):
         
         layout.addWidget(self.main_frame)
 
+        # Connections
+        self.detail_map.systemSelected.connect(self.show_system_details)
+        self.detail_table.itemDoubleClicked.connect(self.on_table_double_click)
+        self.detail_table.verticalHeader().sectionClicked.connect(self.on_row_header_click)
+
 
     def on_generate_click(self):
         try:
@@ -380,8 +604,22 @@ class SectorQtView(QWidget):
         except Exception as ex:
             print(f"Error generating sector: {ex}")
 
+    def on_table_double_click(self, item):
+        row = item.row()
+        if hasattr(self, 'current_detail_systems') and row < len(self.current_detail_systems):
+            self.show_system_details(self.current_detail_systems[row])
+
+    def on_row_header_click(self, row):
+        if hasattr(self, 'current_detail_systems') and row < len(self.current_detail_systems):
+            self.show_system_details(self.current_detail_systems[row])
+
+    def show_system_details(self, system):
+        dialog = SystemDetailDialog(system, self)
+        dialog.exec()
+
     def on_card_click(self, letter, systems):
         self.detail_title.setText(f"Subsector {letter} Detail")
+        self.current_detail_systems = systems
         
         # Populate table
         self.detail_table.setRowCount(0)
