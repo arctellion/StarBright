@@ -55,7 +55,7 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 * Add more tools: Task manager, interpersonal task creator, etc.
 * Add planet mapper
 * Character creator
-* Add more polish and bling..
+* Add more polish and bling.
 
 ---
 
