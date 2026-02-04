@@ -1,14 +1,23 @@
+"""
+System generation module for Traveller 5.1 rules.
+Provides functions for generating UWPs, PBGs, trade codes, and extended profiles,
+as well as subsector and sector-wide generation.
+"""
 import random
 import travtools.converters as cnv
 import travtools.dice as dd
 import travtools.names as names
 
 def fun_uwp(n):
-  """
-  Generates a UWP (Universal World Profile), based on Traveller 5.1 generation rules.
+    """
+    Generates a UWP (Universal World Profile), based on Traveller 5.1 generation rules.
 
-  Takes argument n, as a seed number to ensure that the generation process is repeatable for a given value of n.
-  """
+    Args:
+        n (int): A seed number to ensure repeatable generation.
+
+    Returns:
+        str: The generated UWP string.
+    """
 
   #random seed set
   random.seed(1000 + n) # + 123456) add back in for sim

@@ -1,3 +1,8 @@
+"""
+Main entry point for the StarBright application.
+Initializes the PyQt6 application, sets up the main navigation menu,
+and manages the view stack.
+"""
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMenuBar, QPushButton
 

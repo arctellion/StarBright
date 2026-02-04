@@ -1,5 +1,19 @@
+"""
+Conversion utilities for Traveller extended hexadecimal (E-Hex) system.
+Provides functions for converting between decimal and E-Hex, including 
+handling of negative QREBS values.
+"""
+
 def ext_hex(n):
-    """Converts decimal into extended Hexadecimal"""
+    """
+    Converts decimal into extended Hexadecimal (0-9, A-F, G, H, J, K, L).
+    
+    Args:
+        n (int): The decimal number to convert.
+        
+    Returns:
+        str: The E-Hex representation.
+    """
     
     result = ""
     if n < 16:

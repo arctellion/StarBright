@@ -1,3 +1,7 @@
+"""
+Dice rolling utility for Traveller games.
+Provides functions for standard d6 rolls, flux rolls, and parsing roll strings.
+"""
 import numpy as np
 import random
 

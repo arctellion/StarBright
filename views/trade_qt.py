@@ -1,3 +1,8 @@
+"""
+PyQt6 views for trading and commerce.
+Provides interfaces for searching available goods (Buy) and 
+calculating sale prices for cargo (Sell).
+"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QScrollArea, QFrame, QTextEdit
 from PyQt6.QtCore import Qt
 import re
@@ -5,6 +10,10 @@ import travtools.commerce as cm
 from views.qt_components import Styles, GlassFrame, NumericSpinner
 
 class BuyQtView(QWidget):
+    """
+    Main widget for the 'Buying' trade view.
+    Handles searching for available speculative goods and passengers.
+    """
     def __init__(self):
         super().__init__()
         self.uwp_pat = re.compile('[ABCDEXFGHY][0-9A-F][0-9A-F][0-9A][0-9A-F][0-9A-F][0-9A-J]-[0-9A-J]')
@@ -74,6 +83,10 @@ class BuyQtView(QWidget):
             self.result_area.setText(f"Error: {str(ex)}")
 
 class SellQtView(QWidget):
+    """
+    Main widget for the 'Selling' trade view.
+    Handles calculating the market price for selling speculative cargo.
+    """
     def __init__(self):
         super().__init__()
         self.uwp_pat = re.compile('[ABCDEXFGHY][0-9A-F][0-9A-F][0-9A][0-9A-F][0-9A-F][0-9A-J]-[0-9A-J]')

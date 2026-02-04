@@ -1,9 +1,18 @@
+"""
+PyQt6 view for the Name Generator utility.
+Provides an interface for generating procedural names for characters,
+planets, and objects using Markov chains.
+"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QGroupBox
 from PyQt6.QtCore import Qt
 import travtools.names as names
 from views.qt_components import Styles, GlassFrame
 
 class NamesQtView(QWidget):
+    """
+    Main widget for the Name Generator view.
+    Manages input parameters and displays generated procedural names.
+    """
     def __init__(self):
         super().__init__()
         self.init_ui()

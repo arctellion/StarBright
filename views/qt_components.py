@@ -1,8 +1,15 @@
+"""
+Shared PyQt6 components and styling for the StarBright application.
+Defines common styles, custom frames, and input widgets used across different views.
+"""
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, QPushButton
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QColor
 
 class Styles:
+    """
+    Central repository for application styling, including colors and the main stylesheet.
+    """
     BG_COLOR = "#0B0E14"
     CARD_BG = "#161B22"
     BORDER_COLOR = "#30363D"
@@ -100,6 +107,9 @@ class Styles:
     """
 
 class GlassFrame(QFrame):
+    """
+    A custom QFrame with a 'glassy' aesthetic, including a title and optional subtitle.
+    """
     def __init__(self, title=None, subtitle=None, color=Styles.BLUE):
         super().__init__()
         self.setStyleSheet(f"""
@@ -127,6 +137,9 @@ class GlassFrame(QFrame):
         self.layout.addWidget(widget)
 
 class NumericSpinner(QHBoxLayout):
+    """
+    A custom layout combining a label, decrement button, edit field, and increment button.
+    """
     def __init__(self, label, value=0, min_val=0, max_val=99):
         super().__init__()
         self.min_val = min_val

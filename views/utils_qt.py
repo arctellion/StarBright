@@ -1,3 +1,7 @@
+"""
+Shared utilities and miscellaneous views for StarBright.
+Includes travel time calculators, QREBS generators/decoders, and the welcome screen.
+"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QGroupBox, QSpinBox
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPainter, QPixmap
@@ -7,6 +11,9 @@ import travtools.qrebs as qrebs_gen
 from views.qt_components import Styles, GlassFrame
 
 class TravelQtView(QWidget):
+    """
+    View for calculating interplanetary travel times based on distance and acceleration.
+    """
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -56,6 +63,9 @@ class TravelQtView(QWidget):
             self.res_label.setText(f"Error: {e}")
 
 class QrebsQtView(QWidget):
+    """
+    View for generating and decoding QREBS codes.
+    """
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -119,6 +129,9 @@ class QrebsQtView(QWidget):
         self.dec_res.setStyleSheet(f"background: #000; padding: 10px; border-radius: 5px; color: {Styles.GREEN if res['valid'] else 'red'};")
 
 class WelcomeQtView(QWidget):
+    """
+    The initial welcome screen of the application, providing an overview of modules.
+    """
     def __init__(self):
         super().__init__()
         self.bg_pixmap = QPixmap("assets/welcome_bg.png")

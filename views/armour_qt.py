@@ -1,3 +1,8 @@
+"""
+PyQt6 view for the Armour Maker utility.
+Provides an interface for designing custom armour systems or 
+picking from pre-made armour configurations.
+"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QCheckBox, QScrollArea, QFrame, QGridLayout, QGroupBox, QLineEdit
 from PyQt6.QtCore import Qt
 import travtools.armourmaker as am
@@ -5,6 +10,10 @@ import random
 from views.qt_components import Styles, GlassFrame
 
 class ArmourQtView(QWidget):
+    """
+    Main widget for the Armour Maker view.
+    Handles the layout, user interactions, and calls calculations from the armourmaker module.
+    """
     def __init__(self):
         super().__init__()
         self.selected_opts = set(am.STANDARD_SUBSYSTEMS.get("D", []))

@@ -1,9 +1,18 @@
+"""
+PyQt6 view for the Dice Roller utility.
+Provides a graphical interface for rolling standard d6 dice, flux rolls,
+and custom dice strings with result history.
+"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QListWidget, QScrollArea, QFrame, QGridLayout
 from PyQt6.QtCore import Qt
 import travtools.dice as dd
 from views.qt_components import Styles, GlassFrame
 
 class DiceQtView(QWidget):
+    """
+    Main widget for the Dice Roller view.
+    Manages quick roll buttons, custom inputs, and the history list.
+    """
     def __init__(self):
         super().__init__()
         self.history = []

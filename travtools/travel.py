@@ -1,3 +1,7 @@
+"""
+Travel time calculation module for interplanetary travel.
+Uses simplified physics formulas for Traveller gameplay.
+"""
 import math as m
 
 def calculate_travel_time(a_dia, p_dia, s_spd):

@@ -1,3 +1,8 @@
+"""
+PyQt6 view for the Gun Maker utility.
+Provides an interface for designing custom weapons, calculating their 
+statistics, and generating QREBS quality assessments.
+"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QCheckBox, QScrollArea, QFrame, QGridLayout, QGroupBox, QLineEdit
 from PyQt6.QtCore import Qt
 import travtools.gunmaker as gm
@@ -6,6 +11,10 @@ import random
 from views.qt_components import Styles, GlassFrame
 
 class GunQtView(QWidget):
+    """
+    Main widget for the Gun Maker view.
+    Handles weapon core selection, modifications, and result visualization.
+    """
     def __init__(self):
         super().__init__()
         self.burden_cbs = {}

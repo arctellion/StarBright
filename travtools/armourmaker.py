@@ -1,3 +1,8 @@
+"""
+Armour generation module for Traveller 5.1 rules.
+Provides data and calculations for custom and pre-made armour systems,
+including mass, cost, armour values, and QREBS.
+"""
 import math
 
 # --- DATASETS ---
@@ -190,8 +195,19 @@ DRAWBACKS = {
 
 def calculate_custom_armor(type_key, desc_key, burden_key, stage_key, user_key, selected_options, drawbacks):
     """
-    selected_options: list of option IDs
-    drawbacks: dict mapping option ID to drawback ID
+    Calculates the final statistics for a custom armour configuration.
+    
+    Args:
+        type_key (str): The base armour type key.
+        desc_key (str): The descriptor modifier key.
+        burden_key (str): The burden modifier key.
+        stage_key (str): The stage modifier key.
+        user_key (str): The user species/type key.
+        selected_options (list): List of selected subsystem option IDs.
+        drawbacks (dict): Mapping of option IDs to their associated drawback IDs.
+        
+    Returns:
+        dict: A dictionary containing the final armour name, stats, mass, cost, etc.
     """
     base_data = TYPES[type_key]
     desc_data = MODIFIERS["descriptor"].get(desc_key, MODIFIERS["descriptor"][""])

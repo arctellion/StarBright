@@ -1,3 +1,8 @@
+"""
+PyQt6 views for galaxy exploration.
+Contains widgets and views for generating individual star systems, 
+subsectors, and sectors, including an interactive hex map.
+"""
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, 
                              QScrollArea, QFrame, QGridLayout, QSlider, QTableWidget, QTableWidgetItem, 
                              QHeaderView, QTextEdit, QStackedWidget, QDialog)
@@ -11,6 +16,9 @@ import travtools.converters as cnv
 from views.qt_components import Styles, GlassFrame
 
 class HexMapWidget(QWidget):
+    """
+    A custom QWidget that renders an 8x10 hex grid and allows system selection.
+    """
     systemSelected = pyqtSignal(dict)
 
     def __init__(self, systems=None):
@@ -137,6 +145,10 @@ class HexMapWidget(QWidget):
         super().mouseMoveEvent(event)
 
 class SystemDetailDialog(QDialog):
+    """
+    A dialog window that displays detailed information about a star system,
+    including UWP breakdown and extended data.
+    """
     def __init__(self, system, parent=None):
         super().__init__(parent)
         self.system = system
@@ -289,6 +301,9 @@ class SystemDetailDialog(QDialog):
         return ", ".join(parts)
 
 class SubsectorSummaryCard(QFrame):
+    """
+    A small card widget showing a summary of a subsector, used in the Sector view grid.
+    """
     def __init__(self, letter, systems, on_click=None):
         super().__init__()
         self.letter = letter
@@ -328,6 +343,9 @@ class SubsectorSummaryCard(QFrame):
 
 
 class SystemQtView(QWidget):
+    """
+    View for generating and viewing a single star system.
+    """
 
     def __init__(self):
         super().__init__()
@@ -396,6 +414,10 @@ class SystemQtView(QWidget):
             self.details_label.setText(str(ex))
 
 class SubsectorQtView(QWidget):
+    """
+    View for generating and viewing an 8x10 subsector.
+    Includes a table of systems and an interactive hex map.
+    """
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -488,6 +510,10 @@ class SubsectorQtView(QWidget):
         dialog.exec()
 
 class SectorQtView(QWidget):
+    """
+    View for generating and viewing a full 16-subsector sector.
+    Allows drilling down into individual subsectors.
+    """
     def __init__(self):
         super().__init__()
         self.sector_data = {}

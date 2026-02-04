@@ -1,3 +1,7 @@
+"""
+QREBS (Quality, Reliability, Ease of Use, Burden, Size/Safety) generation system.
+Based on Traveller 5.1 rules for device and item quality assessments.
+"""
 import numpy as np
 import travtools.converters as cnv
 

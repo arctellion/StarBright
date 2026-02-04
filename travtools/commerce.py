@@ -1,3 +1,8 @@
+"""
+Trade and commerce module for Traveller speculative trade and passenger traffic.
+Provides functions for generating trade goods, passenger numbers, freight lots,
+and calculating speculative trade prices.
+"""
 import random
 import travtools.converters as cnv
 import travtools.system as sy

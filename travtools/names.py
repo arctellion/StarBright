@@ -1,3 +1,8 @@
+"""
+Name generation module for the StarBright project.
+Utilizes Markov chains and pre-defined datasets to generate procedural 
+character, planet, and object names.
+"""
 import random
 import json
 import os

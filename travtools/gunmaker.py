@@ -1,3 +1,8 @@
+"""
+Weapon generation module for Traveller 5.1 rules.
+Provides data and calculations for designing and customizing firearms, artillery, 
+projectors, and launchers, including mass, cost, damage effects, and firing controls.
+"""
 # Chart 3: Category & Type
 CHART_3_TYPES = {
     "Artillery": {
@@ -182,6 +187,22 @@ CHART_7_OPTIONS = {
 }
 
 def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, user_code, portability_mode, selected_options):
+    """
+    Calculates the final statistics for a custom weapon design.
+    
+    Args:
+        category (str): The weapon category (e.g., 'Long Guns', 'Handguns').
+        type_code (str): The specific weapon type code.
+        desc_code (str): The descriptor modifier code.
+        burden_codes (list): List of burden modifier codes.
+        stage_codes (list): List of stage modifier codes.
+        user_code (str): The user/species modifier code.
+        portability_mode (str): Portability setting ('auto' or specific mode).
+        selected_options (list): List of selected installable option codes.
+        
+    Returns:
+        dict: A dictionary containing the final weapon name, stats, mass, cost, effects, and controls.
+    """
     type_data = CHART_3_TYPES[category][type_code]
     desc_data = CHART_4_DESCRIPTORS[category].get(desc_code, { "name": "", "tl": 0, "range": 0, "mass": 1.0, "qrebs": 0, "h2": "", "d2": "", "h3": "", "d3": "", "cost": 1.0 })
     user_data = CHART_5_USER.get(user_code, CHART_5_USER["M"])
