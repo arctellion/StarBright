@@ -48,6 +48,17 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 
 ---
 
+## TODO ..
+
+* Check gunmaker/armourmaker logic to ensure it matches the rules.
+* Add more makers: Thingmaker, Vehiclemaker, Beastmaker, etc.
+* Add more tools: Task manager, interpersonal task creator, etc.
+* Add planet mapper
+* Character creator
+* Add more polish and bling..
+
+---
+
 ## 📦 Requirements
 
 To run StarBright, the following Python modules are required:
