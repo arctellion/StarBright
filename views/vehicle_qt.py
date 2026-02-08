@@ -3,9 +3,12 @@ PyQt6 view for the Vehicle Maker utility.
 Provides an interface for designing Ground, Flyer, Water, and Military vehicles.
 """
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
-                             QLabel, QComboBox, QScrollArea, QFrame, QGroupBox, QTabWidget, QGridLayout)
+                             QLabel, QComboBox, QScrollArea, QFrame, QGroupBox, QTabWidget, QGridLayout, QLineEdit)
 from PyQt6.QtCore import Qt
 import travtools.vehiclemaker as vm
+import travtools.names as name_gen
+import travtools.qrebs as qrebs_gen
+import random
 from views.qt_components import Styles, GlassFrame
 
 class VehicleQtView(QWidget):
@@ -47,8 +50,18 @@ class VehicleQtView(QWidget):
         
         self.res_type = QLabel("Type")
         self.res_type.setStyleSheet(f"font-size: 18px; color: {Styles.GREY_TEXT}; font-style: italic; border: none;")
-        self.res_name = QLabel("Name")
-        self.res_name.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {Styles.AMBER}; border: none;")
+        self.res_instance_name = QLabel("")
+        self.res_instance_name.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {Styles.CYAN}; border: none;")
+        self.res_name = QLabel("Type")
+        self.res_name.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {Styles.AMBER}; border: none;")
+        
+        name_btn_layout = QHBoxLayout()
+        self.btn_gen_name = QPushButton("Gen Name")
+        self.btn_gen_name.clicked.connect(self.on_gen_name)
+        self.btn_gen_name.setStyleSheet(f"background-color: {Styles.PURPLE}; color: {Styles.BG_COLOR}; max-width: 80px; font-size: 11px;")
+        name_btn_layout.addWidget(self.res_instance_name)
+        name_btn_layout.addWidget(self.btn_gen_name)
+        name_btn_layout.addStretch()
         
         stats_layout = QHBoxLayout()
         self.res_tl = QLabel("TL: -")
@@ -72,11 +85,35 @@ class VehicleQtView(QWidget):
 
         self.profile_frame.layout.addWidget(self.res_type)
         self.profile_frame.layout.addWidget(self.res_name)
+        self.profile_frame.layout.addLayout(name_btn_layout)
         self.profile_frame.layout.addLayout(stats_layout)
         self.profile_frame.layout.addWidget(QLabel("<hr/>"))
         self.profile_frame.layout.addLayout(perf_layout)
         self.profile_frame.layout.addWidget(QLabel("<b>Armor Values</b>"))
         self.profile_frame.layout.addLayout(self.res_pills)
+
+        # QREBS Section
+        qrebs_group = QGroupBox("Production Quality")
+        qrebs_layout = QVBoxLayout(qrebs_group)
+        seed_layout = QHBoxLayout()
+        self.seed_input = QLineEdit()
+        self.seed_input.setPlaceholderText("Seed")
+        self.btn_random = QPushButton("Random")
+        self.btn_random.clicked.connect(self.randomize_qrebs)
+        seed_layout.addWidget(self.seed_input)
+        seed_layout.addWidget(self.btn_random)
+        
+        self.qrebs_res_code = QLabel("")
+        self.qrebs_res_code.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {Styles.CYAN}; border: none;")
+        self.qrebs_res_text = QLabel("")
+        self.qrebs_res_text.setStyleSheet(f"font-size: 13px; color: {Styles.GREY_TEXT}; border: none;")
+        self.qrebs_res_text.setWordWrap(True)
+        
+        qrebs_layout.addLayout(seed_layout)
+        qrebs_layout.addWidget(self.qrebs_res_code)
+        qrebs_layout.addWidget(self.qrebs_res_text)
+        
+        self.profile_frame.layout.addWidget(qrebs_group)
         self.profile_frame.layout.addStretch()
 
         right_column.addWidget(self.profile_frame)
@@ -209,13 +246,34 @@ class VehicleQtView(QWidget):
         )
         self.render_result(res)
 
+    def on_gen_name(self):
+        name = name_gen.generate_vehicle_name()
+        self.res_instance_name.setText(name)
+
+    def randomize_qrebs(self):
+        self.seed_input.setText(str(random.randint(0, 100000)))
+        self.update_all_outputs()
+
     def render_result(self, res):
         if not res: return
         self.res_name.setText(str(res.get("type", "Unknown")))
         self.res_type.setText(f"{self.tabs.tabText(self.tabs.currentIndex())} Vehicle")
         self.res_tl.setText(f"TL: {res.get('tl', '-')}")
         self.res_cost.setText(f"Cost: {res.get('kcr', '-')} KCr")
-        self.res_mass.setText(f"Vol: {res.get('vol', '-')} tons")
+        
+        qrebs_display = res.get('q', '-')
+        if self.seed_input.text():
+            try:
+                q_res = qrebs_gen.generate_qrebs(seed=int(self.seed_input.text()))
+                self.qrebs_res_code.setText(f"Instance Code: {q_res['code']}")
+                self.qrebs_res_text.setText(q_res['text'])
+                qrebs_display = q_res['code']
+            except: pass
+        else:
+            self.qrebs_res_code.setText("")
+            self.qrebs_res_text.setText("")
+
+        self.res_mass.setText(f"Vol: {res.get('vol', '-')} tons | QREBS: {qrebs_display}")
         
         self.res_speed.setText(f"Speed: {res.get('spd', '-')}")
         self.res_load.setText(f"Load: {res.get('ld', '-')}")

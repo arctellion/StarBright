@@ -23,7 +23,8 @@ def load_data():
         return {
             "male_first": [], "female_first": [], "neutral_first": [],
             "last_names": [], "planet_names": [], "planet_prefixes": [],
-            "object_types": [], "brand_names": []
+            "object_types": [], "brand_names": [],
+            "armour_names": [], "gun_names": [], "vehicle_names": []
         }
 
 NAME_DATA = load_data()
@@ -97,6 +98,9 @@ NEUTRAL_GEN = MarkovGenerator(NAME_DATA.get("neutral_first", []))
 LAST_GEN = MarkovGenerator(NAME_DATA.get("last_names", []))
 PLANET_GEN = MarkovGenerator(NAME_DATA.get("planet_names", []))
 BRAND_GEN = MarkovGenerator(NAME_DATA.get("brand_names", []))
+ARMOUR_GEN = MarkovGenerator(NAME_DATA.get("armour_names", []))
+GUN_GEN = MarkovGenerator(NAME_DATA.get("gun_names", []))
+VEHICLE_GEN = MarkovGenerator(NAME_DATA.get("vehicle_names", []))
 
 # --- GENERATION FUNCTIONS ---
 
@@ -158,6 +162,31 @@ def generate_object_name(seed=None):
     serial = random.randint(100, 999)
     return f"{brand}-{serial} {obj_type}"
 
+def generate_armour_name(seed=None):
+    """Generates a procedural armour or protection name."""
+    if seed is not None:
+        random.seed(seed)
+    brand = BRAND_GEN.generate()
+    name = ARMOUR_GEN.generate()
+    serial = random.randint(10, 99)
+    return f"{brand} {name}-{serial}"
+
+def generate_gun_name(seed=None):
+    """Generates a procedural weapon name."""
+    if seed is not None:
+        random.seed(seed)
+    brand = BRAND_GEN.generate()
+    name = GUN_GEN.generate()
+    return f"{brand} {name}"
+
+def generate_vehicle_name(seed=None):
+    """Generates a procedural vehicle name."""
+    if seed is not None:
+        random.seed(seed)
+    brand = BRAND_GEN.generate()
+    name = VEHICLE_GEN.generate()
+    return f"{brand} {name}"
+
 if __name__ == "__main__":
     # Test generation
     print("--- Character Names ---")
@@ -175,3 +204,15 @@ if __name__ == "__main__":
     print("\n--- Object Names ---")
     for _ in range(5):
         print(f"Object: {generate_object_name()}")
+
+    print("\n--- Armour Names ---")
+    for _ in range(5):
+        print(f"Armour: {generate_armour_name()}")
+
+    print("\n--- Gun Names ---")
+    for _ in range(5):
+        print(f"Gun: {generate_gun_name()}")
+
+    print("\n--- Vehicle Names ---")
+    for _ in range(5):
+        print(f"Vehicle: {generate_vehicle_name()}")

@@ -31,7 +31,7 @@ class NamesQtView(QWidget):
         type_layout = QHBoxLayout()
         type_layout.addWidget(QLabel("Generator Type:"))
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["Character", "Planet", "Object"])
+        self.type_combo.addItems(["Character", "Planet", "Object", "Armour", "Gun", "Vehicle"])
         self.type_combo.currentTextChanged.connect(self.on_type_changed)
         type_layout.addWidget(self.type_combo)
         controls_layout.addLayout(type_layout)
@@ -116,6 +116,12 @@ class NamesQtView(QWidget):
                 name = names.generate_planet_name(loc, uwp)
             except Exception as e:
                 name = f"Error: {str(e)}"
+        elif gen_type == "Armour":
+            name = names.generate_armour_name()
+        elif gen_type == "Gun":
+            name = names.generate_gun_name()
+        elif gen_type == "Vehicle":
+            name = names.generate_vehicle_name()
         else:
             name = names.generate_object_name()
             

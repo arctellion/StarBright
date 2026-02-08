@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLab
 from PyQt6.QtCore import Qt
 import travtools.gunmaker as gm
 import travtools.qrebs as qrebs_gen
+import travtools.names as name_gen
 import random
 from views.qt_components import Styles, GlassFrame
 
@@ -112,9 +113,18 @@ class GunQtView(QWidget):
         
         self.res_model = QLabel("Model")
         self.res_model.setStyleSheet(f"font-size: 18px; color: {Styles.GREY_TEXT}; font-style: italic; border: none;")
+        self.res_instance_name = QLabel("")
+        self.res_instance_name.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {Styles.CYAN}; border: none;")
+        self.res_name = QLabel("Type")
+        self.res_name.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {Styles.AMBER}; border: none;")
         
-        self.res_name = QLabel("Name")
-        self.res_name.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {Styles.AMBER}; border: none;")
+        name_btn_layout = QHBoxLayout()
+        self.btn_gen_name = QPushButton("Gen Name")
+        self.btn_gen_name.clicked.connect(self.on_gen_name)
+        self.btn_gen_name.setStyleSheet(f"background-color: {Styles.PURPLE}; color: {Styles.BG_COLOR}; max-width: 80px; font-size: 11px;")
+        name_btn_layout.addWidget(self.res_instance_name)
+        name_btn_layout.addWidget(self.btn_gen_name)
+        name_btn_layout.addStretch()
         
         self.res_stats = QLabel("")
         self.res_stats.setStyleSheet("font-size: 16px; border: none;")
@@ -152,6 +162,7 @@ class GunQtView(QWidget):
 
         profile_frame.layout.addWidget(self.res_model)
         profile_frame.layout.addWidget(self.res_name)
+        profile_frame.layout.addLayout(name_btn_layout)
         profile_frame.layout.addWidget(QLabel("<hr/>"))
         profile_frame.layout.addWidget(self.res_stats)
         profile_frame.layout.addWidget(QLabel("<b>Effects</b>"))
@@ -178,6 +189,10 @@ class GunQtView(QWidget):
         self.seed_input.setText(str(random.randint(0, 100000)))
         self.is_generated = True
         self.update_gm_output()
+
+    def on_gen_name(self):
+        name = name_gen.generate_gun_name()
+        self.res_instance_name.setText(name)
 
     def update_gm_output(self):
         data = self.type_combo.currentData()

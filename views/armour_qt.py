@@ -7,6 +7,8 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLab
 from PyQt6.QtCore import Qt
 import travtools.armourmaker as am
 import random
+import travtools.names as name_gen
+import travtools.qrebs as qrebs_gen
 from views.qt_components import Styles, GlassFrame
 
 class ArmourQtView(QWidget):
@@ -138,8 +140,18 @@ class ArmourQtView(QWidget):
         
         self.res_model = QLabel("Model")
         self.res_model.setStyleSheet(f"font-size: 18px; color: {Styles.GREY_TEXT}; font-style: italic; border: none;")
-        self.res_name = QLabel("Name")
-        self.res_name.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {Styles.AMBER}; border: none;")
+        self.res_instance_name = QLabel("")
+        self.res_instance_name.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {Styles.CYAN}; border: none;")
+        self.res_name = QLabel("Type")
+        self.res_name.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {Styles.AMBER}; border: none;")
+        
+        name_btn_layout = QHBoxLayout()
+        self.btn_gen_name = QPushButton("Gen Name")
+        self.btn_gen_name.clicked.connect(self.on_gen_name)
+        self.btn_gen_name.setStyleSheet(f"background-color: {Styles.PURPLE}; color: {Styles.BG_COLOR}; max-width: 80px; font-size: 11px;")
+        name_btn_layout.addWidget(self.res_instance_name)
+        name_btn_layout.addWidget(self.btn_gen_name)
+        name_btn_layout.addStretch()
         
         stats_layout = QHBoxLayout()
         self.res_tl = QLabel("TL: -")
@@ -166,12 +178,36 @@ class ArmourQtView(QWidget):
 
         profile_frame.layout.addWidget(self.res_model)
         profile_frame.layout.addWidget(self.res_name)
+        profile_frame.layout.addLayout(name_btn_layout)
         profile_frame.layout.addLayout(stats_layout)
         profile_frame.layout.addLayout(self.res_pills)
         profile_frame.layout.addWidget(QLabel("<hr/>"))
         profile_frame.layout.addLayout(attr_layout)
         profile_frame.layout.addWidget(QLabel("<b>Notes & Features</b>"))
         profile_frame.layout.addWidget(self.res_notes)
+        
+        # QREBS Section
+        qrebs_group = QGroupBox("Production Quality")
+        qrebs_layout = QVBoxLayout(qrebs_group)
+        seed_layout = QHBoxLayout()
+        self.seed_input = QLineEdit()
+        self.seed_input.setPlaceholderText("Seed")
+        self.btn_random = QPushButton("Random")
+        self.btn_random.clicked.connect(self.randomize_qrebs)
+        seed_layout.addWidget(self.seed_input)
+        seed_layout.addWidget(self.btn_random)
+        
+        self.qrebs_res_code = QLabel("")
+        self.qrebs_res_code.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {Styles.CYAN}; border: none;")
+        self.qrebs_res_text = QLabel("")
+        self.qrebs_res_text.setStyleSheet(f"font-size: 13px; color: {Styles.GREY_TEXT}; border: none;")
+        self.qrebs_res_text.setWordWrap(True)
+        
+        qrebs_layout.addLayout(seed_layout)
+        qrebs_layout.addWidget(self.qrebs_res_code)
+        qrebs_layout.addWidget(self.qrebs_res_text)
+        
+        profile_frame.layout.addWidget(qrebs_group)
         profile_frame.layout.addStretch()
 
         right_column.addWidget(profile_frame)
@@ -228,11 +264,21 @@ class ArmourQtView(QWidget):
 
     def update_output(self):
         res = am.calculate_custom_armor(self.type_combo.currentData(), self.desc_combo.currentData(), self.burden_combo.currentData(), self.stage_combo.currentData(), self.user_combo.currentData(), list(self.selected_opts), self.selected_drawbacks)
+        self.last_res = res
         self.render_result(res)
 
     def update_output_premade(self):
         res = am.calculate_premade_armor(self.pre_body.currentData(), self.pre_head.currentData(), "")
+        self.last_res = res
         self.render_result(res)
+
+    def on_gen_name(self):
+        name = name_gen.generate_armour_name()
+        self.res_instance_name.setText(name)
+
+    def randomize_qrebs(self):
+        self.seed_input.setText(str(random.randint(0, 100000)))
+        self.update_output()
 
     def render_result(self, res):
         if not res: return
@@ -240,7 +286,22 @@ class ArmourQtView(QWidget):
         self.res_model.setText(res["model"])
         self.res_tl.setText(f"TL: {res['tl']}")
         self.res_cost.setText(f"Cost: Cr {int(res['cost']):,}")
-        self.res_mass.setText(f"Mass: {int(res['mass'])} kg")
+        
+        qrebs_display = res['qrebs']
+        if self.seed_input.text():
+            try:
+                q_res = qrebs_gen.generate_qrebs(seed=int(self.seed_input.text()), modifiers={'b': res.get('qrebs_mod', 0)}) # Base modifier logic
+                # Armour calculation has an internal b_mod, but calculate_custom_armor returns 'qrebs' as 'B=X' or '50000'
+                # Let's extract modifiers if needed, but for now we'll just use the seed.
+                self.qrebs_res_code.setText(f"Instance Code: {q_res['code']}")
+                self.qrebs_res_text.setText(q_res['text'])
+                qrebs_display = q_res['code']
+            except: pass
+        else:
+            self.qrebs_res_code.setText("")
+            self.qrebs_res_text.setText("")
+
+        self.res_mass.setText(f"Mass: {int(res['mass'])} kg | QREBS: {qrebs_display}")
         
         # Pills
         while self.res_pills.count():

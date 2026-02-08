@@ -131,5 +131,26 @@
     "Atlas", "Bravo", "Cygnus", "Dyna", "Echo", "Falcon", "Giga", "Helix", "Iron", "Jupiter",
     "Krono", "Lunar", "Magna", "Nitro", "Orbit", "Prime", "Quark", "Radia", "Sigma", "Telsa",
     "Ultra", "Viper", "Watt", "Xeno", "Yoga", "Zenon", "Apex", "Blue", "Comet", "DASH"
+  ],
+  "armour_names": [
+    "Aegis", "Bulwark", "Carapace", "Defiance", "Endurance", "Fortress", "Guardian", "Hoplite", "Ironclad", "Juggernaut",
+    "Kevlar", "Lorica", "Mantlet", "Nightshade", "Onyx", "Paladin", "Quasar", "Resilience", "Sentinel", "Titan",
+    "Ulysses", "Valour", "Warden", "Xeno", "Yoke", "Zenith", "Aspis", "Bastion", "Cuirass", "Dreadnought",
+    "Echelon", "Frontier", "Garrison", "Hearth", "Immortal", "Justice", "Knight", "Legion", "Monolith", "Nexus",
+    "Orion", "Phalanx", "Quantum", "Rampart", "Spartan", "Templar", "Unity", "Vanguard", "Wraith", "Xiphos"
+  ],
+  "gun_names": [
+    "Apex", "Banshee", "Cobra", "Dragoon", "Eclipse", "Fury", "Gorgon", "Hydra", "Inferno", "Justice",
+    "Kraken", "Lance", "Mamba", "Nemesis", "Orion", "Phantom", "Quake", "Raptor", "Scythe", "Thunderbolt",
+    "Ursa", "Viper", "Wraith", "Xenon", "Yeti", "Zephyrus", "Assailant", "Ballista", "Cyclone", "Dominator",
+    "Enforcer", "Falcon", "Gladiator", "Harvester", "Interceptor", "Jackal", "Kestrel", "Liberator", "Marauder", "Nightstalker",
+    "Overlord", "Predator", "Punisher", "Ravager", "Specter", "Talon", "Umpire", "Vulture", "Wolverine", "X-Terminator"
+  ],
+  "vehicle_names": [
+    "Atlas", "Behemoth", "Chariot", "Drifter", "Explorer", "Falcon", "Goliath", "Hercules", "Icarus", "Javelin",
+    "Kodiak", "Leviathan", "Mastodon", "Nomad", "Odyssey", "Pathfinder", "Quicksilver", "Rover", "Strider", "Terra",
+    "Ulysses", "Voyager", "Wanderer", "X-Cell", "Yonder", "Zenith", "Apollo", "Beagle", "Cavalier", "Discovery",
+    "Endeavour", "Freedom", "Gallant", "Hornet", "Intrepid", "Journey", "Knight", "Liberty", "Magellan", "Navigator",
+    "Oberon", "Pioneer", "Quest", "Ranger", "Sovereign", "Typhoon", "Unity", "Victory", "Wayfarer", "Xavier"
   ]
 }

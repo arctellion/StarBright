@@ -15,6 +15,13 @@ CHART_5_USER = _data.get("CHART_5_USER", {})
 CHART_7_OPTIONS = _data.get("CHART_7_OPTIONS", {})
 CHART_8_CONTROLS = _data.get("CHART_8_CONTROLS", {})
 
+def merge_controls(base, overlay):
+    """Merges two control sets, giving precedence to True values."""
+    res = base.copy()
+    for k, v in overlay.items():
+        if v: res[k] = True
+    return res
+
 def calculate_weapon(category, type_code, desc_code, burden_codes, stage_codes, user_code, portability_mode, selected_options):
     """
     Calculates the final statistics for a custom weapon design.
