@@ -32,3 +32,7 @@ def get_armour_data():
 def get_gun_data():
     """Returns the gun dataset."""
     return load_json_data("gun_data.json")
+
+def get_vehicle_data():
+    """Returns the vehicle dataset."""
+    return load_json_data("vehicle_data.json")

@@ -50,6 +50,7 @@ class StarBrightApp(QMainWindow):
         makers_menu = menubar.addMenu("Makers")
         self.add_nav_action(makers_menu, "Guns", self.show_guns)
         self.add_nav_action(makers_menu, "Armor", self.show_armor)
+        self.add_nav_action(makers_menu, "Vehicles", self.show_vehicles)
         
         # Utilities
         utils_menu = menubar.addMenu("Utilities")
@@ -148,6 +149,10 @@ class StarBrightApp(QMainWindow):
     def show_armor(self):
         from views.armour_qt import ArmourQtView
         self.switch_view("Armor", ArmourQtView)
+
+    def show_vehicles(self):
+        from views.vehicle_qt import VehicleQtView
+        self.switch_view("Vehicles", VehicleQtView)
 
     def show_dice(self):
         from views.dice_qt import DiceQtView

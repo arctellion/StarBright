@@ -1,0 +1,125 @@
+<html>
+
+<head>
+<script type="text/javascript" src="omni_maker.js"></script>
+<script type="text/javascript" src="o_vehicle_common.js"></script>
+<script type="text/javascript" src="showhide.js"></script>
+<link rel="stylesheet" type="text/css" href="showhide.css" />
+</head>
+
+<body>
+
+<a href="armormaker.html">-> to Gun-maker and Armor-maker</a> <br />
+<a href="vilanitools.html">-> to Traveller alien word gen</a> <br />
+
+<div id="wpNav">
+   <ul>
+      <li><a href="#tab_one"    id="wpSelected" class="toggle">Ground Vehicles</a></li>
+      <li><a href="#tab_two"    id="unSelected" class="toggle">Flyers</a></li>
+      <li><a href="#tab_three"  id="unSelected" class="toggle">Watercraft</a></li>
+      <li><a href="#tab_four"   id="unSelected" class="toggle">Military Vehicles</a></li>
+      <!--li><a href="#tab_five"   id="unSelected" class="toggle">Smallcraft</a></li-->
+      <!--li><a href="#tab_six"    id="unSelected" class="toggle">Modules</a></li-->
+   </ul>
+</div>
+
+<div id="tab_one" class="show">
+   <h3>Ground Vehicles</h3>
+
+   <form method=post action="../cgi-bin/processForm.cgi">   
+   <script>
+   ground_printOptions();
+   </script>
+   <br /><textarea name="output" rows="20" cols="120" ></textarea><br />   
+   <input type="button" value="calculate" onclick="ground_recalc(this.form)" />
+   Address: <input name="address" length="20" />
+   <input type="hidden" name="builder" value="vehicles.ground" />
+   <input type="submit" value="Email it" />
+   </form>
+
+</div>
+
+<div id="tab_two" class="hide">
+   <h3>Flyers</h3>
+
+   <form method=post action="../cgi-bin/processForm.cgi">   
+   <script>
+   flyer_printOptions();
+   </script>
+   <br /><textarea name="output" rows="20" cols="120" ></textarea><br />   
+   <input type="button" value="calculate" onclick="flyer_recalc(this.form)" />
+   Address: <input name="address" length="20" />
+   <input type="hidden" name="builder" value="vehicles.flyer" />
+   <input type="submit" value="Email it" />
+   </form>
+
+</div>
+
+<div id="tab_three" class="hide">
+   <h3>Watercraft</h3>
+
+   <form method=post action="../cgi-bin/processForm.cgi">   
+   <script>
+   watercraft_printOptions();
+   </script>
+   <br /><textarea name="output" rows="20" cols="120" ></textarea><br />   
+   <input type="button" value="calculate" onclick="watercraft_recalc(this.form)" />
+   Address: <input name="address" length="20" />
+   <input type="hidden" name="builder" value="vehicles.watercraft" />
+   <input type="submit" value="Email it" />
+   </form>
+   
+</div>
+
+<div id="tab_four" class="hide">
+   <h3>Military Vehicles</h3>
+
+   <form method=post action="../cgi-bin/processForm.cgi">   
+   <script>
+   mil_printOptions();
+   </script>
+   <br /><textarea name="output" rows="20" cols="120" ></textarea><br />   
+   <input type="button" value="calculate" onclick="mil_recalc(this.form)" />
+   Address: <input name="address" length="20" />
+   <input type="hidden" name="builder" value="vehicles.military" />
+   <input type="submit" value="Email it" />
+   </form>
+
+</div>
+
+<!--div id="tab_five" class="hide">
+   <h3>Smallcraft</h3>
+
+   <form method=post action="../cgi-bin/processForm.cgi">   
+   <script>
+   sc_printOptions();
+   </script>
+   <br /><textarea name="output" rows="20" cols="120" ></textarea><br />   
+   <input type="button" value="calculate" onclick="sc_recalc(this.form)" />
+   Address: <input name="address" length="20" />
+   <input type="hidden" name="builder" value="vehicles.smallcraft" />
+   <input type="submit" value="Email it" />
+   </form>
+
+</div-->
+
+<!--div id="tab_six" class="hide">
+   <h3>Modules</h3>
+   
+   <form method=post action="../cgi-bin/processForm.cgi">
+   <script>
+   installation_printOptions();
+   </script>
+   <br /><textarea name="output" rows="20" cols="120" ></textarea><br />
+   <input type="button" value="calculate" onclick="installation_recalc(this.form)" />
+   </form>
+</div-->
+
+<script type="text/javascript">
+   toggle_init();
+</script>
+
+<font size=-1>Generated using Perl.</font>
+
+</body>
+</html>
