@@ -58,7 +58,7 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 * Check gunmaker/armourmaker logic to ensure it matches the rules.
 * Add more makers: Thingmaker, Beastmaker, etc.
 * Add more tools: Task manager, interpersonal task creator, etc.
-* Add planet mapper
+* Add planet mapper, ability to load sectors and subsectors from traveller map, as well as save and load sectors and subsectors.
 * Character creator
 * Add more polish and bling.
 
