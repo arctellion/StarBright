@@ -23,11 +23,15 @@ The application has been recently migrated to **PyQt6** for enhanced stability a
 ### 🌍 Galaxy Engine
 - **System Generator**: Instant Traveller 5.1 world profiles (UWP, PBG, Extensions, Bases).
 - **Subsector Generator**: Generate 8x10 hex-grid equivalent subsectors.
-- **Sector Generator**: Generate complete sectors consisting of 16 subsectors. (to do..)
+- **Sector Generator**: Generate complete sectors consisting of 16 subsectors.
 
-### 🔫 Maker Tools (Guns & Armour)
-- **GunMaker**: Comprehensive weapon engineering system with real-time stats (Mass, Cost, TL, QREBS).
-- **ArmourMaker**: Modular armor design with subsystem tracking and drawbacks.
+### � Maker Tools (Guns, Armour, Vehicles)
+- **GunMaker**: Comprehensive weapon engineering system with procedural names and QREBS.
+- **ArmourMaker**: Modular armor design with subsystem tracking and procedural names.
+- **VehicleMaker**: Design Ground, Flyer, Watercraft, and Military vehicles with procedural names.
+
+### 🏷️ Utilities
+- **Name Generator**: Procedural names for Characters, Planets, Objects, Guns, Armour, and Vehicles using Markov chains.
 
 ---
 
@@ -42,8 +46,9 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 - **`commerce.py`**: Pricing algorithms for speculative trade and freight.
 - **`gunmaker.py`**: Weapon design logic and chart data.
 - **`armourmaker.py`**: Armor calculation and subsystem datasets.
-- **`names.py`**: Name generation logic.
-- **`names_data.json`**: Name data for name generation.
+- **`vehiclemaker.py`**: Vehicle design logic and chart data.
+- **`names.py`**: Name generation logic using Markov chains.
+- **`names_data.json`**: Procedural name datasets.
 - **`travel.py`**: Travel time and distance calculations.
 
 ---
@@ -51,7 +56,7 @@ The core logic of StarBright is powered by a set of modular Python libraries:
 ## TODO ..
 
 * Check gunmaker/armourmaker logic to ensure it matches the rules.
-* Add more makers: Thingmaker, Vehiclemaker, Beastmaker, etc.
+* Add more makers: Thingmaker, Beastmaker, etc.
 * Add more tools: Task manager, interpersonal task creator, etc.
 * Add planet mapper
 * Character creator
