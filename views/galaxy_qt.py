@@ -5,7 +5,7 @@ subsectors, and sectors, including an interactive hex map.
 """
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, 
                              QScrollArea, QFrame, QGridLayout, QSlider, QTableWidget, QTableWidgetItem, 
-                             QHeaderView, QTextEdit, QStackedWidget, QDialog)
+                             QHeaderView, QTextEdit, QStackedWidget, QDialog, QComboBox)
 from PyQt6.QtCore import Qt, QPointF, QPoint, QSize, pyqtSignal
 from PyQt6.QtGui import QPainter, QPen, QColor, QPolygonF, QFont, QCursor
 import random
@@ -200,6 +200,8 @@ class SystemDetailDialog(QDialog):
         sec_frame = GlassFrame("Extended Data", "", Styles.GREEN)
         sec_layout = QVBoxLayout()
         
+        sec_layout.addWidget(QLabel(f"<b>Stars:</b> <span style='color: {Styles.AMBER};'>{self.system.get('stars', 'Unknown')}</span>"))
+        sec_layout.addWidget(QLabel(f"<b>Allegiance:</b> {self.system.get('allegiance', 'Unknown')}"))
         sec_layout.addWidget(QLabel(f"<b>PBG:</b> {self.system['pbg']} <span style='color: {Styles.GREY_TEXT}; ml-2'>(Pop Multiplier: {self.system['pbg'][0]}, Belts: {self.system['pbg'][1]}, Gas Giants: {self.system['pbg'][2]})</span>"))
         sec_layout.addWidget(QLabel(f"<b>Bases:</b> {self.get_bases_desc(self.system['bases'])}"))
         sec_layout.addWidget(QLabel(f"<b>Trade Classifications:</b> {self.system['trade']}"))
@@ -207,6 +209,28 @@ class SystemDetailDialog(QDialog):
         
         sec_frame.layout.addLayout(sec_layout)
         layout.addWidget(sec_frame)
+        
+        # All API Data (Scrollable)
+        if 'raw_api_data' in self.system:
+            raw_frame = GlassFrame("Detailed API Telemetry", "All available data from Traveller Map", Styles.GREY_TEXT)
+            raw_scroll = QScrollArea()
+            raw_scroll.setWidgetResizable(True)
+            raw_scroll.setMaximumHeight(200)
+            raw_scroll.setStyleSheet("background: #000; border: none;")
+            
+            raw_content = QWidget()
+            raw_list = QVBoxLayout(raw_content)
+            
+            # Known fields to skip (already shown)
+            skip = ['Name', 'Hex', 'UWP', 'PBG', 'Bases', 'Remarks', '{Ix}', '(Ex)', '[Cx]', 'Stars', 'Allegiance']
+            
+            for k, v in self.system['raw_api_data'].items():
+                if k not in skip and v:
+                    raw_list.addWidget(QLabel(f"<b>{k}:</b> {v}"))
+            
+            raw_scroll.setWidget(raw_content)
+            raw_frame.layout.addWidget(raw_scroll)
+            layout.addWidget(raw_frame)
         
         # Close button
         btn_close = QPushButton("Close")
@@ -304,10 +328,11 @@ class SubsectorSummaryCard(QFrame):
     """
     A small card widget showing a summary of a subsector, used in the Sector view grid.
     """
-    def __init__(self, letter, systems, on_click=None):
+    def __init__(self, letter, systems, name=None, on_click=None):
         super().__init__()
         self.letter = letter
         self.systems = systems
+        self.name = name or f"Subsector {letter}"
         self.on_click = on_click
         self.setObjectName("SubsectorSummaryCard")
 
@@ -325,7 +350,7 @@ class SubsectorSummaryCard(QFrame):
         """)
         layout = QVBoxLayout(self)
         
-        self.letter_label = QLabel(f"Subsector {letter}")
+        self.letter_label = QLabel(self.name)
         self.letter_label.setStyleSheet(f"color: {Styles.AMBER}; font-weight: bold; font-size: 14px; border: none;")
         
         count = len(systems)
@@ -338,7 +363,7 @@ class SubsectorSummaryCard(QFrame):
 
     def mousePressEvent(self, event):
         if self.on_click:
-            self.on_click(self.letter, self.systems)
+            self.on_click(self.letter, self.systems, self.name)
         super().mousePressEvent(event)
 
 
@@ -666,3 +691,252 @@ class SectorQtView(QWidget):
         self.stack.setCurrentIndex(1)
 
 
+
+class TravellerMapQtView(QWidget):
+    """
+    Enhanced View for Traveller Map API using official Milieu and Sector lists.
+    """
+    def __init__(self):
+        super().__init__()
+        import travtools.traveller_map_api as tmap
+        self.tmap = tmap
+        self.metadata = self.load_metadata()
+        self.ss_names = {} # Map Index -> Name
+        self.init_ui()
+        self.populate_milieux()
+
+    def _load_metadata_internal(self):
+        import os
+        import json
+        json_path = os.path.join(os.path.dirname(__file__), '..', 'travtools', 'traveller_map_data.json')
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading traveller map metadata: {e}")
+            return {"milieux": [], "sectors": {}}
+
+    def load_metadata(self):
+        # Alias for consistency if needed, but the method above is fine
+        return self._load_metadata_internal()
+
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        frame = GlassFrame("Traveller Map Viewer", "Official Sectors from travellermap.com", Styles.BLUE)
+        
+        input_layout = QHBoxLayout()
+        self.milieu_combo = QComboBox()
+        self.sector_combo = QComboBox()
+        self.sector_combo.setEditable(True)
+        self.sector_combo.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        self.sector_combo.completer().setFilterMode(Qt.MatchFlag.MatchContains)
+        
+        btn_clear = QPushButton("Clear")
+        btn_clear.setFixedWidth(60)
+        btn_clear.clicked.connect(self.populate_milieux)
+
+        btn_load = QPushButton("Fetch Sector Data")
+        btn_load.clicked.connect(self.on_load_click)
+        
+        self.milieu_combo.currentIndexChanged.connect(self.on_milieu_change)
+        
+        input_layout.addWidget(QLabel("Milieu:"))
+        input_layout.addWidget(self.milieu_combo)
+        input_layout.addWidget(QLabel("Sector:"))
+        input_layout.addWidget(self.sector_combo, 1)
+        input_layout.addWidget(btn_clear)
+        input_layout.addWidget(btn_load)
+        
+        # Main content areas (Stacked)
+        self.stack = QStackedWidget()
+        
+        # Page 1: Sector Grid View
+        self.grid_scroll = QScrollArea()
+        self.grid_scroll.setWidgetResizable(True)
+        self.grid_scroll.setStyleSheet(f"background-color: #000; border: 1px solid {Styles.BORDER_COLOR};")
+        
+        self.grid_container = QWidget()
+        self.grid_layout = QGridLayout(self.grid_container)
+        self.grid_layout.setSpacing(10)
+        self.grid_scroll.setWidget(self.grid_container)
+        self.stack.addWidget(self.grid_scroll)
+        
+        # Page 2: Subsector Detail View
+        self.detail_widget = QWidget()
+        self.detail_layout = QVBoxLayout(self.detail_widget)
+        
+        detail_header = QHBoxLayout()
+        self.detail_title = QLabel("Subsector Detail")
+        self.detail_title.setStyleSheet(f"color: {Styles.BLUE}; font-size: 20px; font-weight: bold;")
+        btn_back = QPushButton("Back to Sector View")
+        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        btn_back.setFixedWidth(150)
+        detail_header.addWidget(self.detail_title)
+        detail_header.addStretch()
+        detail_header.addWidget(btn_back)
+        
+        detail_content = QHBoxLayout()
+        
+        # Left side: Table
+        self.table = QTableWidget(0, 4)
+        self.table.setHorizontalHeaderLabels(["Name", "Coord", "UWP", "Remarks"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.setStyleSheet(f"background-color: #000; gridline-color: {Styles.BORDER_COLOR}; color: {Styles.WHITE_TEXT};")
+        self.table.setMaximumWidth(400)
+        
+        # Right side: Hex Map
+        self.map_scroll = QScrollArea()
+        self.hex_map = HexMapWidget()
+        self.map_scroll.setWidget(self.hex_map)
+        self.map_scroll.setWidgetResizable(True)
+        self.map_scroll.setStyleSheet(f"border: 1px solid {Styles.BORDER_COLOR}; background: #000;")
+        
+        detail_content.addWidget(self.table, 1)
+        detail_content.addWidget(self.map_scroll, 2)
+        
+        self.detail_layout.addLayout(detail_header)
+        self.detail_layout.addLayout(detail_content)
+        self.stack.addWidget(self.detail_widget)
+        
+        frame.layout.addLayout(input_layout)
+        frame.layout.addWidget(self.stack)
+        
+        layout.addWidget(frame)
+
+        # Connections
+        self.hex_map.systemSelected.connect(self.show_system_details)
+        self.table.itemDoubleClicked.connect(self.on_table_double_click)
+        self.table.verticalHeader().sectionClicked.connect(self.on_row_header_click)
+
+    def populate_milieux(self):
+        self.milieu_combo.clear()
+        self.milieu_combo.addItem("Select Milieu...", None)
+        for m in self.metadata.get("milieux", []):
+            self.milieu_combo.addItem(f"{m['Name']} ({m['Code']})", m['Code'])
+        
+        # Reset sectors
+        self.sector_combo.clear()
+        self.sector_combo.addItem("Select Sector...", None)
+        
+        # Clear data and grid
+        self.full_sector_systems = []
+        for i in reversed(range(self.grid_layout.count())): 
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+        
+        self.stack.setCurrentIndex(0)
+
+    def on_milieu_change(self):
+        milieu_code = self.milieu_combo.currentData()
+        self.sector_combo.clear()
+        self.sector_combo.addItem("Select Sector...", None)
+        
+        if not milieu_code:
+            return
+
+        if milieu_code in self.metadata.get("sectors", {}):
+            sectors = self.metadata["sectors"][milieu_code]
+            
+            # Sort sectors alphabetically by name
+            def get_name(s):
+                name = s['Names'][0]['Text']
+                for n in s['Names']:
+                    if 'Lang' not in n or n['Lang'] == 'en':
+                        return n['Text']
+                return name
+            
+            sorted_sectors = sorted(sectors, key=get_name)
+            
+            for s in sorted_sectors:
+                self.sector_combo.addItem(get_name(s), s['Abbreviation'])
+        
+        # Reset search/text
+        self.sector_combo.setEditText("")
+
+    def on_load_click(self):
+        milieu = self.milieu_combo.currentData()
+        sector_name = self.sector_combo.currentText()
+        if not milieu or sector_name == "Select Sector...":
+            return
+
+        # Fetch system data
+        tab_data = self.tmap.fetch_sector_tab_data(milieu, sector_name)
+        if tab_data:
+            self.full_sector_systems = self.tmap.parse_tab_data(tab_data)
+            self.sector_abbr = self.sector_combo.currentData()
+            self.sector_display_name = sector_name
+            
+            # Fetch sector metadata for subsector names
+            self.ss_names = {}
+            meta = self.tmap.fetch_sector_metadata(milieu, sector_name)
+            if meta and "Subsectors" in meta:
+                for ss in meta["Subsectors"]:
+                    idx = ss.get("Index")
+                    name = ss.get("Name")
+                    if idx and name:
+                        self.ss_names[idx] = name
+            
+            self.render_sector_grid()
+            self.stack.setCurrentIndex(0)
+        else:
+            print(f"Failed to load TabDelimited data for {sector_name}")
+
+    def render_sector_grid(self):
+        # Clear previous grid
+        for i in reversed(range(self.grid_layout.count())): 
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+        
+        # Group systems by subsector (A-P)
+        ss_map = {}
+        for s in self.full_sector_systems:
+            ss = s.get('subsector', ' ')
+            if ss not in ss_map: ss_map[ss] = []
+            ss_map[ss].append(s)
+            
+        names = "ABCDEFGHIJKLMNOP"
+        for i, letter in enumerate(names):
+            row = i // 4
+            col = i % 4
+            systems = ss_map.get(letter, [])
+            ss_name = self.ss_names.get(letter)
+            card = SubsectorSummaryCard(letter, systems, name=ss_name, on_click=self.on_card_click)
+            self.grid_layout.addWidget(card, row, col)
+
+    def on_card_click(self, letter, systems, ss_name):
+        display_name = ss_name if ss_name else f"Subsector {letter}"
+        self.detail_title.setText(f"{self.sector_display_name} - {display_name}")
+        self.current_systems = systems
+        self.update_display()
+        self.stack.setCurrentIndex(1)
+
+    def update_display(self):
+        self.table.setRowCount(0)
+        for s in self.current_systems:
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            self.table.setItem(row, 0, QTableWidgetItem(s['name']))
+            self.table.setItem(row, 1, QTableWidgetItem(s['coord']))
+            uwp_item = QTableWidgetItem(s['uwp'])
+            uwp_item.setForeground(Qt.GlobalColor.yellow)
+            self.table.setItem(row, 2, uwp_item)
+            self.table.setItem(row, 3, QTableWidgetItem(s['trade']))
+        
+        self.hex_map.set_systems(self.current_systems)
+
+    def on_table_double_click(self, item):
+        row = item.row()
+        if hasattr(self, 'current_systems') and row < len(self.current_systems):
+            self.show_system_details(self.current_systems[row])
+
+    def on_row_header_click(self, row):
+        if hasattr(self, 'current_systems') and row < len(self.current_systems):
+            self.show_system_details(self.current_systems[row])
+
+    def show_system_details(self, system):
+        dialog = SystemDetailDialog(system, self)
+        dialog.exec()

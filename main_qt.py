@@ -40,6 +40,7 @@ class StarBrightApp(QMainWindow):
         self.add_nav_action(galaxy_menu, "System", self.show_system)
         self.add_nav_action(galaxy_menu, "SubSector", self.show_subsector)
         self.add_nav_action(galaxy_menu, "Sector", self.show_sector)
+        self.add_nav_action(galaxy_menu, "Traveller Map", self.show_traveller_map)
         
         # Trading
         trade_menu = menubar.addMenu("Trading")
@@ -133,6 +134,10 @@ class StarBrightApp(QMainWindow):
     def show_sector(self):
         from views.galaxy_qt import SectorQtView
         self.switch_view("Sector", SectorQtView)
+
+    def show_traveller_map(self):
+        from views.galaxy_qt import TravellerMapQtView
+        self.switch_view("Traveller Map", TravellerMapQtView)
 
     def show_buy(self):
         from views.trade_qt import BuyQtView
