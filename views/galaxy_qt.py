@@ -14,6 +14,8 @@ import travtools.system as ts
 import travtools.names as names
 import travtools.converters as cnv
 from views.qt_components import Styles, GlassFrame
+from views.world_map_qt import WorldMapDialog
+from travtools.world_map_gen import WorldMapGen
 
 class HexMapWidget(QWidget):
     """
@@ -232,10 +234,33 @@ class SystemDetailDialog(QDialog):
             raw_frame.layout.addWidget(raw_scroll)
             layout.addWidget(raw_frame)
         
-        # Close button
+        # Map and Close buttons
+        btn_layout = QHBoxLayout()
+        btn_map = QPushButton("View World Map")
+        btn_map.clicked.connect(self.on_view_map_click)
+        btn_map.setStyleSheet(f"background-color: {Styles.BLUE}; font-weight: bold; height: 30px;")
+        
         btn_close = QPushButton("Close")
         btn_close.clicked.connect(self.close)
-        layout.addWidget(btn_close)
+        btn_close.setFixedHeight(30)
+        
+        btn_layout.addWidget(btn_map)
+        btn_layout.addWidget(btn_close)
+        layout.addLayout(btn_layout)
+
+    def on_view_map_click(self):
+        try:
+            # Determine seed from hex or name
+            seed = sum(ord(c) for c in self.system['name'])
+            gen = WorldMapGen(self.system['uwp'], seed=seed)
+            gen.generate_terrain()
+            map_data = gen.get_map_json()
+            
+            dialog = WorldMapDialog(self.system['name'], self.system['uwp'], map_data, gen.size, self)
+            dialog.exec()
+        except Exception as e:
+            from PyQt6.QtWidgets import QMessageBox
+            QMessageBox.critical(self, "Error", f"Failed to generate map: {e}")
 
     def get_starport_desc(self, c):
         descs = {
@@ -647,7 +672,7 @@ class SectorQtView(QWidget):
                 row = i // 4
                 col = i % 4
                 systems = self.sector_data.get(letter, [])
-                card = SubsectorSummaryCard(letter, systems, self.on_card_click)
+                card = SubsectorSummaryCard(letter, systems, on_click=self.on_card_click)
                 self.grid_layout.addWidget(card, row, col)
             
             self.stack.setCurrentIndex(0) # Ensure grid is visible
@@ -668,7 +693,7 @@ class SectorQtView(QWidget):
         dialog = SystemDetailDialog(system, self)
         dialog.exec()
 
-    def on_card_click(self, letter, systems):
+    def on_card_click(self, letter, systems, name):
         self.detail_title.setText(f"Subsector {letter} Detail")
         self.current_detail_systems = systems
         
