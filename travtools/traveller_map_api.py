@@ -1,3 +1,7 @@
+"""
+[DEPRECATED] Access Traveller Map API via web. 
+New implementations should use travtools/traveller_map_db.py for local SQLite access.
+"""
 import requests
 import json
 import travtools.converters as cnv

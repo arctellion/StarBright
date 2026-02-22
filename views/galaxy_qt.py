@@ -27,12 +27,16 @@ class HexMapWidget(QWidget):
         super().__init__()
         self.systems = systems or []
         self.hex_radius = 35
+        self.x_off = 0
+        self.y_off = 0
         self.setMinimumSize(800, 800)
         self.setMouseTracking(True)
 
 
-    def set_systems(self, systems):
+    def set_systems(self, systems, x_off=0, y_off=0):
         self.systems = systems
+        self.x_off = x_off
+        self.y_off = y_off
         self.update()
 
     def paintEvent(self, event):
@@ -55,14 +59,16 @@ class HexMapWidget(QWidget):
                 # Draw Coord
                 painter.setPen(QPen(QColor("#444")))
                 painter.setFont(QFont("Arial", 7))
-                painter.drawText(int(center.x()) - 10, int(center.y()) - 15, f"{x:02d}{y:02d}")
+                real_x = x + self.x_off
+                real_y = y + self.y_off
+                painter.drawText(int(center.x()) - 10, int(center.y()) - 15, f"{real_x:02d}{real_y:02d}")
                 painter.setPen(pen)
 
         # Draw Systems
         for s in self.systems:
             coord = s['coord']
-            x = int(coord[:2])
-            y = int(coord[2:])
+            x = int(coord[:2]) - self.x_off
+            y = int(coord[2:]) - self.y_off
             center = self.hex_to_pixel(x, y)
             
             # System Marker
@@ -112,8 +118,8 @@ class HexMapWidget(QWidget):
         
         for s in self.systems:
             coord = s['coord']
-            x = int(coord[:2])
-            y = int(coord[2:])
+            x = int(coord[:2]) - self.x_off
+            y = int(coord[2:]) - self.y_off
             center = self.hex_to_pixel(x, y)
             
             # Simple distance check from center of hex
@@ -132,8 +138,8 @@ class HexMapWidget(QWidget):
         hovering = False
         for s in self.systems:
             coord = s['coord']
-            x = int(coord[:2])
-            y = int(coord[2:])
+            x = int(coord[:2]) - self.x_off
+            y = int(coord[2:]) - self.y_off
             center = self.hex_to_pixel(x, y)
             dist = math.sqrt((center.x() - event.position().x())**2 + (center.y() - event.position().y())**2)
             if dist < 15:
@@ -151,9 +157,10 @@ class SystemDetailDialog(QDialog):
     A dialog window that displays detailed information about a star system,
     including UWP breakdown and extended data.
     """
-    def __init__(self, system, parent=None):
+    def __init__(self, system, parent=None, show_telemetry=True):
         super().__init__(parent)
         self.system = system
+        self.show_telemetry = show_telemetry
         self.setWindowTitle(f"System Details: {system['name']}")
         self.setMinimumWidth(500)
         self.init_ui()
@@ -204,7 +211,15 @@ class SystemDetailDialog(QDialog):
         
         sec_layout.addWidget(QLabel(f"<b>Stars:</b> <span style='color: {Styles.AMBER};'>{self.system.get('stars', 'Unknown')}</span>"))
         sec_layout.addWidget(QLabel(f"<b>Allegiance:</b> {self.system.get('allegiance', 'Unknown')}"))
-        sec_layout.addWidget(QLabel(f"<b>PBG:</b> {self.system['pbg']} <span style='color: {Styles.GREY_TEXT}; ml-2'>(Pop Multiplier: {self.system['pbg'][0]}, Belts: {self.system['pbg'][1]}, Gas Giants: {self.system['pbg'][2]})</span>"))
+        pbg = self.system.get('pbg', '000')
+        if not pbg or len(pbg) < 3:
+            pbg = (pbg + "000")[:3]
+            
+        p_ext = pbg[0]
+        b_ext = pbg[1]
+        g_ext = pbg[2]
+
+        sec_layout.addWidget(QLabel(f"<b>PBG:</b> {pbg} <span style='color: {Styles.GREY_TEXT}; ml-2'>(Pop Multiplier: {p_ext}, Belts: {b_ext}, Gas Giants: {g_ext})</span>"))
         sec_layout.addWidget(QLabel(f"<b>Bases:</b> {self.get_bases_desc(self.system['bases'])}"))
         sec_layout.addWidget(QLabel(f"<b>Trade Classifications:</b> {self.system['trade']}"))
         sec_layout.addWidget(QLabel(f"<b>Importance & Economic:</b> {self.system['ext']}"))
@@ -213,7 +228,7 @@ class SystemDetailDialog(QDialog):
         layout.addWidget(sec_frame)
         
         # All API Data (Scrollable)
-        if 'raw_api_data' in self.system:
+        if self.show_telemetry and 'raw_api_data' in self.system:
             raw_frame = GlassFrame("Detailed API Telemetry", "All available data from Traveller Map", Styles.GREY_TEXT)
             raw_scroll = QScrollArea()
             raw_scroll.setWidgetResizable(True)
@@ -421,6 +436,11 @@ class SystemQtView(QWidget):
         input_layout.addWidget(btn_random)
         input_layout.addWidget(btn_generate)
         
+        self.btn_map = QPushButton("View World Map")
+        self.btn_map.setEnabled(False)
+        self.btn_map.clicked.connect(self.on_view_map_click)
+        self.btn_map.setStyleSheet(f"background-color: {Styles.BLUE}; font-weight: bold; height: 34px;")
+        
         self.result_frame = QFrame()
         self.result_frame.setStyleSheet(f"border: 1px solid {Styles.BORDER_COLOR}; border-radius: 8px; background: #000; padding: 15px;")
         self.result_layout = QVBoxLayout(self.result_frame)
@@ -434,6 +454,7 @@ class SystemQtView(QWidget):
         
         self.result_layout.addWidget(self.uwp_label)
         self.result_layout.addWidget(self.details_label)
+        self.result_layout.addWidget(self.btn_map)
         self.result_layout.addStretch()
         
         frame.layout.addLayout(input_layout)
@@ -459,9 +480,28 @@ class SystemQtView(QWidget):
             self.uwp_label.setText(f"{planet_name} [{uwp}]")
             details = f"<b>PBG:</b> {pbg}<br><b>Bases:</b> {bases if bases else 'None'}<br><b>Trade:</b> {trade}<br><b>Extensions:</b> {ext}"
             self.details_label.setText(details)
+            
+            self.current_uwp = uwp
+            self.current_name = planet_name
+            self.btn_map.setEnabled(True)
         except Exception as ex:
             self.uwp_label.setText("Error")
             self.details_label.setText(str(ex))
+            self.btn_map.setEnabled(False)
+
+    def on_view_map_click(self):
+        if not hasattr(self, 'current_uwp'): return
+        try:
+            seed = sum(ord(c) for c in self.current_name)
+            gen = WorldMapGen(self.current_uwp, seed=seed)
+            gen.generate_terrain()
+            map_data = gen.get_map_json()
+            
+            dialog = WorldMapDialog(self.current_name, self.current_uwp, map_data, gen.size, self)
+            dialog.exec()
+        except Exception as e:
+            from PyQt6.QtWidgets import QMessageBox
+            QMessageBox.critical(self, "Error", f"Failed to generate map: {e}")
 
 class SubsectorQtView(QWidget):
     """
@@ -556,7 +596,7 @@ class SubsectorQtView(QWidget):
             self.show_system_details(self.current_systems[row])
 
     def show_system_details(self, system):
-        dialog = SystemDetailDialog(system, self)
+        dialog = SystemDetailDialog(system, self, show_telemetry=False)
         dialog.exec()
 
 class SectorQtView(QWidget):
@@ -690,7 +730,7 @@ class SectorQtView(QWidget):
             self.show_system_details(self.current_detail_systems[row])
 
     def show_system_details(self, system):
-        dialog = SystemDetailDialog(system, self)
+        dialog = SystemDetailDialog(system, self, show_telemetry=False)
         dialog.exec()
 
     def on_card_click(self, letter, systems, name):
@@ -710,7 +750,12 @@ class SectorQtView(QWidget):
             self.detail_table.setItem(row, 3, QTableWidgetItem(s['trade']))
             
         # Update map
-        self.detail_map.set_systems(systems)
+        letter_idx = ord(letter) - ord('A')
+        col = letter_idx % 4
+        row = letter_idx // 4
+        x_off = col * 8
+        y_off = row * 10
+        self.detail_map.set_systems(systems, x_off=x_off, y_off=y_off)
         
         # Switch to detail page
         self.stack.setCurrentIndex(1)
@@ -719,31 +764,16 @@ class SectorQtView(QWidget):
 
 class TravellerMapQtView(QWidget):
     """
-    Enhanced View for Traveller Map API using official Milieu and Sector lists.
+    Enhanced View for Traveller Map using local SQLite database.
     """
     def __init__(self):
         super().__init__()
-        import travtools.traveller_map_api as tmap
-        self.tmap = tmap
-        self.metadata = self.load_metadata()
+        import travtools.traveller_map_db as tdb
+        self.tdb = tdb
         self.ss_names = {} # Map Index -> Name
         self.init_ui()
         self.populate_milieux()
 
-    def _load_metadata_internal(self):
-        import os
-        import json
-        json_path = os.path.join(os.path.dirname(__file__), '..', 'travtools', 'traveller_map_data.json')
-        try:
-            with open(json_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading traveller map metadata: {e}")
-            return {"milieux": [], "sectors": {}}
-
-    def load_metadata(self):
-        # Alias for consistency if needed, but the method above is fine
-        return self._load_metadata_internal()
 
     def init_ui(self):
         layout = QVBoxLayout(self)
@@ -838,8 +868,11 @@ class TravellerMapQtView(QWidget):
     def populate_milieux(self):
         self.milieu_combo.clear()
         self.milieu_combo.addItem("Select Milieu...", None)
-        for m in self.metadata.get("milieux", []):
-            self.milieu_combo.addItem(f"{m['Name']} ({m['Code']})", m['Code'])
+        milieux = self.tdb.get_milieux()
+        allowed = ["M0", "M1105", "M1120", "M1900"]
+        for m in milieux:
+            if m in allowed:
+                self.milieu_combo.addItem(m, m)
         
         # Reset sectors
         self.sector_combo.clear()
@@ -862,21 +895,9 @@ class TravellerMapQtView(QWidget):
         if not milieu_code:
             return
 
-        if milieu_code in self.metadata.get("sectors", {}):
-            sectors = self.metadata["sectors"][milieu_code]
-            
-            # Sort sectors alphabetically by name
-            def get_name(s):
-                name = s['Names'][0]['Text']
-                for n in s['Names']:
-                    if 'Lang' not in n or n['Lang'] == 'en':
-                        return n['Text']
-                return name
-            
-            sorted_sectors = sorted(sectors, key=get_name)
-            
-            for s in sorted_sectors:
-                self.sector_combo.addItem(get_name(s), s['Abbreviation'])
+        sectors = self.tdb.get_sectors(milieu_code)
+        for s in sectors:
+            self.sector_combo.addItem(s['name'], s['name'])
         
         # Reset search/text
         self.sector_combo.setEditText("")
@@ -887,27 +908,19 @@ class TravellerMapQtView(QWidget):
         if not milieu or sector_name == "Select Sector...":
             return
 
-        # Fetch system data
-        tab_data = self.tmap.fetch_sector_tab_data(milieu, sector_name)
-        if tab_data:
-            self.full_sector_systems = self.tmap.parse_tab_data(tab_data)
-            self.sector_abbr = self.sector_combo.currentData()
+        # Fetch system data from DB
+        systems = self.tdb.get_sector_systems(milieu, sector_name)
+        if systems:
+            self.full_sector_systems = systems
             self.sector_display_name = sector_name
             
-            # Fetch sector metadata for subsector names
-            self.ss_names = {}
-            meta = self.tmap.fetch_sector_metadata(milieu, sector_name)
-            if meta and "Subsectors" in meta:
-                for ss in meta["Subsectors"]:
-                    idx = ss.get("Index")
-                    name = ss.get("Name")
-                    if idx and name:
-                        self.ss_names[idx] = name
+            # Fetch sector metadata for subsector names from DB
+            self.ss_names = self.tdb.get_sector_metadata(milieu, sector_name)
             
             self.render_sector_grid()
             self.stack.setCurrentIndex(0)
         else:
-            print(f"Failed to load TabDelimited data for {sector_name}")
+            print(f"Failed to load data for {sector_name} from database")
 
     def render_sector_grid(self):
         # Clear previous grid
@@ -936,6 +949,7 @@ class TravellerMapQtView(QWidget):
         display_name = ss_name if ss_name else f"Subsector {letter}"
         self.detail_title.setText(f"{self.sector_display_name} - {display_name}")
         self.current_systems = systems
+        self.current_letter = letter
         self.update_display()
         self.stack.setCurrentIndex(1)
 
@@ -951,7 +965,12 @@ class TravellerMapQtView(QWidget):
             self.table.setItem(row, 2, uwp_item)
             self.table.setItem(row, 3, QTableWidgetItem(s['trade']))
         
-        self.hex_map.set_systems(self.current_systems)
+        letter_idx = ord(self.current_letter) - ord('A') if hasattr(self, 'current_letter') else 0
+        col = letter_idx % 4
+        row = letter_idx // 4
+        x_off = col * 8
+        y_off = row * 10
+        self.hex_map.set_systems(self.current_systems, x_off=x_off, y_off=y_off)
 
     def on_table_double_click(self, item):
         row = item.row()
@@ -963,5 +982,5 @@ class TravellerMapQtView(QWidget):
             self.show_system_details(self.current_systems[row])
 
     def show_system_details(self, system):
-        dialog = SystemDetailDialog(system, self)
+        dialog = SystemDetailDialog(system, self, show_telemetry=False)
         dialog.exec()

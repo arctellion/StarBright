@@ -335,13 +335,15 @@ def fun_bases(uwp):
             base += "S"
     return base
 
-def fun_subsector(seed, density=0.5):
+def fun_subsector(seed, density=0.5, x_off=0, y_off=0):
     """
     Generates a subsector (8x10 grid).
 
     Args:
         seed (int): Initial seed for the subsector.
         density (float): Chance of a hex containing a system (0.0 to 1.0).
+        x_off (int): X-coordinate offset (e.g., 0, 8, 16, 24).
+        y_off (int): Y-coordinate offset (e.g., 0, 10, 20, 30).
 
     Returns:
         list: A list of dictionaries containing system data.
@@ -363,11 +365,15 @@ def fun_subsector(seed, density=0.5):
                 trade = fun_trade(uwp)
                 ext = fun_ext(uwp, pbg, bases, trade)
                 
-                planet_name = names.generate_planet_name(f"{x:02d}{y:02d}", uwp)
+                real_x = x + x_off
+                real_y = y + y_off
+                coord_str = f"{real_x:02d}{real_y:02d}"
+                
+                planet_name = names.generate_planet_name(coord_str, uwp)
                 
                 systems.append({
                     'name': planet_name,
-                    'coord': f"{x:02d}{y:02d}",
+                    'coord': coord_str,
                     'uwp': uwp,
                     'pbg': pbg,
                     'bases': bases,
@@ -390,8 +396,17 @@ def fun_sector(seed, density=0.5):
     sector_data = {}
     # Sector is typically 4x4 subsectors
     # Subsectors are A-P
-    names = "ABCDEFGHIJKLMNOP"
-    for i, name in enumerate(names):
+    # A B C D
+    # E F G H
+    # I J K L
+    # M N O P
+    names_list = "ABCDEFGHIJKLMNOP"
+    for i, name in enumerate(names_list):
+        col = i % 4
+        row = i // 4
+        x_off = col * 8
+        y_off = row * 10
+        
         sub_seed = seed + (i * 10000) # Ensure distinct seeds for each subsector
-        sector_data[name] = fun_subsector(sub_seed, density)
+        sector_data[name] = fun_subsector(sub_seed, density, x_off, y_off)
     return sector_data
