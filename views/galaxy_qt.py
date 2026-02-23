@@ -265,13 +265,9 @@ class SystemDetailDialog(QDialog):
 
     def on_view_map_click(self):
         try:
-            # Determine seed from hex or name
             seed = sum(ord(c) for c in self.system['name'])
             gen = WorldMapGen(self.system['uwp'], seed=seed)
-            gen.generate_terrain()
-            map_data = gen.get_map_json()
-            
-            dialog = WorldMapDialog(self.system['name'], self.system['uwp'], map_data, gen.size, self)
+            dialog = WorldMapDialog(gen, self.system['name'], self)
             dialog.exec()
         except Exception as e:
             from PyQt6.QtWidgets import QMessageBox
@@ -494,10 +490,7 @@ class SystemQtView(QWidget):
         try:
             seed = sum(ord(c) for c in self.current_name)
             gen = WorldMapGen(self.current_uwp, seed=seed)
-            gen.generate_terrain()
-            map_data = gen.get_map_json()
-            
-            dialog = WorldMapDialog(self.current_name, self.current_uwp, map_data, gen.size, self)
+            dialog = WorldMapDialog(gen, self.current_name, self)
             dialog.exec()
         except Exception as e:
             from PyQt6.QtWidgets import QMessageBox
