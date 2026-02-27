@@ -12,35 +12,33 @@ TERRAIN_PALETTE = {
     'City': QColor("#6b7280"), 'Starport': QColor("#ffffff"), 'Islands': QColor("#a3e635"),
     'Resource': QColor("#facc15"), 'Twilight': QColor("#4a044e"), 'Ocean Depth': QColor("#0f172a"),
     'Crater': QColor("#57534e"), 'Woods': QColor("#14532d"), 'Abyss': QColor("#020617"),
-    'Rural': QColor("#4ade80"),
-    'Grid': QColor("rgba(255, 255, 255, 20)")
+    'Rural': QColor("#4ade80"), 'Grid': QColor("rgba(255, 255, 255, 20)")
 }
 
 class WorldMapWidget(QWidget):
     hex_clicked = pyqtSignal(object) 
 
-    def __init__(self, map_data, size, is_submap=False, context_data=None):
+    def __init__(self, map_data, size, is_submap=False):
         super().__init__()
         self.map_data = map_data
         self.world_size = size
         self.is_submap = is_submap
-        self.context_data = context_data # Dictionary of submaps for neighbor rendering
         
         # --- GEOMETRY FOR POINTY TOP HEXES ---
-        self.hex_size = 16 # Radius
-        self.hex_w = self.hex_size * math.sqrt(3) # Width (flat-to-flat)
-        self.hex_h = self.hex_size * 2            # Height (point-to-point)
+        self.hex_size = 20 # Radius
+        self.hex_w = self.hex_size * math.sqrt(3)  # Width (flat side to flat side)
+        self.hex_h = self.hex_size * 2             # Height (point to point)
         
-        self.dx = self.hex_w            # Horizontal step
-        self.dy = self.hex_h * 0.75     # Vertical step
+        self.dx = self.hex_w                       # Horizontal step
+        self.dy = self.hex_h * 0.75                # Vertical step
 
         self.scale = 1.0
         if not is_submap:
-            if size > 15: self.scale = 0.5
-            elif size > 10: self.scale = 0.7
-            elif size > 6: self.scale = 0.85
+            if size > 15: self.scale = 0.4
+            elif size > 10: self.scale = 0.6
+            elif size > 6: self.scale = 0.8
         else:
-            self.scale = 2.5 # Zoomed in view for details
+            self.scale = 1.5 
 
         self.hex_hitboxes = [] 
         self.icons = {
@@ -50,12 +48,11 @@ class WorldMapWidget(QWidget):
             'Starport': self.load_icon(ICON_STARPORT)
         }
 
-        # Widget Size
         if not is_submap:
             mw = 6 * size * self.dx + 200
             mh = 5 * size * self.dy + 300
         else:
-            mw, mh = 800, 600 # Larger window for detail view
+            mw, mh = 800, 600
             
         self.setMinimumSize(int(mw * self.scale), int(mh * self.scale))
 
@@ -80,56 +77,46 @@ class WorldMapWidget(QWidget):
             self.draw_sub_map(painter, TERRAIN_PALETTE)
 
     def draw_world_map(self, painter, palette):
-        map_left = 80
-        map_top = 60
+        map_left = 100
+        map_top = 100
+
+        # Math for interlocking: Distance between centers of meshing triangles
+        interlock_dx = (self.world_size * self.dx + self.dx) / 2
+        tri_height = self.world_size * self.dy
 
         for tri in self.map_data:
             tid = tri['id']
-            row = tid // 5
-            col = tid % 5
             orientation = tri['orientation']
             
-            # --- Layout Calculation ---
-            # Strip Layout:
-            # Col Offset: Each triangle takes up (Size * dx) width.
-            base_x = map_left + col * (self.world_size * self.dx)
-            
-            # Row Offset:
-            # Row 0: Top.
-            # Row 1: Starts at bottom of Row 0? No, Row 0 is Point Down. 
-            # Row 0 Height = Size * dy.
-            # Row 1 (Point Up) starts at Top of Row 0? No, they interlock.
-            
-            # Standard Traveller Map visual alignment:
-            # The triangles are adjacent.
-            # Point Down Triangle: Bounding Box Height = Size * dy.
-            # Point Up Triangle: Bounding Box Height = Size * dy.
-            
-            base_y = map_top + row * (self.world_size * self.dy)
+            if tid < 5: # North Row
+                row, col = 0, tid
+                # Shift by 0.5 hex to snap into the equator's staggered hex grid
+                base_x = map_left + (col * 2) * interlock_dx + (0.5 * self.dx)
+                base_y = map_top
+            elif tid < 15: # Equator Row
+                row, col = 1, tid - 5
+                base_x = map_left + col * interlock_dx
+                base_y = map_top + tri_height
+            else: # South Row
+                row, col = 2, tid - 15
+                # Align with Equator Up triangles (odd cols: 1, 3, 5, 7, 9)
+                base_x = map_left + (col * 2 + 1) * interlock_dx + (0.5 * self.dx)
+                base_y = map_top + 2 * tri_height
 
-            # --- Draw Hexes ---
+            tri_width = self.world_size * self.dx
+            cx = base_x + tri_width / 2
+            
             for h in tri['hexes']:
                 lx, ly = h['x'], h['y']
-                px, py = 0, 0
                 
-                # Centering logic for the Triangle Shape
-                if orientation == 0: # Point Down
+                if orientation == 1: # Point Up
                     row_width = ly + 1
-                    # Calculate center of the row
-                    center_x = base_x + (self.world_size * self.dx / 2)
-                    # Shift left by half the row width
-                    start_x = center_x - (row_width * self.dx / 2)
-                    
-                    px = start_x + (lx * self.dx) + (self.dx / 2)
-                    py = base_y + (ly * self.dy) + (self.hex_size)
-                    
-                else: # Point Up
+                    px = cx + (lx - (row_width - 1) / 2.0) * self.dx
+                    py = base_y + ly * self.dy
+                else: # Point Down
                     row_width = self.world_size - ly
-                    center_x = base_x + (self.world_size * self.dx / 2)
-                    start_x = center_x - (row_width * self.dx / 2)
-                    
-                    px = start_x + (lx * self.dx) + (self.dx / 2)
-                    py = base_y + (ly * self.dy) + (self.hex_size)
+                    px = cx + (lx - (row_width - 1) / 2.0) * self.dx
+                    py = base_y + ly * self.dy
 
                 color = self.get_terrain_color(h['terrain'], palette)
                 poly = self.draw_hex_pointy(painter, QPointF(px, py), color)
@@ -137,72 +124,27 @@ class WorldMapWidget(QWidget):
                 self.hex_hitboxes.append((poly, (tid, h['x'], h['y'])))
 
     def draw_sub_map(self, painter, palette):
-        # Center of the viewport
         center_x, center_y = 400, 300
-        
-        # Draw Context (Neighbors) if they exist
-        # This is where we would loop through self.context_data if fully implemented.
-        # For now, we draw the single submap centered.
-        
-        # If we have context data (dictionary of submaps):
-        # if self.context_data:
-        #     for (dq, dr), submap in self.context_data.items():
-        #         # Offset the drawing origin
-        #         self.draw_single_submap(painter, center_x, center_y, submap, offset=(dq, dr))
-        
-        # Single submap drawing:
-        # Calculate the width of a World Hex in pixels to center the submap correctly
-        # A World Hex is rendered as the "Central" hex of the detail view.
-        
-        # Draw the sub-hexes
-        h_step = self.dx
-        v_step = self.dy
-        
-        # Draw the hexes from the SubMap object
-        # self.map_data is the SubMap.hexes dictionary
         for p, h in self.map_data.items():
             q, r = p
-            # Axial to Pixel for Pointy Top
-            px = center_x + h_step * (q + r/2.0)
-            py = center_y + v_step * r
+            px = center_x + self.dx * (q + r/2.0)
+            py = center_y + self.dy * r
             
             color = self.get_terrain_color(h.terrain, palette)
             poly = self.draw_hex_pointy(painter, QPointF(px, py), color)
             self.draw_terrain_icon(painter, QPointF(px, py), h.terrain)
             self.hex_hitboxes.append((poly, (None, q, r)))
-            
-        # Draw coordinate grid overlay (optional, matches screenshots)
-        # Example: Draw a hexagon outline representing the Parent Hex boundary
-        painter.setPen(QPen(QColor(255, 255, 255, 50), 2))
-        # Radius of the 75-hex cluster is roughly 5 hex widths
-        # Draw a large hexagon around the center
-        # This visually confirms the boundary of the clicked hex
-        pts = []
-        for i in range(6):
-            angle_deg = 60 * i - 90
-            angle_rad = math.pi / 180 * angle_deg
-            # Approximate radius for visual outline
-            rad = 5 * self.dx 
-            pts.append(QPointF(center_x + rad * math.cos(angle_rad), center_y + rad * math.sin(angle_rad)))
-        painter.drawPolygon(QPolygonF(pts))
 
     def get_terrain_color(self, terrain, palette):
-        # Priority order matches PDF
         if 'Starport' in terrain: return palette['Starport']
         if 'City' in terrain: return palette['City']
         if 'IceCap' in terrain: return palette['IceCap']
         if 'Ice Field' in terrain: return palette['Ice Field']
         if 'Ocean Depth' in terrain: return palette['Ocean Depth']
-        if 'Abyss' in terrain: return palette['Abyss']
         if 'Ocean' in terrain: return palette['Ocean']
         if 'Mountain' in terrain: return palette['Mountain']
         if 'Shore' in terrain: return palette['Shore']
         if 'Islands' in terrain: return palette['Islands']
-        if 'Desert' in terrain: return palette['Desert']
-        if 'Crater' in terrain: return palette['Crater']
-        if 'Woods' in terrain: return palette['Woods']
-        if 'Cropland' in terrain: return palette['Cropland']
-        if 'Rough' in terrain: return palette['Rough']
         return palette['Clear']
 
     def draw_terrain_icon(self, painter, center, terrain):
@@ -224,9 +166,7 @@ class WorldMapWidget(QWidget):
         else:
             for h in self.map_data.values():
                 for t in h.terrain: visible.add(t)
-        
-        order = ['IceCap', 'Ice Field', 'Mountain', 'Ocean', 'Shore', 'Islands', 'Desert', 'Rough', 'Woods', 'Cropland', 'Clear', 'City', 'Starport']
-        return [t for t in order if t in visible]
+        return list(visible)
 
     def draw_hex_pointy(self, painter, center, color):
         x, y = center.x(), center.y()
@@ -252,7 +192,7 @@ class WorldMapWidget(QWidget):
                 self.hex_clicked.emit(data)
                 break
 
-# ... (WorldMapDialog remains largely the same, just passing context_data to widget)
+# ... (WorldMapDialog class remains the same)
 
 class WorldMapDialog(QDialog):
     """The Main Window for the Map Viewer."""
