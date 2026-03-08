@@ -1,9 +1,8 @@
 """
-PyQt6 view for the Armour Maker utility.
-Provides an interface for designing custom armour systems or 
-picking from pre-made armour configurations.
+PyQt6 view for the Pre-Made Armour Picker.
+Provides an interface for selecting from pre-made armour configurations.
 """
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QCheckBox, QScrollArea, QFrame, QGridLayout, QGroupBox, QLineEdit
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QScrollArea, QFrame, QGroupBox, QLineEdit
 from PyQt6.QtCore import Qt
 import travtools.armourmaker as am
 import random
@@ -11,27 +10,22 @@ import travtools.names as name_gen
 import travtools.qrebs as qrebs_gen
 from views.qt_components import Styles, GlassFrame
 
-class ArmourQtView(QWidget):
+class PremadeArmourQtView(QWidget):
     """
-    Main widget for the Armour Maker view.
-    Handles the layout, user interactions, and calls calculations from the armourmaker module.
+    Main widget for the Pre-made Armour view.
+    Handles the selection of pre-made body and head armor.
     """
     def __init__(self):
         super().__init__()
-        self.selected_opts = set(am.STANDARD_SUBSYSTEMS.get("D", []))
-        self.selected_drawbacks = {}
-        self.last_type = "D"
-        self.sub_cbs = {}
-        self.sub_drawbacks = {}
         self.init_ui()
-        self.update_output()
+        self.update_output_premade()
 
     def init_ui(self):
         self.main_layout = QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(20)
 
-        # --- Left Column: Design & Subsystems ---
+        # --- Left Column: Selection ---
         left_scroll = QScrollArea()
         left_scroll.setWidgetResizable(True)
         left_scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -39,75 +33,26 @@ class ArmourQtView(QWidget):
         left_layout = QVBoxLayout(left_scroll_content)
         left_layout.setSpacing(20)
 
-        # Custom Design Frame
-        custom_group = QGroupBox("Custom Armour Design")
-        custom_layout = QVBoxLayout(custom_group)
-        
-        self.type_combo = QComboBox()
+        # Pre-made Picker
+        pre_group = QGroupBox("Pre-made Armour Picker")
+        pre_layout = QVBoxLayout(pre_group)
+        self.pre_body = QComboBox()
+        self.pre_body.addItem("(None)", "")
         for k, v in am.TYPES.items():
-            if v['type'] == 'System':
-                self.type_combo.addItem(f"{v['name']} (TL{v['tl']})", k)
-        self.type_combo.setCurrentIndex(self.type_combo.findData("D"))
-        self.type_combo.currentIndexChanged.connect(self.on_type_change)
+            if v["category"] == "Body": self.pre_body.addItem(v["name"], k)
+        self.pre_body.currentIndexChanged.connect(self.update_output_premade)
         
-        self.desc_combo = QComboBox()
-        for k in am.MODIFIERS["descriptor"].keys():
-            self.desc_combo.addItem(k or "(Blank)", k)
-        self.desc_combo.currentIndexChanged.connect(self.update_output)
-        
-        self.burden_combo = QComboBox()
-        for k in am.MODIFIERS["burden"].keys():
-            self.burden_combo.addItem(k or "(Blank)", k)
-        self.burden_combo.currentIndexChanged.connect(self.update_output)
-        
-        self.stage_combo = QComboBox()
-        for k in am.MODIFIERS["stage"].keys():
-            self.stage_combo.addItem(k or "(Blank)", k)
-        self.stage_combo.currentIndexChanged.connect(self.update_output)
-        
-        self.user_combo = QComboBox()
-        for k, v in am.USERS.items():
-            self.user_combo.addItem(v['name'], k)
-        self.user_combo.currentIndexChanged.connect(self.update_output)
+        self.pre_head = QComboBox()
+        self.pre_head.addItem("(None)", "")
+        for k, v in am.TYPES.items():
+            if v["category"] == "Head": self.pre_head.addItem(v["name"], k)
+        self.pre_head.currentIndexChanged.connect(self.update_output_premade)
 
-        custom_layout.addWidget(QLabel("Armor Type:"))
-        custom_layout.addWidget(self.type_combo)
-        custom_layout.addWidget(QLabel("Descriptor:"))
-        custom_layout.addWidget(self.desc_combo)
-        custom_layout.addWidget(QLabel("Burden:"))
-        custom_layout.addWidget(self.burden_combo)
-        custom_layout.addWidget(QLabel("Stage:"))
-        custom_layout.addWidget(self.stage_combo)
-        custom_layout.addWidget(QLabel("User:"))
-        custom_layout.addWidget(self.user_combo)
-        left_layout.addWidget(custom_group)
-
-        # Subsystems
-        sub_group = QGroupBox("Subsystems")
-        sub_layout = QVBoxLayout(sub_group)
-        for cat, ids in am.SUBSYSTEM_CATS.items():
-            cat_group = QGroupBox(cat.capitalize())
-            cat_layout = QVBoxLayout(cat_group)
-            for opt_id in ids:
-                v = next((o for o in am.OPTIONS if o["id"] == opt_id), None)
-                if not v: continue
-                
-                cb_layout = QVBoxLayout()
-                cb = QCheckBox(v['name'])
-                cb.setProperty("opt_id", opt_id)
-                cb.stateChanged.connect(self.on_cb_change)
-                self.sub_cbs[opt_id] = cb
-                
-                db_lbl = QLabel("")
-                db_lbl.setStyleSheet(f"color: {Styles.AMBER}; font-size: 11px; font-style: italic; margin-left: 20px;")
-                db_lbl.setVisible(False)
-                self.sub_drawbacks[opt_id] = db_lbl
-                
-                cb_layout.addWidget(cb)
-                cb_layout.addWidget(db_lbl)
-                cat_layout.addLayout(cb_layout)
-            sub_layout.addWidget(cat_group)
-        left_layout.addWidget(sub_group)
+        pre_layout.addWidget(QLabel("Body Armour:"))
+        pre_layout.addWidget(self.pre_body)
+        pre_layout.addWidget(QLabel("Head Protection:"))
+        pre_layout.addWidget(self.pre_head)
+        left_layout.addWidget(pre_group)
 
         left_layout.addStretch()
         left_scroll.setWidget(left_scroll_content)
@@ -192,57 +137,8 @@ class ArmourQtView(QWidget):
         right_column.addWidget(profile_frame)
         self.main_layout.addLayout(right_column, 1)
 
-    def on_cb_change(self, state):
-        cb = self.sender()
-        opt_id = cb.property("opt_id")
-        if state == Qt.CheckState.Checked.value:
-            self.selected_opts.add(opt_id)
-            standards = am.STANDARD_SUBSYSTEMS.get(self.type_combo.currentData(), [])
-            if opt_id not in standards:
-                extras = [o for o in self.selected_opts if o not in standards]
-                table_num = 1 if len(extras) == 1 else (2 + (len(extras)-2)%3)
-                self.selected_drawbacks[opt_id] = random.choice(am.DRAWBACKS[table_num])["id"]
-        else:
-            self.selected_opts.discard(opt_id)
-            self.selected_drawbacks.pop(opt_id, None)
-        self.update_output()
-        self.refresh_cb_styles()
-
-    def on_type_change(self):
-        new_type = self.type_combo.currentData()
-        old_standards = set(am.STANDARD_SUBSYSTEMS.get(self.last_type, []))
-        new_standards = set(am.STANDARD_SUBSYSTEMS.get(new_type, []))
-        self.selected_opts = {opt for opt in self.selected_opts if opt not in old_standards}
-        self.selected_opts.update(new_standards)
-        for opt_id in list(self.selected_drawbacks.keys()):
-            if opt_id in new_standards: del self.selected_drawbacks[opt_id]
-        self.last_type = new_type
-        self.update_output()
-        self.refresh_cb_styles()
-
-    def refresh_cb_styles(self):
-        standards = am.STANDARD_SUBSYSTEMS.get(self.type_combo.currentData(), [])
-        for opt_id, cb in self.sub_cbs.items():
-            v = next((o for o in am.OPTIONS if o["id"] == opt_id), None)
-            is_std = opt_id in standards
-            is_sel = opt_id in self.selected_opts
-            cb.blockSignals(True)
-            cb.setChecked(is_sel)
-            cb.blockSignals(False)
-            cb.setText(f"{v['name']} (Standard)" if is_std else v['name'])
-            cb.setStyleSheet(f"color: {Styles.GREEN if is_std else Styles.WHITE_TEXT}")
-            
-            db_lbl = self.sub_drawbacks[opt_id]
-            if is_sel and not is_std and opt_id in self.selected_drawbacks:
-                db_id = self.selected_drawbacks[opt_id]
-                db_name = next((d['name'] for p in am.DRAWBACKS.values() for d in p if d['id'] == db_id), "Unknown")
-                db_lbl.setText(f"↳ Drawback: {db_name}")
-                db_lbl.setVisible(True)
-            else:
-                db_lbl.setVisible(False)
-
-    def update_output(self):
-        res = am.calculate_custom_armor(self.type_combo.currentData(), self.desc_combo.currentData(), self.burden_combo.currentData(), self.stage_combo.currentData(), self.user_combo.currentData(), list(self.selected_opts), self.selected_drawbacks)
+    def update_output_premade(self):
+        res = am.calculate_premade_armor(self.pre_body.currentData(), self.pre_head.currentData(), "")
         self.last_res = res
         self.render_result(res)
 
@@ -252,7 +148,9 @@ class ArmourQtView(QWidget):
 
     def randomize_qrebs(self):
         self.seed_input.setText(str(random.randint(0, 100000)))
-        self.update_output()
+        # No direct way to update output here since it's premade, 
+        # but render_result handles seed input.
+        self.update_output_premade()
 
     def render_result(self, res):
         if not res: return
@@ -264,9 +162,7 @@ class ArmourQtView(QWidget):
         qrebs_display = res['qrebs']
         if self.seed_input.text():
             try:
-                q_res = qrebs_gen.generate_qrebs(seed=int(self.seed_input.text()), modifiers={'b': res.get('qrebs_mod', 0)}) # Base modifier logic
-                # Armour calculation has an internal b_mod, but calculate_custom_armor returns 'qrebs' as 'B=X' or '50000'
-                # Let's extract modifiers if needed, but for now we'll just use the seed.
+                q_res = qrebs_gen.generate_qrebs(seed=int(self.seed_input.text()), modifiers={'b': res.get('qrebs_mod', 0)})
                 self.qrebs_res_code.setText(f"Instance Code: {q_res['code']}")
                 self.qrebs_res_text.setText(q_res['text'])
                 qrebs_display = q_res['code']
