@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLa
 from PyQt6.QtCore import Qt, QPointF, QRectF, pyqtSignal, QByteArray
 from PyQt6.QtGui import QPainter, QPen, QColor, QPolygonF, QFont, QBrush, QImage
 from views.qt_components import Styles, GlassFrame
-from travtools.world_map_gen import SubMap, ICON_MOUNTAIN, ICON_OCEAN, ICON_CITY, ICON_STARPORT
+from travtools.world_map_gen import (SubMap, ICON_MOUNTAIN, ICON_OCEAN, ICON_CITY, ICON_STARPORT, 
+    ICON_RUINS, ICON_CRATER, ICON_CROPLAND, ICON_TOWN, ICON_ARCOLOGY, ICON_PENAL)
 import math
 
 TERRAIN_PALETTE = {
@@ -12,7 +13,11 @@ TERRAIN_PALETTE = {
     'City': QColor("#6b7280"), 'Starport': QColor("#ffffff"), 'Islands': QColor("#a3e635"),
     'Resource': QColor("#facc15"), 'Twilight': QColor("#4a044e"), 'Ocean Depth': QColor("#0f172a"),
     'Crater': QColor("#57534e"), 'Woods': QColor("#14532d"), 'Abyss': QColor("#020617"),
-    'Rural': QColor("#4ade80"), 'Grid': QColor("rgba(255, 255, 255, 20)")
+    'Rural': QColor("#4ade80"), 'Grid': QColor("rgba(255, 255, 255, 20)"),
+    'Ruins': QColor("#94a3b8"), 'Town': QColor("#cbd5e1"), 'Arcology': QColor("#e2e8f0"),
+    'Penal': QColor("#ef4444"), 'Wasteland': QColor("#422006"), 'Exotic': QColor("#d946ef"),
+    'Noble Lands': QColor("#8b5cf6"), 'Chasm': QColor("#0c0a09"), 'Precipice': QColor("#44403c"),
+    'Frozen Lands': QColor("#93c5fd"), 'Sea': QColor("#2563eb")
 }
 
 class WorldMapWidget(QWidget):
@@ -45,7 +50,13 @@ class WorldMapWidget(QWidget):
             'Mountain': self.load_icon(ICON_MOUNTAIN),
             'Ocean': self.load_icon(ICON_OCEAN),
             'City': self.load_icon(ICON_CITY),
-            'Starport': self.load_icon(ICON_STARPORT)
+            'Starport': self.load_icon(ICON_STARPORT),
+            'Ruins': self.load_icon(ICON_RUINS),
+            'Crater': self.load_icon(ICON_CRATER),
+            'Cropland': self.load_icon(ICON_CROPLAND),
+            'Town': self.load_icon(ICON_TOWN),
+            'Arcology': self.load_icon(ICON_ARCOLOGY),
+            'Penal': self.load_icon(ICON_PENAL)
         }
 
         if not is_submap:
@@ -137,21 +148,43 @@ class WorldMapWidget(QWidget):
 
     def get_terrain_color(self, terrain, palette):
         if 'Starport' in terrain: return palette['Starport']
+        if 'Arcology' in terrain: return palette['Arcology']
         if 'City' in terrain: return palette['City']
+        if 'Town' in terrain: return palette['Town']
+        if 'Noble Lands' in terrain: return palette['Noble Lands']
+        if 'Exotic' in terrain: return palette['Exotic']
+        if 'Penal' in terrain: return palette['Penal']
         if 'IceCap' in terrain: return palette['IceCap']
         if 'Ice Field' in terrain: return palette['Ice Field']
+        if 'Frozen Lands' in terrain: return palette['Frozen Lands']
         if 'Ocean Depth' in terrain: return palette['Ocean Depth']
         if 'Ocean' in terrain: return palette['Ocean']
+        if 'Sea' in terrain: return palette['Sea']
         if 'Mountain' in terrain: return palette['Mountain']
+        if 'Chasm' in terrain: return palette['Chasm']
+        if 'Precipice' in terrain: return palette['Precipice']
         if 'Shore' in terrain: return palette['Shore']
         if 'Islands' in terrain: return palette['Islands']
+        if 'Cropland' in terrain: return palette['Cropland']
+        if 'Desert' in terrain: return palette['Desert']
+        if 'Wasteland' in terrain: return palette['Wasteland']
+        if 'Ruins' in terrain: return palette['Ruins']
+        if 'Crater' in terrain: return palette['Crater']
+        if 'Resource' in terrain: return palette['Resource']
+        if 'Rural' in terrain: return palette['Rural']
         return palette['Clear']
 
     def draw_terrain_icon(self, painter, center, terrain):
         icon = None
-        if 'Mountain' in terrain: icon = self.icons['Mountain']
+        if 'Starport' in terrain: icon = self.icons['Starport']
+        elif 'Arcology' in terrain: icon = self.icons['Arcology']
         elif 'City' in terrain: icon = self.icons['City']
-        elif 'Starport' in terrain: icon = self.icons['Starport']
+        elif 'Town' in terrain: icon = self.icons['Town']
+        elif 'Mountain' in terrain: icon = self.icons['Mountain']
+        elif 'Ruins' in terrain: icon = self.icons['Ruins']
+        elif 'Crater' in terrain: icon = self.icons['Crater']
+        elif 'Cropland' in terrain: icon = self.icons['Cropland']
+        elif 'Penal' in terrain: icon = self.icons['Penal']
         
         if icon:
             rect = QRectF(center.x() - 10, center.y() - 10, 20, 20)

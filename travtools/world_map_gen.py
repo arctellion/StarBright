@@ -6,6 +6,12 @@ ICON_MOUNTAIN = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewB
 ICON_OCEAN = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4 18 Q10 12 16 18 T28 18" stroke="#90CAF9" fill="none" stroke-width="2"/></svg>').decode('utf-8')
 ICON_CITY = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="6" y="6" width="20" height="20" fill="#B0BEC5" stroke="#546E7A" stroke-width="1"/></svg>').decode('utf-8')
 ICON_STARPORT = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><polygon points="16,2 19,12 30,12 21,19 24,30 16,23 8,30 11,19 2,12 13,12" fill="#FFFFFF" stroke="#000" stroke-width="0.5"/></svg>').decode('utf-8')
+ICON_RUINS = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M8 26 V18 H12 V22 H20 V18 H24 V26 Z" fill="#94a3b8" stroke="#475569" stroke-width="1"/></svg>').decode('utf-8')
+ICON_CRATER = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="10" ry="6" fill="none" stroke="#71717a" stroke-width="1"/></svg>').decode('utf-8')
+ICON_CROPLAND = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4 24 L8 8 M12 24 L16 8 M20 24 L24 8" stroke="#a3e635" stroke-width="2"/></svg>').decode('utf-8')
+ICON_TOWN = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M8 26 V16 L16 10 L24 16 V26 Z" fill="#94a3b8" stroke="#475569" stroke-width="1"/></svg>').decode('utf-8')
+ICON_ARCOLOGY = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 4 L28 28 H4 Z M16 10 L22 22 H10 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/></svg>').decode('utf-8')
+ICON_PENAL = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M8 8 H24 V24 H8 Z M12 8 V24 M16 8 V24 M20 8 V24" fill="none" stroke="#ef4444" stroke-width="1"/></svg>').decode('utf-8')
 
 class Hex:
     def __init__(self, x, y, triangle_id=None, parent_hex=None):
@@ -14,14 +20,14 @@ class Hex:
         self.triangle_id = triangle_id
         self.parent_hex = parent_hex
         self.terrain = set()
-        self.is_land = False
+        self.is_land = True
         self.sub_map = None 
 
     def add(self, terrain_type):
         self.terrain.add(terrain_type)
-        if terrain_type in ['Ocean', 'Ocean Depth', 'Abyss']:
+        if terrain_type in ['Ocean', 'Ocean Depth', 'Abyss', 'Sea']:
             self.is_land = False
-        else:
+        elif terrain_type in ['Islands', 'Shore']:
             self.is_land = True
 
     def has(self, terrain_type):
@@ -35,6 +41,7 @@ class Triangle:
         # 0 = Point Down (Equator)
         self.orientation = orientation
         self.hexes = {}
+        self.is_ocean = False
 
 class SubMap:
     def __init__(self, parent_hex, level, rng):
@@ -72,14 +79,16 @@ class SubMap:
             for _ in range(3): self.rng.choice(list(self.hexes.values())).add('Rough')
 
 class WorldMapGen:
-    def __init__(self, uwp, trade_codes=None, seed=None):
+    def __init__(self, uwp, trade_codes=None, economic_ext=None, seed=None):
         self.uwp = uwp
         self.size = self.parse_hex(uwp[1])
-        self.hydro = self.parse_hex(uwp[3])
         self.atmos = self.parse_hex(uwp[2])
+        self.hydro = self.parse_hex(uwp[3])
         self.pop = self.parse_hex(uwp[4])
+        self.tech = self.parse_hex(uwp[8])
         
         self.trade_codes = trade_codes if trade_codes else []
+        self.economic_ext = economic_ext if economic_ext else "(000+0)"
         self.seed_val = seed if seed is not None else sum(ord(c) for c in uwp)
         self.rng = random.Random(self.seed_val)
         
@@ -137,10 +146,15 @@ class WorldMapGen:
         return neighbors
 
     def generate_terrain_pdf_rules(self):
-        for t in self.triangles:
+        # 2. Resources (R from Ex)
+        try: res_val = self.parse_hex(self.economic_ext[1])
+        except: res_val = 0
+        for _ in range(res_val):
+            t = self.rng.choice(self.triangles)
             h = self.rng.choice(list(t.hexes.values()))
             h.add('Resource')
 
+        # 3. Mountains
         for t in self.triangles:
             num_mtns = self.rng.randint(1, 6)
             candidates = list(t.hexes.values())
@@ -148,65 +162,170 @@ class WorldMapGen:
             for i in range(min(num_mtns, len(candidates))):
                 candidates[i].add('Mountain')
 
+        # 4 & 5. Chasms and Precipices
+        for _ in range(self.size):
+            t_c = self.rng.choice(self.triangles)
+            for _ in range(self.rng.randint(1, 6)):
+                self.rng.choice(list(t_c.hexes.values())).add('Chasm')
+            t_p = self.rng.choice(self.triangles)
+            self.rng.choice(list(t_p.hexes.values())).add('Precipice')
+
+        # 6. Die-Back (Ruins)
+        if 'Di' in self.trade_codes:
+            for t in self.triangles:
+                num_ruins = self.rng.randint(1, 6)
+                for _ in range(num_ruins):
+                    self.rng.choice(list(t.hexes.values())).add('Ruins')
+
+        # 7. Vacuum Plain (Craters)
+        if 'Va' in self.trade_codes:
+            for t in self.triangles:
+                num_craters = self.rng.randint(1, 6)
+                for _ in range(num_craters):
+                    self.rng.choice(list(t.hexes.values())).add('Crater')
+
+        # 9. Oceans
         num_ocean_triangles = min(20, self.hydro * 2)
         ocean_triangle_ids = self.rng.sample(range(20), num_ocean_triangles)
         land_triangle_ids = [i for i in range(20) if i not in ocean_triangle_ids]
 
         for tid in ocean_triangle_ids:
             t = self.triangles[tid]
+            t.is_ocean = True
             for h in t.hexes.values():
                 h.add('Ocean')
-                h.is_land = False
         
+        # 8. Desert Fill (after ocean selection)
+        if 'De' in self.trade_codes:
+            for h in self.get_hexes():
+                if not h.terrain:
+                    h.add('Desert')
+
+        # 10. Seas
         num_seas = min(len(land_triangle_ids), self.hydro)
         sea_triangles = self.rng.sample(land_triangle_ids, num_seas)
         for tid in sea_triangles:
             t = self.triangles[tid]
             h = self.rng.choice(list(t.hexes.values()))
-            h.add('Ocean')
-            h.is_land = False
+            h.add('Sea')
 
+        # 11. Islands
         for tid in ocean_triangle_ids:
             t = self.triangles[tid]
             for h in t.hexes.values():
                 if h.has('Mountain'):
                     h.terrain.discard('Mountain')
                     h.add('Islands')
-                    h.is_land = True
 
-        for t in self.triangles:
-            for h in t.hexes.values():
-                if h.is_land:
-                    neighbors = self.get_neighbors(h)
-                    for n in neighbors:
-                        if n.has('Ocean'):
-                            h.add('Shore')
-                            break
+        # Shore lines
+        for h in self.get_hexes():
+            if h.is_land:
+                neighbors = self.get_neighbors(h)
+                for n in neighbors:
+                    if n.has('Ocean') or n.has('Sea'):
+                        h.add('Shore')
+                        break
 
-        for tid in list(range(0, 5)) + list(range(15, 20)):
-            t = self.triangles[tid]
-            for h in t.hexes.values():
-                if h.has('Ocean'): h.add('Ice Field')
-                else: h.add('IceCap')
-
-        placed_cities = 0
-        if self.pop > 0:
-            self.rng.shuffle(land_triangle_ids)
-            for tid in land_triangle_ids:
-                if placed_cities >= self.pop: break
+        # 12. Ice-Caps. (Hyd/2 rows top and bottom)
+        rows = self.hydro // 2
+        if rows > 0:
+            for tid in range(5): # North
                 t = self.triangles[tid]
-                candidates = [h for h in t.hexes.values() if h.is_land]
-                if candidates:
-                    self.rng.choice(candidates).add('City')
-                    placed_cities += 1
+                for h in t.hexes.values():
+                    if h.y < rows:
+                        if h.has('Ocean'): h.add('Ice Field')
+                        else: h.add('IceCap')
+            for tid in range(15, 20): # South
+                t = self.triangles[tid]
+                for h in t.hexes.values():
+                    if h.y >= (self.size - rows):
+                        if h.has('Ocean'): h.add('Ice Field')
+                        else: h.add('IceCap')
 
-        cities = [h for h in self.get_hexes() if h.has('City')]
-        if cities:
-            self.rng.choice(cities).add('Starport')
-        elif self.pop > 0:
+        # 13. Ic - More Ice Cap
+        if 'Ic' in self.trade_codes:
+            extra = self.rng.randint(1, 6)
+            for tid in range(5):
+                for h in self.triangles[tid].hexes.values():
+                    if h.y < (rows + extra):
+                        if h.has('Ocean'): h.add('Ice Field')
+                        else: h.add('IceCap')
+            for tid in range(15, 20):
+                for h in self.triangles[tid].hexes.values():
+                    if h.y >= (self.size - rows - extra):
+                        if h.has('Ocean'): h.add('Ice Field')
+                        else: h.add('IceCap')
+
+        # 14 & 15. Fr / Tu
+        if 'Fr' in self.trade_codes or 'Tu' in self.trade_codes:
+            for h in self.get_hexes():
+                if h.has('Ocean'): h.add('Ice Field')
+                elif h.is_land and not h.has('IceCap'): h.add('Frozen Lands')
+
+        # 16 & 17. Ag / Fa
+        if 'Ag' in self.trade_codes or 'Fa' in self.trade_codes:
+            num = self.rng.randint(2, 12) if 'Ag' in self.trade_codes else self.rng.randint(1, 6)
+            for t in self.triangles:
+                if not t.is_ocean:
+                    for _ in range(num):
+                        land_hexes = [h for h in t.hexes.values() if h.is_land]
+                        if land_hexes: self.rng.choice(land_hexes).add('Cropland')
+
+        # 18-21. Pop features
+        if self.pop > 0:
+            if 'Lo' in self.trade_codes or 'Ni' in self.trade_codes:
+                land = [h for h in self.get_hexes() if h.is_land]
+                if land: self.rng.choice(land).add('Town')
+            else:
+                cities_to_place = self.pop
+                continents = [t for t in self.triangles if not t.is_ocean]
+                self.rng.shuffle(continents)
+                for t in continents:
+                    if cities_to_place <= 0: break
+                    land_hexes = [h for h in t.hexes.values() if h.is_land]
+                    if land_hexes:
+                        self.rng.choice(land_hexes).add('City')
+                        cities_to_place -= 1
+                if 'Hi' in self.trade_codes:
+                    for _ in range(self.pop // 2):
+                        land = [h for h in self.get_hexes() if h.is_land]
+                        if land: self.rng.choice(land).add('Arcology')
+
+        # 22. Rural
+        cities = [h for h in self.get_hexes() if h.has('City') or h.has('Arcology')]
+        for city in cities:
+            for h in self.get_hexes():
+                if h.is_land and not h.has('City') and not h.has('Arcology'):
+                    dist = abs(h.x - city.x) + abs(h.y - city.y) 
+                    if dist <= self.pop: h.add('Rural')
+
+        # 23. Starport
+        if cities: self.rng.choice(cities).add('Starport')
+        else:
             land = [h for h in self.get_hexes() if h.is_land]
             if land: self.rng.choice(land).add('Starport')
 
+        # 26. Penal
+        if 'Pe' in self.trade_codes:
+            for t in self.triangles:
+                for _ in range(self.pop):
+                    land = [h for h in t.hexes.values() if h.is_land]
+                    if land: self.rng.choice(land).add('Penal')
+
+        # 27. Wasteland
+        if self.tech > 5:
+            t = self.rng.choice(self.triangles)
+            num_waste = self.rng.randint(1, 6)
+            for _ in range(num_waste):
+                self.rng.choice(list(t.hexes.values())).add('Wasteland')
+
+        # 28 & 29. Exotic & Noble
+        t_e = self.rng.choice(self.triangles)
+        self.rng.choice(list(t_e.hexes.values())).add('Exotic')
+        t_n = self.rng.choice(self.triangles)
+        self.rng.choice(list(t_n.hexes.values())).add('Noble Lands')
+
+        # 30. Clear
         for h in self.get_hexes():
             if not h.terrain:
                 h.add('Clear')

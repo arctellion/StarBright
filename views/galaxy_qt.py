@@ -266,7 +266,18 @@ class SystemDetailDialog(QDialog):
     def on_view_map_click(self):
         try:
             seed = sum(ord(c) for c in self.system['name'])
-            gen = WorldMapGen(self.system['uwp'], seed=seed)
+            # Pass trade codes and economic extension if available
+            trade_codes = self.system.get('trade', '').split()
+            # Economic extension is usually inside the 'ext' field as (Ex)
+            # self.system['ext'] looks like {Ix}(Ex)[Cx]
+            ext_full = self.system.get('ext', '')
+            economic_ext = "(000+0)"
+            if '(' in ext_full and ')' in ext_full:
+                start = ext_full.find('(')
+                end = ext_full.find(')') + 1
+                economic_ext = ext_full[start:end]
+            
+            gen = WorldMapGen(self.system['uwp'], trade_codes=trade_codes, economic_ext=economic_ext, seed=seed)
             dialog = WorldMapDialog(gen, self.system['name'], self)
             dialog.exec()
         except Exception as e:
@@ -479,6 +490,8 @@ class SystemQtView(QWidget):
             
             self.current_uwp = uwp
             self.current_name = planet_name
+            self.current_trade = trade
+            self.current_ext = ext
             self.btn_map.setEnabled(True)
         except Exception as ex:
             self.uwp_label.setText("Error")
@@ -489,7 +502,16 @@ class SystemQtView(QWidget):
         if not hasattr(self, 'current_uwp'): return
         try:
             seed = sum(ord(c) for c in self.current_name)
-            gen = WorldMapGen(self.current_uwp, seed=seed)
+            trade_codes = self.current_trade.split() if hasattr(self, 'current_trade') else []
+            economic_ext = "(000+0)"
+            if hasattr(self, 'current_ext'):
+                ext_full = self.current_ext
+                if '(' in ext_full and ')' in ext_full:
+                    start = ext_full.find('(')
+                    end = ext_full.find(')') + 1
+                    economic_ext = ext_full[start:end]
+            
+            gen = WorldMapGen(self.current_uwp, trade_codes=trade_codes, economic_ext=economic_ext, seed=seed)
             dialog = WorldMapDialog(gen, self.current_name, self)
             dialog.exec()
         except Exception as e:
