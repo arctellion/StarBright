@@ -136,14 +136,25 @@ class WorldMapWidget(QWidget):
 
     def draw_sub_map(self, painter, palette):
         center_x, center_y = 400, 300
+        # The 75-hex layout is roughly 0..8 in q and r. Center is approx 4,4.
         for p, h in self.map_data.items():
+            # The 75-hex layout is centered around (0,0)
             q, r = p
-            px = center_x + self.dx * (q + r/2.0)
-            py = center_y + self.dy * r
+            cq, cr = q, r
+            px = center_x + self.dx * (cq + cr/2.0)
+            py = center_y + self.dy * cr
             
             color = self.get_terrain_color(h.terrain, palette)
             poly = self.draw_hex_pointy(painter, QPointF(px, py), color)
             self.draw_terrain_icon(painter, QPointF(px, py), h.terrain)
+            
+            # Draw Numbers if they exist
+            if hasattr(h, 'number') and h.number > 0:
+                text_color = QColor(0, 0, 0, 150) if h.color == 'Black' else QColor(255, 255, 255, 150)
+                painter.setPen(QPen(text_color))
+                painter.setFont(QFont("Arial", 8))
+                painter.drawText(QRectF(px-15, py-15, 30, 30), Qt.AlignmentFlag.AlignCenter, str(h.number))
+
             self.hex_hitboxes.append((poly, (None, q, r)))
 
     def get_terrain_color(self, terrain, palette):

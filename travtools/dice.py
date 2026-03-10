@@ -32,6 +32,10 @@ def die_roll():
     """Rolls a single d6."""
     return random.randint(1, 6)
 
+def d66():
+    """Rolls a D66 (two d6, one as tens, one as units)."""
+    return die_roll() * 10 + die_roll()
+
 def roll_string(s):
     """
     Parses and rolls a string like '2d6+3' or '1d6'.

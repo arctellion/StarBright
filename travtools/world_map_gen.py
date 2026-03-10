@@ -1,5 +1,6 @@
 import random
 import base64
+import math
 
 # --- ICONS (Base64 SVGs) ---
 ICON_MOUNTAIN = base64.b64encode(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 6 L28 26 L4 26 Z" fill="#5D4037" stroke="#3E2723" stroke-width="1"/></svg>').decode('utf-8')
@@ -43,40 +44,176 @@ class Triangle:
         self.hexes = {}
         self.is_ocean = False
 
+# Standard T5 Regional Map Layout (75 hexes)
+# Mapping (q, r) -> (color, number) based on T5 rules / image
+# (0,0) is center, q axial, r diagonal-down.
+WORLD_HEX_LAYOUT = [
+    # Top Row
+    (0, -5, 'Black', 36),
+    # Row 2
+    (-1, -4, 'Black', 41), (0, -4, 'Black', 63), (1, -5, 'Black', 35),
+    # Row 3
+    (-2, -3, 'Black', 42), (-1, -3, 'White', 31), (0, -3, 'White', 26), (1, -4, 'Black', 62), (2, -5, 'Black', 34), (3, -6, 'White', 66),
+    # Row 4
+    (-3, -2, 'Black', 43), (-2, -2, 'White', 25), (-1, -2, 'White', 24), (0, -2, 'Black', 64), (1, -3, 'White', 16), (2, -4, 'White', 64), (3, -5, 'Black', 61), (4, -6, 'White', 65), (5, -7, 'Black', 33),
+    # Row 5 (12 hexes)
+    (-4, -1, 'Black', 11), (-3, -1, 'Black', 44), (-2, -1, 'White', 32), (-1, -1, 'White', 23), (0, -1, 'White', 22), (1, -2, 'Black', 65), (2, -3, 'White', 11), (3, -4, 'White', 12), (4, -5, 'White', 15), (5, -6, 'White', 63), (6, -7, 'White', 61), (7, -8, 'Black', 32),
+    # Row 6 (Center, 13 hexes)
+    (-5, 0, 'Black', 12), (-4, 0, 'Black', 45), (-3, 0, 'White', 33), (-2, 0, 'White', 34), (-1, 0, 'White', 35), (0, 0, 'Black', 66), (1, -1, 'None', 0), (2, -2, 'White', 14), (3, -3, 'White', 56), (4, -4, 'White', 61), (5, -5, 'White', 55), (6, -6, 'Black', 31), (7, -7, 'White', 56),
+    # Row 7 (12 hexes)
+    (-5, 1, 'Black', 13), (-4, 1, 'Black', 46), (-3, 1, 'White', 36), (-2, 1, 'White', 41), (-1, 1, 'White', 42), (0, 1, 'Black', 51), (1, 0, 'White', 43), (2, -1, 'White', 44), (3, -2, 'White', 53), (4, -3, 'White', 54), (5, -4, 'White', 52), (6, -5, 'Black', 56),
+    # Row 8 (9 hexes)
+    (-5, 2, 'Black', 14), (-4, 2, 'Black', 51), (-3, 2, 'White', 16), (-2, 2, 'Black', 16), (-1, 2, 'White', 45), (0, 2, 'White', 46), (1, 1, 'Black', 52), (2, 0, 'White', 51), (3, -1, 'Black', 26), 
+    # Row 9 (6 hexes)
+    (-5, 3, 'Black', 15), (-4, 3, 'Black', 52), (-3, 3, 'Black', 53), (-2, 3, 'Black', 54), (-1, 3, 'None', 0), (0, 2, 'Black', 25),
+    # Row 10 (3 hexes)
+    (-4, 4, 'Black', 21), (-3, 4, 'Black', 53), (-2, 4, 'Black', 23),
+    # Bottom Row
+    (-3, 5, 'Black', 22)
+]
+# Adjust logic to fill to 75 if needed, but this is the primary structure.
+
 class SubMap:
     def __init__(self, parent_hex, level, rng):
         self.parent_hex = parent_hex
         self.level = level 
         self.rng = rng
         self.hexes = {} 
-        self.generate_cluster()
+        self.generate_layout()
         self.populate()
 
-    def generate_cluster(self):
-        for q in range(-5, 6):
-            for r in range(-5, 6):
-                if abs(q) <= 5 and abs(r) <= 5 and abs(q + r) <= 5:
-                    self.hexes[(q, r)] = Hex(q, r, parent_hex=self.parent_hex)
+    def generate_layout(self):
+        # 75-hex T5 Regional Map layout
+        # (q, r, color, number)
+        # Transcribed from the provided image
+        # Left: World Hex (Regional) - 75 hexes
+        # Staggered axial coordinates (q, r) where q is column, r is row-diagonal
+        # Transcription from left diagram (row by row):
+        layout_world = [
+            (0, -5, 'Black', 36),
+            (-1, -4, 'Black', 41), (0, -4, 'Black', 63), (1, -5, 'Black', 35),
+            (-2, -3, 'Black', 42), (-1, -3, 'White', 31), (0, -3, 'White', 26), (1, -4, 'Black', 62), (2, -5, 'Black', 34), (3, -6, 'White', 66),
+            (-3, -2, 'Black', 43), (-2, -2, 'White', 25), (-1, -2, 'White', 24), (0, -2, 'Black', 64), (1, -3, 'White', 16), (2, -4, 'White', 64), (3, -5, 'Black', 61), (4, -6, 'White', 65), (5, -7, 'Black', 33),
+            (-4, -1, 'Black', 11), (-3, -1, 'Black', 44), (-2, -1, 'White', 32), (-1, -1, 'White', 23), (0, -1, 'White', 21), (1, -2, 'Black', 65), (2, -3, 'White', 11), (3, -4, 'White', 12), (4, -5, 'White', 15), (5, -6, 'White', 63), (6, -7, 'White', 61), (7, -8, 'Black', 32),
+            (-5, 0, 'Black', 12), (-4, 0, 'Black', 45), (-3, 0, 'White', 33), (-2, 0, 'White', 34), (-1, 0, 'White', 35), (0, 0, 'Black', 66), (1, -1, 'White', 16), (2, -2, 'White', 14), (3, -3, 'White', 56), (4, -4, 'White', 61), (5, -5, 'White', 55), (6, -6, 'Black', 31), (7, -7, 'White', 56),
+            (-5, 1, 'Black', 13), (-4, 1, 'Black', 46), (-3, 1, 'White', 36), (-2, 1, 'White', 41), (-1, 1, 'White', 42), (0, 1, 'Black', 51), (1, 0, 'White', 43), (2, -1, 'White', 44), (3, -2, 'White', 53), (4, -3, 'White', 54), (5, -4, 'White', 52), (6, -5, 'Black', 56),
+            (-5, 2, 'Black', 14), (-4, 2, 'Black', 51), (-3, 2, 'White', 16), (-2, 2, 'Black', 16), (-1, 2, 'White', 45), (0, 2, 'White', 46), (1, 1, 'Black', 52), (2, 0, 'White', 51), (3, -1, 'Black', 26), 
+            (-5, 3, 'Black', 15), (-4, 3, 'Black', 52), (-3, 3, 'Black', 53), (-2, 3, 'Black', 54), (-1, 3, 'Black', 25), (0, 3, 'Black', 24),
+            (-4, 4, 'Black', 21), (-3, 4, 'Black', 53), (-2, 4, 'Black', 23),
+            (-3, 5, 'Black', 22)
+        ]
+        
+        # Middle: Terrain Hex (Vdistant) - 75 hexes
+        # Column-based numbering (transcribed from middle diagram)
+        layout_terrain = [
+            (0, -5, 'Black', 36),
+            (-1, -4, 'Black', 41), (0, -4, 'Black', 63), (1, -5, 'Black', 35),
+            (-2, -3, 'Black', 42), (-1, -3, 'White', 16), (0, -3, 'White', 42), (1, -4, 'Black', 64), (2, -5, 'Black', 62), (3, -6, 'White', 66),
+            (-3, -2, 'Black', 43), (-2, -2, 'White', 44), (-1, -2, 'White', 21), (0, -2, 'White', 15), (1, -3, 'White', 14), (2, -4, 'White', 63), (3, -5, 'Black', 61), (4, -6, 'White', 34),
+            (-4, -1, 'Black', 11), (-3, -1, 'Black', 12), (-2, -1, 'White', 24), (-1, -1, 'White', 22), (0, -1, 'White', 13), (1, -2, 'Black', 65), (2, -3, 'White', 64), (3, -4, 'White', 65), (4, -5, 'White', 66), (5, -7, 'Black', 33),
+            (-5, 0, 'Black', 12), (-4, 0, 'Black', 45), (-3, 0, 'White', 26), (-2, 0, 'White', 25), (-1, 0, 'White', 23), (0, 0, 'White', 12), (1, -1, 'White', 11), (2, -2, 'White', 66), (3, -3, 'White', 63), (4, -4, 'White', 61), (5, -5, 'White', 33),
+            (-5, 1, 'Black', 14), (-4, 1, 'Black', 46), (-3, 1, 'White', 31), (-2, 1, 'White', 32), (-1, 1, 'White', 45), (0, 1, 'White', 66), (1, 0, 'White', 63), (2, -1, 'White', 61), (3, -2, 'Black', 32),
+            (-5, 2, 'Black', 15), (-4, 2, 'Black', 51), (-3, 2, 'White', 33), (-2, 2, 'White', 44), (-1, 2, 'White', 46), (0, 2, 'White', 54), (1, 1, 'White', 55), (2, 0, 'White', 62), (3, -1, 'Black', 31),
+            (-5, 3, 'Black', 16), (-4, 3, 'White', 34), (-3, 3, 'White', 35), (-2, 3, 'White', 43), (-1, 3, 'White', 51), (0, 3, 'White', 53), (1, 2, 'White', 56), (2, 1, 'Black', 26),
+            (-5, 4, 'Black', 52), (-4, 4, 'White', 36), (-3, 4, 'White', 42), (-2, 4, 'White', 52), (-1, 4, 'White', 56), (0, 4, 'Black', 31),
+            (-4, 5, 'Black', 21), (-3, 5, 'Black', 53), (-2, 5, 'Black', 41), (-1, 5, 'Black', 54), (0, 5, 'Black', 55), (1, 4, 'Black', 26),
+            (-3, 6, 'Black', 22), (-2, 6, 'Black', 23), (-1, 6, 'Black', 24), (0, 6, 'Black', 25)
+        ]
+
+        # Right: Local Hex (Distant) - 37 hexes
+        # Transcribed from right diagram (mirroring regional layout shape but smaller)
+        layout_local = [
+            (0, -3, 'Black', 36),
+            (-1, -2, 'Black', 41), (0, -2, 'Black', 63), (1, -3, 'Black', 35),
+            (-2, -1, 'Black', 42), (-1, -1, 'White', 31), (0, -1, 'White', 26), (1, -2, 'Black', 62), (2, -3, 'Black', 34), (3, -4, 'White', 66),
+            (-3, 0, 'Black', 43), (-2, 0, 'White', 25), (-1, 0, 'White', 24), (0, 0, 'Black', 65), (1, -1, 'White', 16), (2, -2, 'White', 64), (3, -3, 'Black', 61), (4, -4, 'White', 65), (5, -5, 'Black', 33),
+            (-3, 1, 'Black', 44), (-2, 1, 'White', 32), (-1, 1, 'White', 23), (0, 1, 'Black', 66), (1, 0, 'White', 11), (2, -1, 'White', 12), (3, -2, 'White', 15), (4, -3, 'White', 63),
+            (-3, 2, 'Black', 45), (-2, 2, 'White', 33), (-1, 2, 'White', 34), (0, 2, 'White', 35), (1, 1, 'White', 14), (2, 0, 'White', 56), (3, -1, 'White', 61),
+            (-2, 3, 'Black', 46), (-1, 3, 'White', 36), (0, 3, 'White', 41), (1, 2, 'White', 42), (2, 1, 'White', 55),
+            (-2, 4, 'Black', 51), (-1, 4, 'White', 43), (0, 4, 'White', 44), (1, 3, 'White', 53),
+            (-1, 5, 'Black', 52), (0, 5, 'White', 51), (1, 4, 'Black', 26),
+            (-1, 6, 'Black', 53), (0, 6, 'Black', 25),
+            (0, 7, 'Black', 21)
+        ]
+
+        if self.level == "Terrain":
+            layout_data = layout_terrain
+        elif self.level == "Local":
+            layout_local_actual = layout_local # Or a variant if they are identical
+            layout_data = layout_local_actual
+        else: # World Hex (Regional)
+            layout_data = layout_world
+
+        
+        self.hexes = {}
+        for q, r, color, num in layout_data:
+            h = Hex(q, r, parent_hex=self.parent_hex)
+            h.color = color
+            h.number = num
+            self.hexes[(q, r)] = h
+
+    def get_next_level(self):
+        levels = ["World", "Terrain", "Local"]
+        try:
+            return levels[levels.index(self.level) + 1]
+        except (ValueError, IndexError):
+            return None
 
     def populate(self):
-        p_terrain = 'Clear'
-        if self.parent_hex and self.parent_hex.terrain:
-            if 'Ocean' in self.parent_hex.terrain: p_terrain = 'Ocean'
-            elif 'Mountain' in self.parent_hex.terrain: p_terrain = 'Mountain'
-            elif 'IceCap' in self.parent_hex.terrain: p_terrain = 'IceCap'
-            else: p_terrain = list(self.parent_hex.terrain)[0]
+        # 1. Table-based population from worldhex.rules.md
+        if not self.parent_hex: return
+        parent_terrain = list(self.parent_hex.terrain)
+        
+        # Consistent mapping based on worldmap.rules.md and T5 conventions
+        rules = {
+            'Ocean': {31: 'Ocean', 32: 'Islands', 11: 'Reef'},
+            'Mountain': {21: 'Mountain', 11: 'Rough'},
+            'IceCap': {36: 'IceCap', 44: 'Ice Field'},
+            'Desert': {22: 'Desert', 21: 'Mesa'},
+            'City': {51: 'City', 55: 'Town', 24: 'Cropland'},
+            'Ruins': {26: 'Ruins', 11: 'Rough'},
+            'Starport': {56: 'Starport', 51: 'City'},
+            'Crater': {74: 'Crater', 11: 'Rough'},
+            'Frozen Lands': {43: 'Frozen Lands', 44: 'Ice Field'},
+            'Baked Lands': {41: 'Baked Lands', 22: 'Desert'},
+            'Cropland': {24: 'Cropland', 23: 'Rural'},
+        }
 
-        if p_terrain == 'Ocean':
-            for h in self.hexes.values(): h.add('Ocean')
-            if (0,0) in self.hexes: self.hexes[(0,0)].add('Ocean Depth')
-        elif p_terrain == 'Mountain':
-            for h in self.hexes.values(): h.add('Rough')
-            for _ in range(5): self.rng.choice(list(self.hexes.values())).add('Mountain')
-        elif p_terrain == 'IceCap':
-            for h in self.hexes.values(): h.add('IceCap')
-        else:
-            for h in self.hexes.values(): h.add('Clear')
-            for _ in range(3): self.rng.choice(list(self.hexes.values())).add('Rough')
+        # Determine base terrain (the most "fundamental" one)
+        # Priority: Ocean > IceCap > Desert > Clear
+        base_fill = 'Clear'
+        for t in ['Ocean', 'IceCap', 'Desert', 'Frozen Lands', 'Baked Lands']:
+            if t in parent_terrain:
+                base_fill = t
+                break
+        
+        for h in self.hexes.values():
+            h.add(base_fill)
+
+        # Apply specific overrides for each terrain type found on parent
+        for pt in parent_terrain:
+            rule = rules.get(pt)
+            if rule:
+                for h in self.hexes.values():
+                    # Apply if there's a specific instruction for this hex number
+                    # or if the color matches a generic pattern (simplified)
+                    t_over = rule.get(h.number)
+                    if t_over:
+                        h.add(t_over)
+                    
+                    # Special color-based distributions for certain terrains
+                    if pt == 'City' and h.color == 'White' and self.rng.random() < 0.2:
+                        h.add('Rural')
+                    if pt == 'Ocean' and h.color == 'Black' and self.rng.random() < 0.1:
+                        h.add('Ocean Depth')
+
+        # Handle Shore lines specifically (interpolation)
+        if 'Shore' in parent_terrain:
+            for h in self.hexes.values():
+                # Simple spatial gradient for shorelines
+                if h.y < 0: h.add('Ocean')
+                elif h.y == 0: h.add('Shore')
+                else: h.add('Clear')
 
 class WorldMapGen:
     def __init__(self, uwp, trade_codes=None, economic_ext=None, seed=None):
@@ -340,11 +477,26 @@ class WorldMapGen:
             output.append(tri)
         return output
 
-    def subdivide_hex(self, triangle_id, x, y):
+    def subdivide_hex(self, triangle_id, x, y, terrain_x=None, terrain_y=None):
+        """Recursively subdivide from World -> Terrain -> Local."""
         target_tri = self.triangles[triangle_id]
         target_hex = target_tri.hexes.get((x, y))
-        if target_hex:
-            if not target_hex.sub_map:
-                target_hex.sub_map = SubMap(target_hex, "Terrain", self.rng)
+        
+        if not target_hex:
+            return None
+            
+        # Level 1: World -> Terrain
+        if not target_hex.sub_map:
+            target_hex.sub_map = SubMap(target_hex, "Terrain", self.rng)
+            
+        if terrain_x is None or terrain_y is None:
             return target_hex.sub_map
+            
+        # Level 2: Terrain -> Local
+        terrain_hex = target_hex.sub_map.hexes.get((terrain_x, terrain_y))
+        if terrain_hex:
+            if not terrain_hex.sub_map:
+                terrain_hex.sub_map = SubMap(terrain_hex, "Local", self.rng)
+            return terrain_hex.sub_map
+            
         return None
