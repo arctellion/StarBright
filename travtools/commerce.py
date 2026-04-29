@@ -247,8 +247,10 @@ def sell_price(n, d, b = 0, t = 0):
     #print('Base Price: {}\n'.format(price))
     if price < 0:
         price = 0
-    price = int(price * pbrk)
-    return price
+    
+    base_price = int(price)
+    final_price = int(price * pbrk)
+    return (base_price, final_price)
 
 #Trade Goods Data
 ag_ga = [['Bulk Protein','Bulk Carbs','Bulk Fats','Bulk Pharma','Livestock', 'Seedstock'], #Raws

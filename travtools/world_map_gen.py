@@ -48,29 +48,86 @@ class Triangle:
 # Mapping (q, r) -> (color, number) based on T5 rules / image
 # (0,0) is center, q axial, r diagonal-down.
 WORLD_HEX_LAYOUT = [
-    # Top Row
-    (0, -5, 'Black', 36),
-    # Row 2
-    (-1, -4, 'Black', 41), (0, -4, 'Black', 63), (1, -5, 'Black', 35),
-    # Row 3
-    (-2, -3, 'Black', 42), (-1, -3, 'White', 31), (0, -3, 'White', 26), (1, -4, 'Black', 62), (2, -5, 'Black', 34), (3, -6, 'White', 66),
-    # Row 4
-    (-3, -2, 'Black', 43), (-2, -2, 'White', 25), (-1, -2, 'White', 24), (0, -2, 'Black', 64), (1, -3, 'White', 16), (2, -4, 'White', 64), (3, -5, 'Black', 61), (4, -6, 'White', 65), (5, -7, 'Black', 33),
-    # Row 5 (12 hexes)
-    (-4, -1, 'Black', 11), (-3, -1, 'Black', 44), (-2, -1, 'White', 32), (-1, -1, 'White', 23), (0, -1, 'White', 22), (1, -2, 'Black', 65), (2, -3, 'White', 11), (3, -4, 'White', 12), (4, -5, 'White', 15), (5, -6, 'White', 63), (6, -7, 'White', 61), (7, -8, 'Black', 32),
-    # Row 6 (Center, 13 hexes)
-    (-5, 0, 'Black', 12), (-4, 0, 'Black', 45), (-3, 0, 'White', 33), (-2, 0, 'White', 34), (-1, 0, 'White', 35), (0, 0, 'Black', 66), (1, -1, 'None', 0), (2, -2, 'White', 14), (3, -3, 'White', 56), (4, -4, 'White', 61), (5, -5, 'White', 55), (6, -6, 'Black', 31), (7, -7, 'White', 56),
-    # Row 7 (12 hexes)
-    (-5, 1, 'Black', 13), (-4, 1, 'Black', 46), (-3, 1, 'White', 36), (-2, 1, 'White', 41), (-1, 1, 'White', 42), (0, 1, 'Black', 51), (1, 0, 'White', 43), (2, -1, 'White', 44), (3, -2, 'White', 53), (4, -3, 'White', 54), (5, -4, 'White', 52), (6, -5, 'Black', 56),
-    # Row 8 (9 hexes)
-    (-5, 2, 'Black', 14), (-4, 2, 'Black', 51), (-3, 2, 'White', 16), (-2, 2, 'Black', 16), (-1, 2, 'White', 45), (0, 2, 'White', 46), (1, 1, 'Black', 52), (2, 0, 'White', 51), (3, -1, 'Black', 26), 
-    # Row 9 (6 hexes)
-    (-5, 3, 'Black', 15), (-4, 3, 'Black', 52), (-3, 3, 'Black', 53), (-2, 3, 'Black', 54), (-1, 3, 'None', 0), (0, 2, 'Black', 25),
-    # Row 10 (3 hexes)
-    (-4, 4, 'Black', 21), (-3, 4, 'Black', 53), (-2, 4, 'Black', 23),
-    # Bottom Row
-    (-3, 5, 'Black', 22)
+    ( 1, -5, 'White', 56),
+    ( 0, -4, 'Black', 22),
+    ( 2, -5, 'White', 61),
+    (-1, -3, 'Black', 23),
+    ( 1, -4, 'Black', 31),
+    ( 3, -5, 'White', 65),
+    (-2, -2, 'Black', 53),
+    ( 0, -3, 'Black', 56),
+    ( 2, -4, 'White', 66),
+    ( 4, -5, 'Black', 33),
+    (-3, -1, 'Black', 21),
+    (-1, -2, 'Black', 54),
+    ( 1, -3, 'Black', 34),
+    ( 3, -4, 'White', 12),
+    ( 5, -5, 'White', 63),
+    (-4,  0, 'Black', 24),
+    (-2, -1, 'Black', 55),
+    ( 0, -2, 'Black', 36),
+    ( 2, -3, 'White', 64),
+    ( 4, -4, 'White', 15),
+    (-3,  0, 'Black', 15),
+    (-1, -1, 'White', 45),
+    ( 1, -2, 'Black', 35),
+    ( 3, -3, 'White', 11),
+    ( 5, -4, 'Black', 32),
+    (-4,  1, 'Black', 14),
+    (-2,  0, 'None', 0),
+    ( 0, -1, 'Black', 63),
+    ( 2, -2, 'Black', 61),
+    ( 4, -3, 'White', 62),
+    (-3,  1, 'White', 41),
+    (-1,  0, 'Black', 41),
+    ( 1, -1, 'Black', 62),
+    ( 3, -2, 'White', 14),
+    ( 5, -3, 'White', 55),
+    (-4,  2, 'None', 0),
+    (-2,  1, 'Black', 42),
+    ( 0,  0, 'White', 26),
+    ( 2, -1, 'Black', 65),
+    ( 4, -2, 'White', 53),
+    (-3,  2, 'White', 25),
+    (-1,  1, 'White', 31),
+    ( 1,  0, 'White', 16),
+    ( 3, -1, 'White', 13),
+    ( 5, -2, 'White', 52),
+    (-4,  3, 'Black', 13),
+    (-2,  2, 'Black', 43),
+    ( 0,  1, 'Black', 64),
+    ( 2,  0, 'None', 0),
+    ( 4, -1, 'White', 54),
+    (-3,  3, 'Black', 11),
+    (-1,  2, 'White', 24),
+    ( 1,  1, 'White', 22),
+    ( 3,  0, 'White', 44),
+    ( 5, -1, 'Black', 26),
+    (-4,  4, 'Black', 12),
+    (-2,  3, 'Black', 44),
+    ( 0,  2, 'White', 23),
+    ( 2,  1, 'Black', 51),
+    ( 4,  0, 'White', 51),
+    (-3,  4, 'Black', 45),
+    (-1,  3, 'White', 32),
+    ( 1,  2, 'Black', 66),
+    ( 3,  1, 'White', 46),
+    ( 5,  0, 'Black', 25),
+    (-2,  4, 'None', 0),
+    ( 0,  3, 'White', 35),
+    ( 2,  2, 'None', 0),
+    ( 4,  1, 'None', 0),
+    (-1,  4, 'White', 34),
+    ( 1,  3, 'White', 42),
+    ( 3,  2, 'Black', 52),
+    ( 0,  4, 'White', 36),
+    ( 2,  3, 'Black', 16),
+    ( 1,  4, 'White', 21),
 ]
+
+
+
+
 # Adjust logic to fill to 75 if needed, but this is the primary structure.
 
 class SubMap:
@@ -83,77 +140,51 @@ class SubMap:
         self.populate()
 
     def generate_layout(self):
-        # 75-hex T5 Regional Map layout
-        # (q, r, color, number)
-        # Transcribed from the provided image
-        # Left: World Hex (Regional) - 75 hexes
-        # Staggered axial coordinates (q, r) where q is column, r is row-diagonal
-        # Transcription from left diagram (row by row):
-        layout_world = [
-            (0, -5, 'Black', 36),
-            (-1, -4, 'Black', 41), (0, -4, 'Black', 63), (1, -5, 'Black', 35),
-            (-2, -3, 'Black', 42), (-1, -3, 'White', 31), (0, -3, 'White', 26), (1, -4, 'Black', 62), (2, -5, 'Black', 34), (3, -6, 'White', 66),
-            (-3, -2, 'Black', 43), (-2, -2, 'White', 25), (-1, -2, 'White', 24), (0, -2, 'Black', 64), (1, -3, 'White', 16), (2, -4, 'White', 64), (3, -5, 'Black', 61), (4, -6, 'White', 65), (5, -7, 'Black', 33),
-            (-4, -1, 'Black', 11), (-3, -1, 'Black', 44), (-2, -1, 'White', 32), (-1, -1, 'White', 23), (0, -1, 'White', 21), (1, -2, 'Black', 65), (2, -3, 'White', 11), (3, -4, 'White', 12), (4, -5, 'White', 15), (5, -6, 'White', 63), (6, -7, 'White', 61), (7, -8, 'Black', 32),
-            (-5, 0, 'Black', 12), (-4, 0, 'Black', 45), (-3, 0, 'White', 33), (-2, 0, 'White', 34), (-1, 0, 'White', 35), (0, 0, 'Black', 66), (1, -1, 'White', 16), (2, -2, 'White', 14), (3, -3, 'White', 56), (4, -4, 'White', 61), (5, -5, 'White', 55), (6, -6, 'Black', 31), (7, -7, 'White', 56),
-            (-5, 1, 'Black', 13), (-4, 1, 'Black', 46), (-3, 1, 'White', 36), (-2, 1, 'White', 41), (-1, 1, 'White', 42), (0, 1, 'Black', 51), (1, 0, 'White', 43), (2, -1, 'White', 44), (3, -2, 'White', 53), (4, -3, 'White', 54), (5, -4, 'White', 52), (6, -5, 'Black', 56),
-            (-5, 2, 'Black', 14), (-4, 2, 'Black', 51), (-3, 2, 'White', 16), (-2, 2, 'Black', 16), (-1, 2, 'White', 45), (0, 2, 'White', 46), (1, 1, 'Black', 52), (2, 0, 'White', 51), (3, -1, 'Black', 26), 
-            (-5, 3, 'Black', 15), (-4, 3, 'Black', 52), (-3, 3, 'Black', 53), (-2, 3, 'Black', 54), (-1, 3, 'Black', 25), (0, 3, 'Black', 24),
-            (-4, 4, 'Black', 21), (-3, 4, 'Black', 53), (-2, 4, 'Black', 23),
-            (-3, 5, 'Black', 22)
-        ]
+        total = 75
         
-        # Middle: Terrain Hex (Vdistant) - 75 hexes
-        # Column-based numbering (transcribed from middle diagram)
-        layout_terrain = [
-            (0, -5, 'Black', 36),
-            (-1, -4, 'Black', 41), (0, -4, 'Black', 63), (1, -5, 'Black', 35),
-            (-2, -3, 'Black', 42), (-1, -3, 'White', 16), (0, -3, 'White', 42), (1, -4, 'Black', 64), (2, -5, 'Black', 62), (3, -6, 'White', 66),
-            (-3, -2, 'Black', 43), (-2, -2, 'White', 44), (-1, -2, 'White', 21), (0, -2, 'White', 15), (1, -3, 'White', 14), (2, -4, 'White', 63), (3, -5, 'Black', 61), (4, -6, 'White', 34),
-            (-4, -1, 'Black', 11), (-3, -1, 'Black', 12), (-2, -1, 'White', 24), (-1, -1, 'White', 22), (0, -1, 'White', 13), (1, -2, 'Black', 65), (2, -3, 'White', 64), (3, -4, 'White', 65), (4, -5, 'White', 66), (5, -7, 'Black', 33),
-            (-5, 0, 'Black', 12), (-4, 0, 'Black', 45), (-3, 0, 'White', 26), (-2, 0, 'White', 25), (-1, 0, 'White', 23), (0, 0, 'White', 12), (1, -1, 'White', 11), (2, -2, 'White', 66), (3, -3, 'White', 63), (4, -4, 'White', 61), (5, -5, 'White', 33),
-            (-5, 1, 'Black', 14), (-4, 1, 'Black', 46), (-3, 1, 'White', 31), (-2, 1, 'White', 32), (-1, 1, 'White', 45), (0, 1, 'White', 66), (1, 0, 'White', 63), (2, -1, 'White', 61), (3, -2, 'Black', 32),
-            (-5, 2, 'Black', 15), (-4, 2, 'Black', 51), (-3, 2, 'White', 33), (-2, 2, 'White', 44), (-1, 2, 'White', 46), (0, 2, 'White', 54), (1, 1, 'White', 55), (2, 0, 'White', 62), (3, -1, 'Black', 31),
-            (-5, 3, 'Black', 16), (-4, 3, 'White', 34), (-3, 3, 'White', 35), (-2, 3, 'White', 43), (-1, 3, 'White', 51), (0, 3, 'White', 53), (1, 2, 'White', 56), (2, 1, 'Black', 26),
-            (-5, 4, 'Black', 52), (-4, 4, 'White', 36), (-3, 4, 'White', 42), (-2, 4, 'White', 52), (-1, 4, 'White', 56), (0, 4, 'Black', 31),
-            (-4, 5, 'Black', 21), (-3, 5, 'Black', 53), (-2, 5, 'Black', 41), (-1, 5, 'Black', 54), (0, 5, 'Black', 55), (1, 4, 'Black', 26),
-            (-3, 6, 'Black', 22), (-2, 6, 'Black', 23), (-1, 6, 'Black', 24), (0, 6, 'Black', 25)
-        ]
+        # Base templates for generating numbers
+        numbered = []
+        for c in ['White', 'Black']:
+            for d1 in range(1, 7):
+                for d2 in range(1, 7):
+                    numbered.append((c, d1*10 + d2))
+                    
+        layout_final = []
 
-        # Right: Local Hex (Distant) - 37 hexes
-        # Transcribed from right diagram (mirroring regional layout shape but smaller)
-        layout_local = [
-            (0, -3, 'Black', 36),
-            (-1, -2, 'Black', 41), (0, -2, 'Black', 63), (1, -3, 'Black', 35),
-            (-2, -1, 'Black', 42), (-1, -1, 'White', 31), (0, -1, 'White', 26), (1, -2, 'Black', 62), (2, -3, 'Black', 34), (3, -4, 'White', 66),
-            (-3, 0, 'Black', 43), (-2, 0, 'White', 25), (-1, 0, 'White', 24), (0, 0, 'Black', 65), (1, -1, 'White', 16), (2, -2, 'White', 64), (3, -3, 'Black', 61), (4, -4, 'White', 65), (5, -5, 'Black', 33),
-            (-3, 1, 'Black', 44), (-2, 1, 'White', 32), (-1, 1, 'White', 23), (0, 1, 'Black', 66), (1, 0, 'White', 11), (2, -1, 'White', 12), (3, -2, 'White', 15), (4, -3, 'White', 63),
-            (-3, 2, 'Black', 45), (-2, 2, 'White', 33), (-1, 2, 'White', 34), (0, 2, 'White', 35), (1, 1, 'White', 14), (2, 0, 'White', 56), (3, -1, 'White', 61),
-            (-2, 3, 'Black', 46), (-1, 3, 'White', 36), (0, 3, 'White', 41), (1, 2, 'White', 42), (2, 1, 'White', 55),
-            (-2, 4, 'Black', 51), (-1, 4, 'White', 43), (0, 4, 'White', 44), (1, 3, 'White', 53),
-            (-1, 5, 'Black', 52), (0, 5, 'White', 51), (1, 4, 'Black', 26),
-            (-1, 6, 'Black', 53), (0, 6, 'Black', 25),
-            (0, 7, 'Black', 21)
-        ]
+        if self.level in ["World Hex", "Local Hex"]:
+            # Direct use of the corrected, geometrically perfect layout
+            layout_final = WORLD_HEX_LAYOUT
+                        
+        elif self.level == "Terrain Hex":
+            # Terrain Hex: Point at the side (Flat-Topped macro hexagon), Pointy-Topped micro!
+            widths = [6, 7, 8, 9, 10, 9, 8, 7, 6, 5]
+            none_indices = {30, 39, 72}
+            
+            num_idx = 0
+            idx = 0
+            r_current = 0
+            for w in widths:
+                start_q = int(math.floor(-r_current / 2.0 - (w - 1) / 2.0 + 0.5))
+                for i in range(w):
+                    if idx in none_indices:
+                        color, num = 'None', 0
+                    else:
+                        if num_idx < len(numbered):
+                            color, num = numbered[num_idx]
+                        num_idx += 1
+                    layout_final.append((start_q + i, r_current, color, num))
+                    idx += 1
+                r_current += 1
 
-        if self.level == "Terrain":
-            layout_data = layout_terrain
-        elif self.level == "Local":
-            layout_local_actual = layout_local # Or a variant if they are identical
-            layout_data = layout_local_actual
-        else: # World Hex (Regional)
-            layout_data = layout_world
-
-        
         self.hexes = {}
-        for q, r, color, num in layout_data:
+        for q, r, color, num in layout_final:
             h = Hex(q, r, parent_hex=self.parent_hex)
             h.color = color
             h.number = num
             self.hexes[(q, r)] = h
 
     def get_next_level(self):
-        levels = ["World", "Terrain", "Local"]
+        levels = ["World Hex", "Terrain Hex", "Local Hex"]
         try:
             return levels[levels.index(self.level) + 1]
         except (ValueError, IndexError):
@@ -487,7 +518,7 @@ class WorldMapGen:
             
         # Level 1: World -> Terrain
         if not target_hex.sub_map:
-            target_hex.sub_map = SubMap(target_hex, "Terrain", self.rng)
+            target_hex.sub_map = SubMap(target_hex, "World Hex", self.rng)
             
         if terrain_x is None or terrain_y is None:
             return target_hex.sub_map
@@ -496,7 +527,7 @@ class WorldMapGen:
         terrain_hex = target_hex.sub_map.hexes.get((terrain_x, terrain_y))
         if terrain_hex:
             if not terrain_hex.sub_map:
-                terrain_hex.sub_map = SubMap(terrain_hex, "Local", self.rng)
+                terrain_hex.sub_map = SubMap(terrain_hex, "Terrain Hex", self.rng)
             return terrain_hex.sub_map
             
         return None

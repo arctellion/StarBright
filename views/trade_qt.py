@@ -152,9 +152,9 @@ class SellQtView(QWidget):
         try:
             trd = int(self.trade_roll.currentText())
             broker = int(self.broker_skill.currentText())
-            value = cm.sell_price(cargo, uwp, broker, trd)
-            if value > 0:
-                self.result_label.setText(f"Sell Price: Cr{value:,}")
+            base_value, value = cm.sell_price(cargo, uwp, broker, trd)
+            if value > 0 or base_value > 0:
+                self.result_label.setText(f"Base Price: Cr{base_value:,}\nSell Price: Cr{value:,}")
             else:
                 self.result_label.setText("No value found.")
         except Exception as ex:

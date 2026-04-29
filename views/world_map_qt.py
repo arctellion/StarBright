@@ -29,13 +29,16 @@ class WorldMapWidget(QWidget):
         self.world_size = size
         self.is_submap = is_submap
         
-        # --- GEOMETRY FOR POINTY TOP HEXES ---
+        # --- GEOMETRY CALCULATION WILL BE DYNAMIC BASED ON LEVEL ---
         self.hex_size = 20 # Radius
-        self.hex_w = self.hex_size * math.sqrt(3)  # Width (flat side to flat side)
-        self.hex_h = self.hex_size * 2             # Height (point to point)
+        self.level_name = "World Map" # Default
         
-        self.dx = self.hex_w                       # Horizontal step
-        self.dy = self.hex_h * 0.75                # Vertical step
+        # Default Pointy-top stats:
+        self.hex_w = self.hex_size * math.sqrt(3)
+        self.hex_h = self.hex_size * 2
+        self.dx = self.hex_w
+        self.dy = self.hex_h * 0.75
+        self.is_flat_top = False
 
         self.scale = 1.0
         if not is_submap:
@@ -141,19 +144,36 @@ class WorldMapWidget(QWidget):
             # The 75-hex layout is centered around (0,0)
             q, r = p
             cq, cr = q, r
-            px = center_x + self.dx * (cq + cr/2.0)
-            py = center_y + self.dy * cr
+            if self.is_flat_top:
+                # Flat-Topped axial to offset (q goes straight col down-right? no, flat-top axial is px = 1.5 s q, py = sqrt(3) s (r + q/2))
+                px = center_x + self.dx * cq
+                py = center_y + self.dy * (cr + cq / 2.0)
+            else:
+                px = center_x + self.dx * (cq + cr / 2.0)
+                py = center_y + self.dy * cr
+                
+            pt = QPointF(px, py)
             
-            color = self.get_terrain_color(h.terrain, palette)
-            poly = self.draw_hex_pointy(painter, QPointF(px, py), color)
-            self.draw_terrain_icon(painter, QPointF(px, py), h.terrain)
+            # Use specific palette based on terrain
+            terrain = 'Clear'
+            if hasattr(h, 'terrain'): terrain = h.terrain
+            elif hasattr(h, 'is_ice') and h.is_ice: terrain = 'Frozen Lands'
+            elif hasattr(h, 'is_ocean') and h.is_ocean: terrain = 'Sea'
             
-            # Draw Numbers if they exist
-            if hasattr(h, 'number') and h.number > 0:
-                text_color = QColor(0, 0, 0, 150) if h.color == 'Black' else QColor(255, 255, 255, 150)
-                painter.setPen(QPen(text_color))
-                painter.setFont(QFont("Arial", 8))
-                painter.drawText(QRectF(px-15, py-15, 30, 30), Qt.AlignmentFlag.AlignCenter, str(h.number))
+            color = self.get_terrain_color(terrain, palette)
+            
+            if hasattr(h, 'color') and h.color == 'None':
+                color = palette['Clear']
+            
+            poly = self.draw_hex(painter, pt, color)
+            self.draw_terrain_icon(painter, pt, h.terrain)
+            
+            # Draw Numbers if they exist (Disabled per user request)
+            # if hasattr(h, 'number') and h.number > 0:
+            #     text_color = QColor(0, 0, 0, 150) if h.color == 'Black' else QColor(255, 255, 255, 150)
+            #     painter.setPen(QPen(text_color))
+            #     painter.setFont(QFont("Arial", 8))
+            #     painter.drawText(QRectF(px-15, py-15, 30, 30), Qt.AlignmentFlag.AlignCenter, str(h.number))
 
             self.hex_hitboxes.append((poly, (None, q, r)))
 
@@ -211,6 +231,44 @@ class WorldMapWidget(QWidget):
             for h in self.map_data.values():
                 for t in h.terrain: visible.add(t)
         return list(visible)
+
+    def set_level(self, level_name):
+        self.level_name = level_name
+        self.is_flat_top = self.is_submap and level_name in ["World Hex", "Local Hex"]
+        
+        if self.is_flat_top:
+            self.hex_w = self.hex_size * 2
+            self.hex_h = self.hex_size * math.sqrt(3)
+            self.dx = self.hex_size * 1.5
+            self.dy = self.hex_h
+        else:
+            self.hex_w = self.hex_size * math.sqrt(3)
+            self.hex_h = self.hex_size * 2
+            self.dx = self.hex_w
+            self.dy = self.hex_size * 1.5
+
+    def draw_hex(self, painter, center, color):
+        if self.is_flat_top:
+            return self.draw_hex_flat(painter, center, color)
+        else:
+            return self.draw_hex_pointy(painter, center, color)
+
+    def draw_hex_flat(self, painter, center, color):
+        x, y = center.x(), center.y()
+        s = self.hex_size
+        points = []
+        for i in range(6):
+            angle_deg = 60 * i
+            angle_rad = math.pi / 180 * angle_deg
+            px = x + s * math.cos(angle_rad)
+            py = y + s * math.sin(angle_rad)
+            points.append(QPointF(px, py))
+            
+        poly = QPolygonF(points)
+        painter.setBrush(color)
+        painter.setPen(QPen(QColor(255, 255, 255, 20), 0.5))
+        painter.drawPolygon(poly)
+        return poly
 
     def draw_hex_pointy(self, painter, center, color):
         x, y = center.x(), center.y()
@@ -308,6 +366,7 @@ class WorldMapDialog(QDialog):
         self.uwp_lbl.setText(f"<span style='font-size: 16px; color: #aaa;'>UWP: {self.uwp} | </span><span style='color: #60a5fa;'>{title}</span>")
         
         self.map_widget = WorldMapWidget(data, self.generator.size, is_submap)
+        self.map_widget.set_level(title)
         self.map_widget.hex_clicked.connect(self.handle_hex_click)
         self.scroll.setWidget(self.map_widget)
         
@@ -348,7 +407,7 @@ class WorldMapDialog(QDialog):
         self.legend_layout.addStretch()
 
     def handle_hex_click(self, data):
-        if len(self.history) >= 4: return # World -> Terrain -> Local -> Single
+        if len(self.history) >= 4: return # Overview -> World Hex -> Terrain Hex -> Local Hex
         
         # Import SubMap here to avoid circular dependency issues if needed, 
         # though it is imported at top now.
@@ -357,7 +416,7 @@ class WorldMapDialog(QDialog):
         if data[0] is not None: # World level click (tid, x, y)
             submap = self.generator.subdivide_hex(*data)
             if submap:
-                level_name = "Terrain Level (100km Hexes)" if len(self.history) == 1 else "Local Level (10km Hexes)"
+                level_name = "World Hex"
                 self.show_map(submap.hexes, True, level_name)
         else: # Submap level click (None, q, r)
             # Find the hex object in the current submap data
@@ -365,8 +424,9 @@ class WorldMapDialog(QDialog):
             target_hex = current_hexes.get((data[1], data[2]))
             if target_hex:
                 if not target_hex.sub_map:
-                    target_hex.sub_map = SubMap(target_hex, "Local", self.generator.rng)
-                level_name = "Local Level (10km Hexes)" if len(self.history) == 2 else "Single Hex Level (1km Hexes)"
+                    next_lvl = "Terrain Hex" if len(self.history) == 2 else "Local Hex"
+                    target_hex.sub_map = SubMap(target_hex, next_lvl, self.generator.rng)
+                level_name = "Terrain Hex" if len(self.history) == 2 else "Local Hex"
                 self.show_map(target_hex.sub_map.hexes, True, level_name)
 
     def go_back(self):
