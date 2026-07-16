@@ -39,7 +39,8 @@ class GunQtView(QWidget):
         left_layout.setSpacing(20)
 
         # Weapon Core
-        core_frame = GlassFrame("Weapon Core", color=Styles.AMBER)
+        core_group = QGroupBox("Weapon Core")
+        core_layout = QVBoxLayout(core_group)
         self.type_combo = QComboBox()
         for cat, types in gm.CHART_3_TYPES.items():
             for code, data in types.items():
@@ -59,18 +60,19 @@ class GunQtView(QWidget):
         self.port_combo.addItems(["Auto-Calculate", "Personal", "Crewed", "Fixed", "Portable", "Vehicle", "Turret"])
         self.port_combo.currentIndexChanged.connect(self.update_gm_output)
 
-        core_frame.layout.addWidget(QLabel("Category & Type:"))
-        core_frame.layout.addWidget(self.type_combo)
-        core_frame.layout.addWidget(QLabel("Descriptor:"))
-        core_frame.layout.addWidget(self.desc_combo)
-        core_frame.layout.addWidget(QLabel("User:"))
-        core_frame.layout.addWidget(self.user_combo)
-        core_frame.layout.addWidget(QLabel("Portability:"))
-        core_frame.layout.addWidget(self.port_combo)
-        left_layout.addWidget(core_frame)
+        core_layout.addWidget(QLabel("Category & Type:"))
+        core_layout.addWidget(self.type_combo)
+        core_layout.addWidget(QLabel("Descriptor:"))
+        core_layout.addWidget(self.desc_combo)
+        core_layout.addWidget(QLabel("User:"))
+        core_layout.addWidget(self.user_combo)
+        core_layout.addWidget(QLabel("Portability:"))
+        core_layout.addWidget(self.port_combo)
+        left_layout.addWidget(core_group)
 
         # Modifications
-        mod_frame = GlassFrame("Modifications", color=Styles.CYAN)
+        mod_group = QGroupBox("Modifications")
+        mod_layout = QVBoxLayout(mod_group)
         
         # Burden
         burden_group = QGroupBox("Burden")
@@ -80,7 +82,7 @@ class GunQtView(QWidget):
             cb.stateChanged.connect(self.update_gm_output)
             self.burden_cbs[k] = cb
             burden_layout.addWidget(cb)
-        mod_frame.layout.addWidget(burden_group)
+        mod_layout.addWidget(burden_group)
         
         # Stage
         stage_group = QGroupBox("Stage")
@@ -90,7 +92,7 @@ class GunQtView(QWidget):
             cb.stateChanged.connect(self.update_gm_output)
             self.stage_cbs[k] = cb
             stage_layout.addWidget(cb)
-        mod_frame.layout.addWidget(stage_group)
+        mod_layout.addWidget(stage_group)
         
         # Options
         options_group = QGroupBox("Options")
@@ -100,9 +102,32 @@ class GunQtView(QWidget):
             cb.stateChanged.connect(self.update_gm_output)
             self.option_cbs[k] = cb
             options_layout.addWidget(cb)
-        mod_frame.layout.addWidget(options_group)
+        mod_layout.addWidget(options_group)
         
-        left_layout.addWidget(mod_frame)
+        left_layout.addWidget(mod_group)
+
+        # Reset Button
+        self.btn_reset = QPushButton("Reset to Default")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        left_layout.addWidget(self.btn_reset)
+
         left_layout.addStretch()
         left_scroll.setWidget(left_scroll_content)
         self.main_layout.addWidget(left_scroll, 1)
@@ -175,6 +200,55 @@ class GunQtView(QWidget):
 
         right_column.addWidget(profile_frame)
         self.main_layout.addLayout(right_column, 1)
+
+    def reset_to_default(self):
+        # Block signals to avoid multiple updates while resetting
+        self.type_combo.blockSignals(True)
+        self.desc_combo.blockSignals(True)
+        self.user_combo.blockSignals(True)
+        self.port_combo.blockSignals(True)
+        
+        self.type_combo.setCurrentIndex(0)
+        
+        # Populate and set description index to 0
+        data = self.type_combo.currentData()
+        if data:
+            cat, code = data.split("|")
+            self.desc_combo.clear()
+            for k, v in gm.CHART_4_DESCRIPTORS[cat].items():
+                self.desc_combo.addItem(v['name'] or "(None)", k)
+        self.desc_combo.setCurrentIndex(0)
+        
+        self.user_combo.setCurrentText("Medium (Human)")
+        self.port_combo.setCurrentIndex(0)
+        
+        for cb in self.burden_cbs.values():
+            cb.blockSignals(True)
+            cb.setChecked(False)
+            cb.blockSignals(False)
+            
+        for cb in self.stage_cbs.values():
+            cb.blockSignals(True)
+            cb.setChecked(False)
+            cb.blockSignals(False)
+            
+        for cb in self.option_cbs.values():
+            cb.blockSignals(True)
+            cb.setChecked(False)
+            cb.blockSignals(False)
+            
+        self.type_combo.blockSignals(False)
+        self.desc_combo.blockSignals(False)
+        self.user_combo.blockSignals(False)
+        self.port_combo.blockSignals(False)
+        
+        self.seed_input.setText("")
+        self.res_instance_name.setText("")
+        self.is_generated = False
+        self.qrebs_res_code.setText("")
+        self.qrebs_res_text.setText("")
+        
+        self.update_gm_output()
 
     def update_gm_desc(self):
         data = self.type_combo.currentData()

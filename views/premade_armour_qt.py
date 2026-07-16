@@ -54,6 +54,28 @@ class PremadeArmourQtView(QWidget):
         pre_layout.addWidget(self.pre_head)
         left_layout.addWidget(pre_group)
 
+        # Reset Button
+        self.btn_reset = QPushButton("Reset to Default")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        left_layout.addWidget(self.btn_reset)
+
         left_layout.addStretch()
         left_scroll.setWidget(left_scroll_content)
         self.main_layout.addWidget(left_scroll, 1)
@@ -136,6 +158,21 @@ class PremadeArmourQtView(QWidget):
 
         right_column.addWidget(profile_frame)
         self.main_layout.addLayout(right_column, 1)
+
+    def reset_to_default(self):
+        self.pre_body.blockSignals(True)
+        self.pre_head.blockSignals(True)
+        
+        self.pre_body.setCurrentIndex(0)
+        self.pre_head.setCurrentIndex(0)
+        
+        self.pre_body.blockSignals(False)
+        self.pre_head.blockSignals(False)
+        
+        self.seed_input.setText("")
+        self.res_instance_name.setText("")
+        
+        self.update_output_premade()
 
     def update_output_premade(self):
         res = am.calculate_premade_armor(self.pre_body.currentData(), self.pre_head.currentData(), "")

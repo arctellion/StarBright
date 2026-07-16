@@ -109,6 +109,28 @@ class ArmourQtView(QWidget):
             sub_layout.addWidget(cat_group)
         left_layout.addWidget(sub_group)
 
+        # Reset Button
+        self.btn_reset = QPushButton("Reset to Default")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        left_layout.addWidget(self.btn_reset)
+
         left_layout.addStretch()
         left_scroll.setWidget(left_scroll_content)
         self.main_layout.addWidget(left_scroll, 1)
@@ -240,6 +262,35 @@ class ArmourQtView(QWidget):
                 db_lbl.setVisible(True)
             else:
                 db_lbl.setVisible(False)
+
+    def reset_to_default(self):
+        self.type_combo.blockSignals(True)
+        self.desc_combo.blockSignals(True)
+        self.burden_combo.blockSignals(True)
+        self.stage_combo.blockSignals(True)
+        self.user_combo.blockSignals(True)
+        
+        self.type_combo.setCurrentIndex(self.type_combo.findData("D"))
+        self.desc_combo.setCurrentIndex(0)
+        self.burden_combo.setCurrentIndex(0)
+        self.stage_combo.setCurrentIndex(0)
+        self.user_combo.setCurrentIndex(0)
+        
+        self.selected_opts = set(am.STANDARD_SUBSYSTEMS.get("D", []))
+        self.selected_drawbacks = {}
+        self.last_type = "D"
+        
+        self.type_combo.blockSignals(False)
+        self.desc_combo.blockSignals(False)
+        self.burden_combo.blockSignals(False)
+        self.stage_combo.blockSignals(False)
+        self.user_combo.blockSignals(False)
+        
+        self.seed_input.setText("")
+        self.res_instance_name.setText("")
+        
+        self.refresh_cb_styles()
+        self.update_output()
 
     def update_output(self):
         res = am.calculate_custom_armor(self.type_combo.currentData(), self.desc_combo.currentData(), self.burden_combo.currentData(), self.stage_combo.currentData(), self.user_combo.currentData(), list(self.selected_opts), self.selected_drawbacks)

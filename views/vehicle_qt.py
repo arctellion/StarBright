@@ -216,6 +216,29 @@ class VehicleQtView(QWidget):
         form_layout.addWidget(end_combo)
         
         scroll_layout.addWidget(group)
+
+        # Reset Button
+        btn_reset = QPushButton("Reset to Default")
+        btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        btn_reset.clicked.connect(self.reset_to_default)
+        scroll_layout.addWidget(btn_reset)
+
         scroll_layout.addStretch()
         scroll.setWidget(content)
         layout.addWidget(scroll)
@@ -245,6 +268,20 @@ class VehicleQtView(QWidget):
             c['end'].currentData()
         )
         self.render_result(res)
+
+    def reset_tab(self, tab):
+        c = tab.combos
+        for combo in c.values():
+            combo.blockSignals(True)
+            combo.setCurrentIndex(0)
+            combo.blockSignals(False)
+
+    def reset_to_default(self):
+        for tab in [self.ground_tab, self.flyer_tab, self.water_tab, self.military_tab]:
+            self.reset_tab(tab)
+        self.seed_input.setText("")
+        self.res_instance_name.setText("")
+        self.update_all_outputs()
 
     def on_gen_name(self):
         name = name_gen.generate_vehicle_name()
