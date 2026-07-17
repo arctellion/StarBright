@@ -46,6 +46,29 @@ class VehicleQtView(QWidget):
 
         # --- Right Column: Profile ---
         right_column = QVBoxLayout()
+        
+        # Reset Button
+        self.btn_reset = QPushButton("Reset")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        right_column.addWidget(self.btn_reset)
+        
         self.profile_frame = GlassFrame("Vehicle Profile", color=Styles.CYAN)
         
         self.res_type = QLabel("Type")
@@ -216,28 +239,6 @@ class VehicleQtView(QWidget):
         form_layout.addWidget(end_combo)
         
         scroll_layout.addWidget(group)
-
-        # Reset Button
-        btn_reset = QPushButton("Reset to Default")
-        btn_reset.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {Styles.CARD_BG};
-                color: #ff5555;
-                border: 1px solid #ff5555;
-                border-radius: 6px;
-                padding: 10px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: #ff5555;
-                color: {Styles.BG_COLOR};
-            }}
-            QPushButton:pressed {{
-                background-color: #cc4444;
-            }}
-        """)
-        btn_reset.clicked.connect(self.reset_to_default)
-        scroll_layout.addWidget(btn_reset)
 
         scroll_layout.addStretch()
         scroll.setWidget(content)

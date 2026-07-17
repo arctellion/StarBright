@@ -87,8 +87,44 @@ class NamesQtView(QWidget):
         
         main_frame.layout.addWidget(result_group)
         
+        # Reset Button
+        self.btn_reset = QPushButton("Reset")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        main_frame.layout.addWidget(self.btn_reset)
+        
         layout.addWidget(main_frame)
         layout.addStretch()
+
+    def reset_to_default(self):
+        self.type_combo.blockSignals(True)
+        self.gender_combo.blockSignals(True)
+        
+        self.type_combo.setCurrentIndex(0)
+        self.gender_combo.setCurrentIndex(0)
+        self.hex_input.setText("0101")
+        self.uwp_input.setText("E56789A-B")
+        self.result_display.clear()
+        
+        self.type_combo.blockSignals(False)
+        self.gender_combo.blockSignals(False)
+        self.on_type_changed(self.type_combo.currentText())
 
     def on_type_changed(self, text):
         if text == "Character":

@@ -66,6 +66,28 @@ class DiceQtView(QWidget):
         custom_layout.addWidget(roll_btn)
         controls_frame.layout.addLayout(custom_layout)
         
+        # Reset Button
+        self.btn_reset = QPushButton("Reset")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        controls_frame.layout.addWidget(self.btn_reset)
+        
         self.main_layout.addWidget(controls_frame)
 
         # 2. Results and History Section
@@ -99,6 +121,13 @@ class DiceQtView(QWidget):
         
         self.main_layout.addLayout(bottom_layout)
         self.main_layout.addStretch()
+
+    def reset_to_default(self):
+        self.custom_input.setText("2d6")
+        self.result_text.setText("Dice Roll")
+        self.detail_text.setText("")
+        self.history_list.clear()
+        self.history = []
 
     def roll_dice(self, n):
         total, rolls = dd.dice_detailed(n)

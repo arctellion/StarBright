@@ -106,8 +106,15 @@ class GunQtView(QWidget):
         
         left_layout.addWidget(mod_group)
 
+        left_layout.addStretch()
+        left_scroll.setWidget(left_scroll_content)
+        self.main_layout.addWidget(left_scroll, 1)
+
+        # --- Right Column: Profile ---
+        right_column = QVBoxLayout()
+        
         # Reset Button
-        self.btn_reset = QPushButton("Reset to Default")
+        self.btn_reset = QPushButton("Reset")
         self.btn_reset.setStyleSheet(f"""
             QPushButton {{
                 background-color: {Styles.CARD_BG};
@@ -126,14 +133,8 @@ class GunQtView(QWidget):
             }}
         """)
         self.btn_reset.clicked.connect(self.reset_to_default)
-        left_layout.addWidget(self.btn_reset)
-
-        left_layout.addStretch()
-        left_scroll.setWidget(left_scroll_content)
-        self.main_layout.addWidget(left_scroll, 1)
-
-        # --- Right Column: Profile ---
-        right_column = QVBoxLayout()
+        right_column.addWidget(self.btn_reset)
+        
         profile_frame = GlassFrame("Weapon Profile", color=Styles.GREEN)
         
         self.res_model = QLabel("Model")

@@ -45,8 +45,37 @@ class TravelQtView(QWidget):
         frame.layout.addWidget(btn)
         frame.layout.addWidget(self.res_label)
         
+        # Reset Button
+        self.btn_reset = QPushButton("Reset")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        frame.layout.addWidget(self.btn_reset)
+        
         layout.addWidget(frame)
         layout.addStretch()
+
+    def reset_to_default(self):
+        self.adia_in.setText("100")
+        self.pdia_in.setText("5000")
+        self.spd_in.setText("1")
+        self.res_label.setText("Estimated travel time: -")
+        self.res_label.setStyleSheet("font-size: 18px; font-weight: bold; padding: 20px; background: #000; border-radius: 8px;")
 
     def on_calculate(self):
         try:
@@ -111,6 +140,36 @@ class QrebsQtView(QWidget):
         dec_box.layout.addLayout(dec_layout)
         dec_box.layout.addWidget(self.dec_res)
         layout.addWidget(dec_box)
+        
+        # Reset Button
+        self.btn_reset = QPushButton("Reset")
+        self.btn_reset.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Styles.CARD_BG};
+                color: #ff5555;
+                border: 1px solid #ff5555;
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #ff5555;
+                color: {Styles.BG_COLOR};
+            }}
+            QPushButton:pressed {{
+                background-color: #cc4444;
+            }}
+        """)
+        self.btn_reset.clicked.connect(self.reset_to_default)
+        layout.addWidget(self.btn_reset)
+        layout.addStretch()
+
+    def reset_to_default(self):
+        self.qty_spin.setValue(1)
+        self.gen_text.clear()
+        self.dec_in.clear()
+        self.dec_res.setText("Enter code to decode")
+        self.dec_res.setStyleSheet("background: #000; padding: 10px; border-radius: 5px;")
 
     def on_generate(self):
         lines = []
