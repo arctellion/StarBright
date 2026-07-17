@@ -126,11 +126,11 @@
     "Plug", "Cable", "Wire", "Fuse", "Breaker", "Switch", "Lever", "Dial", "Gauge", "Meter"
   ],
   "brand_names": [
-    "Aura", "Bolt", "Core", "Delt", "Eon", "Flux", "Glint", "Holo", "Ion", "Jolt",
-    "Kinet", "Lume", "Meta", "Nova", "Omni", "Pulse", "Quant", "Rift", "Star", "Titan",
-    "Atlas", "Bravo", "Cygnus", "Dyna", "Echo", "Falcon", "Giga", "Helix", "Iron", "Jupiter",
-    "Krono", "Lunar", "Magna", "Nitro", "Orbit", "Prime", "Quark", "Radia", "Sigma", "Telsa",
-    "Ultra", "Viper", "Watt", "Xeno", "Yoga", "Zenon", "Apex", "Blue", "Comet", "DASH"
+    "Militech", "Arasaka", "Weyland", "Yutani", "Hyperion", "Manticore", "Omnicorp", "Aegis", "Cyberdyne", "Xenotech",
+    "Voltaic", "Tachyon", "Quantum", "Spectral", "CryoGen", "MagnaTek", "NovaCorp", "OmniTek", "ApexArmory", "TitanForge",
+    "ViperSys", "KinetiX", "FusionDynamics", "Torgue", "Maliwan", "Jakobs", "Dahl", "Vladof", "Anshin", "Pangolin",
+    "Czerka", "BlasTech", "Merr-Sonn", "SoroSuub", "Rendili", "Sienar", "Arakyd", "Trioptimum", "Armitage", "Sarif",
+    "VersaLife", "Stark", "Oscorp", "Abstergo", "UAC", "Vault-Tec", "RobCo", "Weyland-Yutani", "Tyrell", "Krieger"
   ],
   "armour_names": [
     "Aegis", "Bulwark", "Carapace", "Defiance", "Endurance", "Fortress", "Guardian", "Hoplite", "Ironclad", "Juggernaut",
@@ -140,11 +140,16 @@
     "Orion", "Phalanx", "Quantum", "Rampart", "Spartan", "Templar", "Unity", "Vanguard", "Wraith", "Xiphos"
   ],
   "gun_names": [
-    "Apex", "Banshee", "Cobra", "Dragoon", "Eclipse", "Fury", "Gorgon", "Hydra", "Inferno", "Justice",
-    "Kraken", "Lance", "Mamba", "Nemesis", "Orion", "Phantom", "Quake", "Raptor", "Scythe", "Thunderbolt",
-    "Ursa", "Viper", "Wraith", "Xenon", "Yeti", "Zephyrus", "Assailant", "Ballista", "Cyclone", "Dominator",
-    "Enforcer", "Falcon", "Gladiator", "Harvester", "Interceptor", "Jackal", "Kestrel", "Liberator", "Marauder", "Nightstalker",
-    "Overlord", "Predator", "Punisher", "Ravager", "Specter", "Talon", "Umpire", "Vulture", "Wolverine", "X-Terminator"
+    "Plasmarail", "Gaussrifle", "Magpulse", "Laserstrike", "Neutronbeam", "Disruptor", "Ionblaster", "Thermobar", "Quantumforce",
+    "Disintegrator", "Phaserpulse", "Tachyonbeam", "Graviton", "Subvertor", "Positron", "Sonicwave", "Nanoblast", "Fusionfire",
+    "Cryobeam", "Railcannon", "Bolter", "Plasmapistol", "Laserpulse", "Disruptorbeam", "Chronoblast", "Singularity", "Voidstriker",
+    "Neutronfire", "Darkmatter", "Antimatter", "Electrolaser", "Thermoblast", "Raygun", "Blasterpistol", "Vanquisher", "Annihilator",
+    "Decimator", "Vigilante", "Oppressor", "Punisher", "Executioner", "Devastator", "Sovereign", "Obliterator", "Disintegrator",
+    "Pulverizer", "Shockwave", "Stormbringer", "Hellbreaker", "Doomherald", "Reaper", "Avenger", "Sentinel", "Guardian", "Warlord",
+    "Gladiator", "Centurion", "Warmonger", "Warmaster", "Peacekeeper", "Enforcer", "Desolator", "Cataclysm", "Voidbringer", "Starfury",
+    "Hellfire", "Pulser", "Blaster", "Discharger", "Striker", "Interceptor", "Carbine", "Railgun", "Projector", "Vaporizer",
+    "Gatling", "Flak", "Mortar", "Howitzer", "Bazooka", "Autocannon", "Vulcan", "Subjugator", "Pacifier", "Terminator",
+    "Exterminator", "Inquisitor", "Predator", "Stalker", "Infiltrator", "Vandal", "Saboteur", "Rebel", "Desperado", "Gunslinger"
   ],
   "vehicle_names": [
     "Atlas", "Behemoth", "Chariot", "Drifter", "Explorer", "Falcon", "Goliath", "Hercules", "Icarus", "Javelin",

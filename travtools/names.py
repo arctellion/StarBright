@@ -97,10 +97,10 @@ FEMALE_GEN = MarkovGenerator(NAME_DATA.get("female_first", []))
 NEUTRAL_GEN = MarkovGenerator(NAME_DATA.get("neutral_first", []))
 LAST_GEN = MarkovGenerator(NAME_DATA.get("last_names", []))
 PLANET_GEN = MarkovGenerator(NAME_DATA.get("planet_names", []))
-BRAND_GEN = MarkovGenerator(NAME_DATA.get("brand_names", []))
-ARMOUR_GEN = MarkovGenerator(NAME_DATA.get("armour_names", []))
-GUN_GEN = MarkovGenerator(NAME_DATA.get("gun_names", []))
-VEHICLE_GEN = MarkovGenerator(NAME_DATA.get("vehicle_names", []))
+BRAND_GEN = MarkovGenerator(NAME_DATA.get("brand_names", []), order=3)
+ARMOUR_GEN = MarkovGenerator(NAME_DATA.get("armour_names", []), order=3)
+GUN_GEN = MarkovGenerator(NAME_DATA.get("gun_names", []), order=3)
+VEHICLE_GEN = MarkovGenerator(NAME_DATA.get("vehicle_names", []), order=3)
 
 # --- GENERATION FUNCTIONS ---
 
